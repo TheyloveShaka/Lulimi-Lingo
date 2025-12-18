@@ -1,0 +1,190 @@
+.signup-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-2xl);
+  max-width: 480px;
+  width: 100%;
+  animation: slideUp 0.6s ease-out;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.card-header h2 {
+  font-size: 2rem;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-header p {
+  color: var(--gray-600);
+  font-size: 0.95rem;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  color: var(--gray-400);
+  pointer-events: none;
+  transition: color 0.3s;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 3rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-wrapper input:focus ~ .input-icon,
+.input-wrapper select:focus ~ .input-icon {
+  color: var(--primary-500);
+}
+
+.input-wrapper input.error,
+.input-wrapper select.error {
+  border-color: var(--error);
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 0.85rem;
+  margin-top: -var(--spacing-xs);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: var(--spacing-md);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+}
+
+.submit-btn:hover {
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--spacing-xl) 0;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.divider span {
+  padding: 0 var(--spacing-md);
+}
+
+.social-login {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--gray-700);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+  border-color: var(--primary-500);
+  background: var(--gray-50);
+  box-shadow: var(--shadow-md);
+}
+
+.card-footer {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.card-footer a {
+  color: var(--primary-600);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.card-footer a:hover {
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .signup-card {
+    padding: var(--spacing-xl);
+  }
+
+  .card-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .social-login {
+    grid-template-columns: 1fr;
+  }
+}
