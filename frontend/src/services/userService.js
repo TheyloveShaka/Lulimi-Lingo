@@ -2,7 +2,7 @@
  * User Service - Handles user authentication and profile management
  */
 
-const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'http://localhost:5000'
+const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app'
 
 /**
  * Sign up new user

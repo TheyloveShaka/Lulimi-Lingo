@@ -18,10 +18,10 @@ import {
   getOutOfScopeResponse
 } from './promptRouter';
 
-// API Configuration - Python Backend
+// API Configuration - Node Backend
 const AI_CONFIG = {
-  // Python backend endpoint
-  backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000',
+  // Node.js backend endpoint
+  backendUrl: import.meta.env.VITE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app',
   
   // Fallback to mock responses if backend is down
   useMockResponses: false
