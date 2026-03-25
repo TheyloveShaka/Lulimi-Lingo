@@ -52,6 +52,12 @@ router.post('/practice', generatePractice)
 router.post('/quiz', generateQuiz)
 router.post('/chat', chatWithTutor)
 
+// New AI endpoints (explicit naming)
+router.post('/ai/lesson', generateLesson)
+router.post('/ai/practice', generatePractice)
+router.post('/ai/quiz', generateQuiz)
+router.post('/ai/chat', chatWithTutor)
+
 // Progress endpoints (optional - can use /auth/progress instead)
 router.get('/progress/:userId', getProgress)
 router.post('/progress/:userId', upsertProgress)

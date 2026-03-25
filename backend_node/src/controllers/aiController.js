@@ -1,116 +1,179 @@
-import { generateLesson as aiGenerateLesson, translate as aiTranslate, chat as aiChat } from '../services/aiService.js'
-import { generateContent } from '../services/contentGeneratorService.js'
+import lessonGeneratorService from '../services/lessonGeneratorService.js'
+import quizGeneratorService from '../services/quizGeneratorService.js'
+import practiceGeneratorService from '../services/practiceGeneratorService.js'
+import geminiService from '../services/geminiService.js'
 import Conversation from '../models/Conversation.js'
 import Progress from '../models/Progress.js'
 import User from '../models/User.js'
 
+/**
+ * Generate a lesson using AI
+ * POST /api/ai/lesson
+ */
 export const generateLesson = async (req, res) => {
-  const payload = req.body || {}
-  
-  // Try curriculum-based generation if all fields provided
-  if (payload.classLevel && payload.term && payload.milestoneId && payload.topic) {
-    try {
-      const result = await generateContent('lesson', payload.classLevel, payload.term, payload.milestoneId, payload.topic, payload.options || {})
-      if (result.success) return res.json(result)
-    } catch (err) {
-      console.error('Curriculum content generation error:', err.message)
-    }
-  }
-
-  // Try internal AI
   try {
-    const aiResp = await aiGenerateLesson(payload)
-    if (aiResp && aiResp.success) return res.json(aiResp)
-  } catch (err) {
-    console.error('AI lesson error:', err.message)
-  }
+    const {
+      classLevel = 'S1',
+      term = 'Term 1',
+      week = 'Week 1',
+      topic,
+      objectives = []
+    } = req.body
 
-  // Fallback to proxy to Python backend if configured
-  const PY_BACKEND = process.env.PYTHON_BACKEND_URL
-  if (PY_BACKEND) {
-    try {
-      const r = await fetch(`${PY_BACKEND}/api/lesson`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (r.ok) return res.json(await r.json())
-    } catch (e) { console.error('Proxy lesson error', e.message) }
-  }
-
-  return res.json({ success: true, lesson: { title: payload.topic || 'Mock Lesson', introduction: 'Lesson content unavailable — configure AI backend.' } })
-}
-
-export const generatePractice = async (req, res) => {
-  const payload = req.body || {}
-  
-  // Try curriculum-based generation if all fields provided
-  if (payload.classLevel && payload.term && payload.milestoneId && payload.topic) {
-    try {
-      const result = await generateContent('practice', payload.classLevel, payload.term, payload.milestoneId, payload.topic, payload.options || {})
-      if (result.success) return res.json(result)
-    } catch (err) {
-      console.error('Curriculum practice generation error:', err.message)
+    if (!topic) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic is required'
+      })
     }
-  }
 
-  // Fallback
-  const PY_BACKEND = process.env.PYTHON_BACKEND_URL
-  if (PY_BACKEND) {
-    try {
-      const r = await fetch(`${PY_BACKEND}/api/practice`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (r.ok) return res.json(await r.json())
-    } catch (e) { console.error('Proxy practice error', e.message) }
+    const lesson = await lessonGeneratorService.generate({
+      classLevel,
+      term,
+      week,
+      topic,
+      objectives
+    })
+
+    return res.json({
+      success: true,
+      data: lesson
+    })
+  } catch (error) {
+    console.error('Lesson generation error:', error)
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    })
   }
-  return res.json({ success: true, questions: [] })
 }
 
+/**
+ * Generate a quiz using AI
+ * POST /api/ai/quiz
+ */
 export const generateQuiz = async (req, res) => {
-  const payload = req.body || {}
-  
-  // Try curriculum-based generation if all fields provided
-  if (payload.classLevel && payload.term && payload.milestoneId && payload.topic) {
-    try {
-      const result = await generateContent('quiz', payload.classLevel, payload.term, payload.milestoneId, payload.topic, payload.options || {})
-      if (result.success) return res.json(result)
-    } catch (err) {
-      console.error('Curriculum quiz generation error:', err.message)
-    }
-  }
+  try {
+    const {
+      topic,
+      numQuestions = 5,
+      criteria = []
+    } = req.body
 
-  // Fallback
-  const PY_BACKEND = process.env.PYTHON_BACKEND_URL
-  if (PY_BACKEND) {
-    try {
-      const r = await fetch(`${PY_BACKEND}/api/quiz`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (r.ok) return res.json(await r.json())
-    } catch (e) { console.error('Proxy quiz error', e.message) }
+    if (!topic) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic is required'
+      })
+    }
+
+    const quiz = await quizGeneratorService.generate({
+      topic,
+      numQuestions: Math.min(numQuestions, 10), // Cap at 10
+      criteria
+    })
+
+    return res.json({
+      success: true,
+      data: quiz
+    })
+  } catch (error) {
+    console.error('Quiz generation error:', error)
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    })
   }
-  return res.json({ success: true, quiz: { questions: [] } })
 }
 
-export const chatWithTutor = async (req, res) => {
-  const payload = req.body || {}
-  const { userId, message, conversationHistory = [] } = payload
+/**
+ * Generate practice questions using AI
+ * POST /api/ai/practice
+ */
+export const generatePractice = async (req, res) => {
   try {
+    const {
+      topic,
+      proficiencyLevel = 'beginner',
+      commonMistakes = []
+    } = req.body
+
+    if (!topic) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic is required'
+      })
+    }
+
+    const practice = await practiceGeneratorService.generate({
+      topic,
+      proficiencyLevel,
+      commonMistakes
+    })
+
+    return res.json({
+      success: true,
+      data: practice
+    })
+  } catch (error) {
+    console.error('Practice generation error:', error)
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
+}
+
+/**
+ * Chat with AI Tutor
+ * POST /api/ai/chat
+ */
+export const chatWithTutor = async (req, res) => {
+  try {
+    const {
+      userId,
+      message,
+      conversationHistory = []
+    } = req.body
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is required'
+      })
+    }
+
     // Load user progress for context
     const progress = userId ? await Progress.findOne({ user: userId }).lean() : null
 
     // Call AI service
-    const aiResp = await aiChat(message, { progress, conversationHistory })
-    const reply = (aiResp && aiResp.response) || '(no response)'
+    const reply = await geminiService.chat(message, conversationHistory)
 
     // Persist conversation
-    try {
-      if (userId) {
+    if (userId) {
+      try {
         let conv = await Conversation.findOne({ user: userId })
-        if (!conv) conv = await Conversation.create({ user: userId, messages: [] })
-        conv.messages.push({ role: 'user', content: message })
-        conv.messages.push({ role: 'assistant', content: reply })
+        if (!conv) {
+          conv = await Conversation.create({ user: userId, messages: [] })
+        }
+        conv.messages.push({ role: 'user', content: message, timestamp: new Date() })
+        conv.messages.push({ role: 'assistant', content: reply, timestamp: new Date() })
         conv.updatedAt = new Date()
         await conv.save()
+      } catch (error) {
+        console.error('Conversation save error:', error.message)
       }
-    } catch (e) { console.error('Conversation save error', e.message) }
+    }
 
-    return res.json({ success: true, response: reply })
-  } catch (err) {
-    console.error('Chat error:', err.message)
-    return res.json({ success: false, response: '(error) Tutor unavailable' })
+    return res.json({
+      success: true,
+      response: reply
+    })
+  } catch (error) {
+    console.error('Chat error:', error)
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    })
   }
 }
