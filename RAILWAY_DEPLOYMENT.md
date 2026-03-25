@@ -23,7 +23,14 @@
 
 ### Step 4: Configure Root Directory (Important!)
 
-Since your backend is in `backend_node/`:
+Since your backend is in `backend_node/`, Railway needs to know where to build from.
+
+**Option A: Using railway.json (Recommended)**
+
+- This file is already in your repo root: `railway.json`
+- Railway will auto-detect it and use the settings
+
+**Option B: Manual Configuration**
 
 1. In Railway dashboard, go to Settings
 2. Find "Root Directory"
@@ -99,15 +106,32 @@ Railway automatically deploys whenever you push to `main` branch. No additional 
 
 ## Troubleshooting
 
-If deployment fails:
+### Build Failed Error
 
-1. Check the logs in Railway dashboard
-2. Verify MongoDB is running
-3. Check environment variables are set correctly
-4. Ensure `backend_node/package.json` exists
-5. Run locally first to verify: `npm start`
+If you see "Build Failed" on Railway:
+
+1. **Check Railway Logs:**
+   - Click on your backend service
+   - Go to "Logs" tab
+   - Look for the final error message
+
+2. **Verify Locally:**
+   - Run: `cd backend_node && npm install && npm start`
+   - If it fails locally, fix it locally first
+
+3. **Common Issues:**
+   - Missing `railway.json` file → Already added to repo
+   - Wrong root directory → Check `railway.json` has `"rootDirectory": "backend_node"`
+   - Missing dependencies → All listed in `backend_node/package.json`
+   - Environment variables → Set GEMINI_API_KEY in Railway Variables
+
+4. **If Build Still Fails:**
+   - Go to Railway dashboard
+   - Click "Redeploy" button
+   - Or delete service and reconnect from GitHub
 
 ## Estimated Costs
 
 - Free tier includes: 5GB bandwidth, 100 hours/month runtime
+- After free tier: ~$5-10/month for small projects
 - After free tier: ~$5-10/month for small projects

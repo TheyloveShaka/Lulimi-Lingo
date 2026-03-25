@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd backend_node && npm install",
+  "startCommand": "cd backend_node && npm start",
+  "rootDirectory": "backend_node"
+}
