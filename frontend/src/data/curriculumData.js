@@ -390,13 +390,158 @@ export const curriculumData = {
       Term2: {
         name: 'Term 2',
         weeks: [
-          // Additional S2 Term 2 weeks would go here
+          {
+            id: 18,
+            number: 1,
+            title: 'Accommodation & Housing',
+            topics: [
+              'Types of homes',
+              'House vocabulary',
+              'Room descriptions',
+              'Household items'
+            ],
+            learningObjectives: [
+              'Name types of accommodations',
+              'Describe rooms and features',
+              'Use housing-related vocabulary'
+            ],
+            keywords: ['house', 'home', 'room', 'door', 'window'],
+            difficulty: 'intermediate',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 19,
+            number: 2,
+            title: 'Health & Wellness',
+            topics: [
+              'Health conditions',
+              'Medical vocabulary',
+              'Wellness practices',
+              'Healthcare services'
+            ],
+            learningObjectives: [
+              'Discuss health topics',
+              'Use medical vocabulary',
+              'Seek healthcare assistance'
+            ],
+            keywords: ['health', 'medicine', 'doctor', 'sick', 'hospital'],
+            difficulty: 'intermediate',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 20,
+            number: 3,
+            title: 'Entertainment & Leisure',
+            topics: [
+              'Sports and games',
+              'Entertainment vocabulary',
+              'Hobbies and interests',
+              'Cultural events'
+            ],
+            learningObjectives: [
+              'Discuss leisure activities',
+              'Name popular games and sports',
+              'Express preferences'
+            ],
+            keywords: ['play', 'game', 'sport', 'fun', 'entertainment'],
+            difficulty: 'intermediate',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 21,
+            number: 4,
+            title: 'Technology & Modern Life',
+            topics: [
+              'Modern technology',
+              'Digital communication',
+              'Internet vocabulary',
+              'Contemporary issues'
+            ],
+            learningObjectives: [
+              'Use technology vocabulary',
+              'Discuss digital communication',
+              'Navigate modern topics'
+            ],
+            keywords: ['technology', 'phone', 'internet', 'computer', 'modern'],
+            difficulty: 'intermediate',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          }
         ]
       },
       Term3: {
         name: 'Term 3',
         weeks: [
-          // Additional S2 Term 3 weeks would go here
+          {
+            id: 22,
+            number: 1,
+            title: 'Environment & Nature',
+            topics: [
+              'Environmental vocabulary',
+              'Plants and vegetation',
+              'Water sources',
+              'Conservation awareness'
+            ],
+            learningObjectives: [
+              'Use nature vocabulary',
+              'Discuss environmental topics',
+              'Understand conservation'
+            ],
+            keywords: ['nature', 'tree', 'water', 'environment', 'forest'],
+            difficulty: 'intermediate',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 23,
+            number: 2,
+            title: 'Community & Society',
+            topics: [
+              'Community structures',
+              'Social relationships',
+              'Community roles',
+              'Civic responsibility'
+            ],
+            learningObjectives: [
+              'Understand community structures',
+              'Discuss social relationships',
+              'Express civic values'
+            ],
+            keywords: ['community', 'society', 'neighbor', 'village', 'people'],
+            difficulty: 'intermediate',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 24,
+            number: 3,
+            title: 'Advanced Cultural Studies',
+            topics: [
+              'Deep cultural analysis',
+              'Traditional practices',
+              'Cultural preservation',
+              'Modern cultural blending'
+            ],
+            learningObjectives: [
+              'Analyze cultural practices',
+              'Appreciate linguistic diversity',
+              'Understand cultural evolution'
+            ],
+            keywords: ['culture', 'tradition', 'custom', 'heritage', 'identity'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          }
         ]
       }
     }
@@ -408,16 +553,227 @@ export const curriculumData = {
       Term1: {
         name: 'Term 1',
         weeks: [
-          // S3 weeks would go here
+          {
+            id: 25,
+            number: 1,
+            title: 'Complex Grammar & Syntax',
+            topics: [
+              'Advanced tense usage',
+              'Complex sentence structures',
+              'Subjunctive moods',
+              'Conditional expressions'
+            ],
+            learningObjectives: [
+              'Master complex grammatical structures',
+              'Use advanced syntax correctly',
+              'Express nuanced meanings'
+            ],
+            keywords: ['grammar', 'syntax', 'complex', 'structure', 'conditional'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 26,
+            number: 2,
+            title: 'Professional Communication',
+            topics: [
+              'Formal language',
+              'Business vocabulary',
+              'Professional presentations',
+              'Negotiation skills'
+            ],
+            learningObjectives: [
+              'Use professional language',
+              'Navigate business contexts',
+              'Present ideas effectively'
+            ],
+            keywords: ['professional', 'business', 'formal', 'presentation', 'negotiation'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 27,
+            number: 3,
+            title: 'Literature & Composition',
+            topics: [
+              'Literary analysis',
+              'Writing styles',
+              'Narrative techniques',
+              'Poetic expression'
+            ],
+            learningObjectives: [
+              'Analyze literary texts',
+              'Master writing techniques',
+              'Appreciate linguistic artistry'
+            ],
+            keywords: ['literature', 'writing', 'style', 'narrative', 'poetry'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 28,
+            number: 4,
+            title: 'Sociolinguistics & Dialects',
+            topics: [
+              'Language variation',
+              'Dialects and accents',
+              'Social language use',
+              'Code-switching'
+            ],
+            learningObjectives: [
+              'Understand language variation',
+              'Appreciate dialectal differences',
+              'Understand sociolinguistic contexts'
+            ],
+            keywords: ['dialect', 'sociolinguistics', 'variation', 'accent', 'code-switching'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          }
         ]
       },
       Term2: {
         name: 'Term 2',
-        weeks: []
+        weeks: [
+          {
+            id: 29,
+            number: 1,
+            title: 'Advanced Vocabulary & Idioms',
+            topics: [
+              'Idiomatic expressions',
+              'Specialized vocabulary',
+              'Metaphorical language',
+              'Figurative speech'
+            ],
+            learningObjectives: [
+              'Master idiomatic language',
+              'Use advanced vocabulary',
+              'Understand figurative meanings'
+            ],
+            keywords: ['idiom', 'vocabulary', 'metaphor', 'figurative', 'expression'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 30,
+            number: 2,
+            title: 'Research & Academic Skills',
+            topics: [
+              'Academic writing',
+              'Research methodology',
+              'Critical analysis',
+              'Citation practices'
+            ],
+            learningObjectives: [
+              'Conduct academic research',
+              'Write scholarly papers',
+              'Analyze information critically'
+            ],
+            keywords: ['research', 'academic', 'analysis', 'critical', 'methodology'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 31,
+            number: 3,
+            title: 'Intercultural Communication',
+            topics: [
+              'Cross-cultural understanding',
+              'Intercultural dialogue',
+              'Cultural sensitivity',
+              'Global perspectives'
+            ],
+            learningObjectives: [
+              'Communicate across cultures',
+              'Appreciate cultural differences',
+              'Develop cultural competence'
+            ],
+            keywords: ['intercultural', 'communication', 'culture', 'diversity', 'global'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          }
+        ]
       },
       Term3: {
         name: 'Term 3',
-        weeks: []
+        weeks: [
+          {
+            id: 32,
+            number: 1,
+            title: 'Media Literacy & Discourse Analysis',
+            topics: [
+              'Media language',
+              'Discourse analysis',
+              'Critical media literacy',
+              'Information evaluation'
+            ],
+            learningObjectives: [
+              'Analyze media critically',
+              'Understand discourse patterns',
+              'Evaluate information sources'
+            ],
+            keywords: ['media', 'discourse', 'literacy', 'analysis', 'critical'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 33,
+            number: 2,
+            title: 'Applied Linguistics & Translation',
+            topics: [
+              'Translation theory',
+              'Linguistic analysis',
+              'Language application',
+              'Comparative linguistics'
+            ],
+            learningObjectives: [
+              'Understand translation principles',
+              'Apply linguistic knowledge',
+              'Compare language structures'
+            ],
+            keywords: ['translation', 'linguistics', 'applied', 'comparative', 'equivalence'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 34,
+            number: 3,
+            title: 'Mastery & Integration',
+            topics: [
+              'Language integration',
+              'Fluency development',
+              'Mastery consolidation',
+              'Lifelong learning'
+            ],
+            learningObjectives: [
+              'Achieve language fluency',
+              'Integrate all skills',
+              'Plan continued learning'
+            ],
+            keywords: ['mastery', 'fluency', 'integration', 'proficiency', 'learning'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          }
+        ]
       }
     }
   },
@@ -428,16 +784,227 @@ export const curriculumData = {
       Term1: {
         name: 'Term 1',
         weeks: [
-          // S4 weeks would go here
+          {
+            id: 35,
+            number: 1,
+            title: 'Exam Preparation - Grammar Review',
+            topics: [
+              'Grammar fundamentals review',
+              'Common errors',
+              'Tense mastery',
+              'Sentence construction'
+            ],
+            learningObjectives: [
+              'Review all grammar',
+              'Identify and correct errors',
+              'Master exam-style questions'
+            ],
+            keywords: ['exam', 'grammar', 'review', 'preparation', 'mastery'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 36,
+            number: 2,
+            title: 'Listening & Comprehension Skills',
+            topics: [
+              'Listening strategies',
+              'Comprehension techniques',
+              'Note-taking skills',
+              'Listening assessment'
+            ],
+            learningObjectives: [
+              'Develop listening strategies',
+              'Improve comprehension',
+              'Master listening assessments'
+            ],
+            keywords: ['listening', 'comprehension', 'strategies', 'assessment', 'skills'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 37,
+            number: 3,
+            title: 'Reading & Interpretation',
+            topics: [
+              'Reading strategies',
+              'Text interpretation',
+              'Analytical reading',
+              'Response techniques'
+            ],
+            learningObjectives: [
+              'Develop advanced reading skills',
+              'Interpret complex texts',
+              'Master reading assessments'
+            ],
+            keywords: ['reading', 'interpretation', 'analysis', 'comprehension', 'strategy'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 38,
+            number: 4,
+            title: 'Writing & Essay Composition',
+            topics: [
+              'Essay structure',
+              'Writing techniques',
+              'Argument development',
+              'Proofreading skills'
+            ],
+            learningObjectives: [
+              'Master essay writing',
+              'Structure arguments effectively',
+              'Polish written work'
+            ],
+            keywords: ['writing', 'essay', 'composition', 'argument', 'technique'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          }
         ]
       },
       Term2: {
         name: 'Term 2',
-        weeks: []
+        weeks: [
+          {
+            id: 39,
+            number: 1,
+            title: 'Speaking & Oral Expression',
+            topics: [
+              'Oral fluency',
+              'Pronunciation accuracy',
+              'Public speaking',
+              'Response skills'
+            ],
+            learningObjectives: [
+              'Achieve oral fluency',
+              'Perfect pronunciation',
+              'Master oral assessments'
+            ],
+            keywords: ['speaking', 'oral', 'fluency', 'pronunciation', 'expression'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 40,
+            number: 2,
+            title: 'Language in Context & Application',
+            topics: [
+              'Contextual usage',
+              'Real-world scenarios',
+              'Practical application',
+              'Situational language'
+            ],
+            learningObjectives: [
+              'Apply language in context',
+              'Navigate real scenarios',
+              'Use language authentically'
+            ],
+            keywords: ['context', 'application', 'scenario', 'practical', 'authentic'],
+            difficulty: 'advanced',
+            estimatedHours: 4,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 41,
+            number: 3,
+            title: 'Final Practice Exams & Assessment',
+            topics: [
+              'Full-length practice tests',
+              'Exam techniques',
+              'Time management',
+              'Performance analysis'
+            ],
+            learningObjectives: [
+              'Complete practice exams',
+              'Master exam techniques',
+              'Manage time effectively'
+            ],
+            keywords: ['exam', 'practice', 'assessment', 'technique', 'performance'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          }
+        ]
       },
       Term3: {
         name: 'Term 3',
-        weeks: []
+        weeks: [
+          {
+            id: 42,
+            number: 1,
+            title: 'Final Review & Consolidation',
+            topics: [
+              'Comprehensive review',
+              'Skill consolidation',
+              'Error analysis',
+              'Strength identification'
+            ],
+            learningObjectives: [
+              'Review all materials',
+              'Consolidate learning',
+              'Identify strong areas'
+            ],
+            keywords: ['review', 'consolidation', 'comprehensive', 'mastery', 'final'],
+            difficulty: 'advanced',
+            estimatedHours: 5,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 43,
+            number: 2,
+            title: 'Confidence Building & Mindset',
+            topics: [
+              'Exam confidence',
+              'Stress management',
+              'Mental preparation',
+              'Positive mindset'
+            ],
+            learningObjectives: [
+              'Build exam confidence',
+              'Manage exam stress',
+              'Develop positive mindset'
+            ],
+            keywords: ['confidence', 'mindset', 'stress', 'preparation', 'mental'],
+            difficulty: 'advanced',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          },
+          {
+            id: 44,
+            number: 3,
+            title: 'Post-Exam & Fluency Goals',
+            topics: [
+              'Beyond the exam',
+              'Fluency goals',
+              'Continued learning',
+              'Language mastery'
+            ],
+            learningObjectives: [
+              'Plan post-exam learning',
+              'Set fluency goals',
+              'Achieve language mastery'
+            ],
+            keywords: ['mastery', 'fluency', 'goals', 'beyond', 'achievement'],
+            difficulty: 'advanced',
+            estimatedHours: 3,
+            progress: 0,
+            locked: true
+          }
+        ]
       }
     }
   }

@@ -1,0 +1,187 @@
+.settings-page {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+}
+
+.settings-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.settings-header p {
+  margin: 0.5rem 0 0;
+  color: #666;
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.2rem;
+  color: #1e3c72;
+  font-weight: 600;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-info {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.setting-info svg {
+  color: #667eea;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.setting-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1e3c72;
+  font-weight: 600;
+}
+
+.setting-info p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* Toggle Switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle span {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.toggle span:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle input:checked + span {
+  background-color: #667eea;
+}
+
+.toggle input:checked + span:before {
+  transform: translateX(22px);
+}
+
+.danger-zone {
+  background: linear-gradient(135deg, #fee4e4 0%, #fdd4d4 100%);
+  border: 2px solid #f8b4b4;
+}
+
+.danger-zone h2 {
+  color: #c33;
+  border-bottom-color: #f8b4b4;
+}
+
+.btn-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #ee5a52 0%, #de3838 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  box-shadow: 0 6px 20px rgba(238, 90, 82, 0.4);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 1rem;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .toggle {
+    width: 45px;
+    height: 26px;
+  }
+
+  .toggle span:before {
+    height: 20px;
+    width: 20px;
+  }
+
+  .toggle input:checked + span:before {
+    transform: translateX(19px);
+  }
+}

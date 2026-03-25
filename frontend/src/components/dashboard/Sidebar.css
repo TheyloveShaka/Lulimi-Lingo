@@ -160,13 +160,14 @@
   margin-top: var(--spacing-lg);
 }
 
-@media (max-width: 1024px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
+.nav-item.logout-btn {
+  color: #ef4444;
+}
 
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
+.nav-item.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.nav-item.logout-btn .nav-icon {
+  color: #ef4444;
 }

@@ -15,11 +15,24 @@ const LevelLadder = ({ onWeekClick }) => {
 
   const currentClass = curriculumData[selectedClass]
   const currentTerm = currentClass.terms[selectedTerm]
+  
+  // Flatten topics from all weeks into a single ladder
+  const topics = currentTerm.weeks.flatMap((week, weekIndex) => 
+    week.topics.map((topic, topicIndex) => ({
+      id: `${week.id}-${topicIndex}`,
+      topicTitle: topic,
+      weekTitle: week.title,
+      weekIndex,
+      progress: week.progress,
+      locked: week.locked,
+      originalWeek: week
+    }))
+  )
 
   // Initialize refs array
   useEffect(() => {
-    nodeRefs.current = nodeRefs.current.slice(0, currentTerm.weeks.length)
-  }, [currentTerm.weeks.length])
+    nodeRefs.current = nodeRefs.current.slice(0, topics.length)
+  }, [topics.length])
 
   // Constants for precise calculations
   const CIRCLE_RADIUS = 80 // 160px diameter / 2
@@ -27,10 +40,10 @@ const LevelLadder = ({ onWeekClick }) => {
   // Calculate all paths at once
   useEffect(() => {
     const updateAllPaths = () => {
-      const weeksContainer = containerRef.current?.querySelector('.weeks-container')
-      if (!weeksContainer || nodeRefs.current.length < 2) return
+      const topicsContainer = containerRef.current?.querySelector('.topics-container')
+      if (!topicsContainer || nodeRefs.current.length < 2) return
 
-      const containerRect = weeksContainer.getBoundingClientRect()
+      const containerRect = topicsContainer.getBoundingClientRect()
       const newPaths = []
 
       for (let i = 1; i < nodeRefs.current.length; i++) {
@@ -42,7 +55,7 @@ const LevelLadder = ({ onWeekClick }) => {
         const prevRect = prevNode.getBoundingClientRect()
         const currentRect = currentNode.getBoundingClientRect()
 
-        // Calculate relative positions within weeks container
+        // Calculate relative positions within container
         const prevX = prevRect.left - containerRect.left + prevRect.width / 2
         const prevY = prevRect.top - containerRect.top + prevRect.height / 2
         const currentX = currentRect.left - containerRect.left + currentRect.width / 2
@@ -86,40 +99,40 @@ const LevelLadder = ({ onWeekClick }) => {
       clearTimeout(timer)
       window.removeEventListener('resize', updateAllPaths)
     }
-  }, [currentTerm.weeks.length])
+  }, [topics.length])
 
-  const WeekNode = ({ week, index }) => {
+  const TopicNode = ({ item, index }) => {
     const isLeftSide = index % 2 === 0
-    const delay = index * 0.1
+    const delay = index * 0.08
 
     return (
       <motion.div
-        className={`week-node-container ${isLeftSide ? 'left' : 'right'}`}
+        className={`topic-node-container ${isLeftSide ? 'left' : 'right'}`}
         initial={{ opacity: 1, x: isLeftSide ? -50 : 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay }}
       >
-        {/* Week Node - 2x bigger with bounce */}
+        {/* Topic Node */}
         <motion.button
           ref={(el) => (nodeRefs.current[index] = el)}
-          className={`week-node ${week.locked ? 'locked' : ''} ${week.progress === 100 ? 'completed' : ''} ${week.progress > 0 && week.progress < 100 ? 'in-progress' : ''}`}
-          onClick={() => !week.locked && onWeekClick(week)}
-          whileHover={!week.locked ? { scale: 1.1, y: -5 } : {}}
-          whileTap={!week.locked ? { scale: 0.95 } : {}}
+          className={`topic-node ${item.locked ? 'locked' : ''} ${item.progress === 100 ? 'completed' : ''} ${item.progress > 0 && item.progress < 100 ? 'in-progress' : ''}`}
+          onClick={() => !item.locked && onWeekClick(item.originalWeek)}
+          whileHover={!item.locked ? { scale: 1.1, y: -5 } : {}}
+          whileTap={!item.locked ? { scale: 0.95 } : {}}
           animate={{ y: [0, -8, 0], opacity: 1 }}
           transition={{ 
             y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
             opacity: { duration: 0 }
           }}
-          disabled={week.locked}
+          disabled={item.locked}
         >
           {/* Progress Ring */}
           <div className="progress-ring">
             <CircularProgressbar
-              value={week.progress}
+              value={item.progress}
               strokeWidth={6}
               styles={buildStyles({
-                pathColor: week.progress === 100 ? '#10b981' : '#6b9fff',
+                pathColor: item.progress === 100 ? '#10b981' : '#6b9fff',
                 trailColor: 'rgba(229, 231, 235, 0.3)',
                 pathTransitionDuration: 0.5,
               })}
@@ -128,36 +141,31 @@ const LevelLadder = ({ onWeekClick }) => {
 
           {/* Icon */}
           <div className="node-icon">
-            {week.locked && <Lock size={26} />}
-            {week.progress === 100 && <CheckCircle2 size={26} />}
-            {week.progress > 0 && week.progress < 100 && <Play size={26} />}
-            {week.progress === 0 && !week.locked && <Star size={26} />}
+            {item.locked && <Lock size={26} />}
+            {item.progress === 100 && <CheckCircle2 size={26} />}
+            {item.progress > 0 && item.progress < 100 && <Play size={26} />}
+            {item.progress === 0 && !item.locked && <Star size={26} />}
           </div>
 
-          {/* Week Number Badge with Title */}
-          <div className="week-badge">
-            Week {week.id}
-            <span className="week-subtitle">({week.title})</span>
+          {/* Topic Title Badge */}
+          <div className="topic-badge">
+            <span className="topic-title">{item.topicTitle.substring(0, 20)}{item.topicTitle.length > 20 ? '...' : ''}</span>
           </div>
         </motion.button>
 
         {/* Tooltip */}
         <motion.div
-          className="week-tooltip"
+          className="topic-tooltip"
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ opacity: 1, scale: 1 }}
         >
-          <h4>{week.title}</h4>
-          <div className="tooltip-topics">
-            {week.topics.map((topic, i) => (
-              <span key={i} className="topic-pill">• {topic}</span>
-            ))}
-          </div>
+          <h4>{item.topicTitle}</h4>
+          <p className="week-context">{item.weekTitle}</p>
           <div className="tooltip-progress">
             <div className="progress-bar-tooltip">
-              <div className="progress-fill-tooltip" style={{ width: `${week.progress}%` }}></div>
+              <div className="progress-fill-tooltip" style={{ width: `${item.progress}%` }}></div>
             </div>
-            <span>{week.progress}% Complete</span>
+            <span>{item.progress}% Complete</span>
           </div>
         </motion.div>
       </motion.div>
@@ -210,10 +218,10 @@ const LevelLadder = ({ onWeekClick }) => {
       <div className="ladder-path" ref={containerRef} style={{ position: 'relative' }}>
         <div className="ladder-header">
           <h2>{currentClass.name} - {currentTerm.name}</h2>
-          <p>Complete each week to unlock the next</p>
+          <p>Master each topic to unlock the next milestone</p>
         </div>
 
-        <div className="weeks-container">
+        <div className="topics-container">
           {/* SVG overlay for all connecting paths */}
           {paths.length > 0 && (
             <svg
@@ -241,12 +249,12 @@ const LevelLadder = ({ onWeekClick }) => {
                 {/* Create circular masks for each node */}
                 <mask id="line-mask">
                   <rect width="100%" height="100%" fill="white" />
-                  {currentTerm.weeks.map((_, idx) => {
+                  {topics.map((_, idx) => {
                     const node = nodeRefs.current[idx]
                     if (!node) return null
-                    const weeksContainer = containerRef.current?.querySelector('.weeks-container')
-                    if (!weeksContainer) return null
-                    const containerRect = weeksContainer.getBoundingClientRect()
+                    const topicsContainer = containerRef.current?.querySelector('.topics-container')
+                    if (!topicsContainer) return null
+                    const containerRect = topicsContainer.getBoundingClientRect()
                     const nodeRect = node.getBoundingClientRect()
                     const cx = nodeRect.left - containerRect.left + nodeRect.width / 2
                     const cy = nodeRect.top - containerRect.top + nodeRect.height / 2
@@ -265,7 +273,7 @@ const LevelLadder = ({ onWeekClick }) => {
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.8, delay: index * 0.1 + 0.2 }}
+                    transition={{ duration: 0.8, delay: index * 0.08 + 0.2 }}
                   />
                   {/* Animated pulse - thicker */}
                   <motion.path
@@ -281,7 +289,7 @@ const LevelLadder = ({ onWeekClick }) => {
                       duration: 1.5,
                       repeat: Infinity,
                       ease: "linear",
-                      delay: index * 0.1 + 1
+                      delay: index * 0.08 + 1
                     }}
                     opacity={0.8}
                   />
@@ -290,10 +298,10 @@ const LevelLadder = ({ onWeekClick }) => {
             </svg>
           )}
           
-          {currentTerm.weeks.map((week, index) => (
-            <WeekNode 
-              key={week.id} 
-              week={week} 
+          {topics.map((item, index) => (
+            <TopicNode 
+              key={item.id} 
+              item={item} 
               index={index}
             />
           ))}
@@ -304,12 +312,12 @@ const LevelLadder = ({ onWeekClick }) => {
           className="finish-line"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: currentTerm.weeks.length * 0.1 }}
+          transition={{ duration: 0.6, delay: topics.length * 0.08 }}
         >
           <div className="finish-flag">
             <Star size={32} />
             <h3>Term Complete!</h3>
-            <p>Great job! Ready for the next term?</p>
+            <p>Excellent! You've mastered all topics for this term.</p>
           </div>
         </motion.div>
       </div>

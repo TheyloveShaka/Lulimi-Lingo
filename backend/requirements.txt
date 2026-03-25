@@ -1,0 +1,47 @@
+# Lulimi Lingo - Python Backend Requirements
+# =============================================
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# CORS for React frontend
+starlette==0.35.1
+
+# AI/ML Libraries
+transformers==4.37.0
+torch==2.1.2
+accelerate==0.26.1
+bitsandbytes==0.42.0
+peft==0.7.1
+datasets==2.16.1
+sentencepiece==0.1.99
+
+# Google Gemini (free tier)
+google-genai
+
+# OpenAI (optional)
+openai==1.10.0
+
+# Langchain for orchestration
+langchain==0.1.4
+langchain-community==0.0.16
+
+# Database
+sqlalchemy==2.0.25
+aiosqlite==0.19.0
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+httpx==0.26.0
+numpy==1.26.3
+
+# Text processing for Luganda
+nltk==3.8.1
+regex==2023.12.25
+
+# Logging and monitoring
+loguru==0.7.2

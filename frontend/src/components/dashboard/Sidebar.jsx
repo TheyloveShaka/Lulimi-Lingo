@@ -3,13 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Home, TrendingUp, BookOpen, Brain, Trophy, 
   BookMarked, Award, Settings, HelpCircle, User,
-  ChevronLeft, ChevronRight, Sparkles
+  ChevronLeft, ChevronRight, Sparkles, LogOut
 } from 'lucide-react'
 import './Sidebar.css'
 
-const Sidebar = ({ expanded, onToggle }) => {
-  const [activePage, setActivePage] = useState('home')
-
+const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
   const menuItems = [
     { id: 'home', label: 'Home', icon: <Home size={22} /> },
     { id: 'progress', label: 'My Progress', icon: <TrendingUp size={22} /> },
@@ -24,7 +22,20 @@ const Sidebar = ({ expanded, onToggle }) => {
     { id: 'profile', label: 'Profile', icon: <User size={22} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={22} /> },
     { id: 'help', label: 'Help', icon: <HelpCircle size={22} /> },
+    { id: 'logout', label: 'Logout', icon: <LogOut size={22} />, isLogout: true },
   ]
+
+  const handleMenuClick = (itemId, isLogout) => {
+    if (isLogout) {
+      // Clear user session with correct localStorage keys
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('lulimiLingoCurrentUser')
+      // Reload page to reset auth state
+      window.location.href = '/'
+    } else {
+      onPageChange(itemId)
+    }
+  }
 
   return (
     <motion.aside
@@ -78,8 +89,8 @@ const Sidebar = ({ expanded, onToggle }) => {
             {menuItems.map((item) => (
               <motion.button
                 key={item.id}
-                className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-                onClick={() => setActivePage(item.id)}
+                className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => handleMenuClick(item.id)}
                 whileHover={{ scale: 1.02, x: 5 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -106,8 +117,8 @@ const Sidebar = ({ expanded, onToggle }) => {
             {bottomItems.map((item) => (
               <motion.button
                 key={item.id}
-                className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-                onClick={() => setActivePage(item.id)}
+                className={`nav-item ${currentPage === item.id ? 'active' : ''} ${item.isLogout ? 'logout-btn' : ''}`}
+                onClick={() => handleMenuClick(item.id, item.isLogout)}
                 whileHover={{ scale: 1.02, x: 5 }}
                 whileTap={{ scale: 0.98 }}
               >

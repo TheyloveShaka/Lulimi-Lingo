@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { Mail, Lock, LogIn } from 'lucide-react'
+import { Mail, Lock, LogIn, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { loginUser } from '../../services/userService'
 import './LoginModal.css'
 
 const LoginModal = ({ onClose, onLogin }) => {
@@ -10,6 +11,7 @@ const LoginModal = ({ onClose, onLogin }) => {
     password: ''
   })
   const [errors, setErrors] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -25,7 +27,7 @@ const LoginModal = ({ onClose, onLogin }) => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const newErrors = {}
@@ -41,15 +43,33 @@ const LoginModal = ({ onClose, onLogin }) => {
       return
     }
 
-    // Simulate login - retrieve user from localStorage
-    const users = JSON.parse(localStorage.getItem('lulimiLingoUsers') || '[]')
-    const user = users.find(u => u.email === formData.email && u.password === formData.password)
-    
-    if (user) {
-      onLogin(user)
-      navigate('/dashboard')
-    } else {
-      setErrors({ email: 'Invalid email or password' })
+    setIsLoading(true)
+    try {
+      const result = await loginUser(formData)
+      
+      if (result.success && result.user) {
+        // Store user data (without password)
+        const userData = {
+          _id: result.user._id,
+          name: result.user.name,
+          email: result.user.email,
+          classLevel: result.user.classLevel,
+          language: result.user.language,
+          completedLessons: result.user.completedLessons || [],
+          completedTopics: result.user.completedTopics || [],
+          progressPercentage: result.user.progressPercentage || 0
+        }
+        localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(userData))
+        
+        onLogin(userData)
+        navigate('/dashboard')
+      } else {
+        setErrors({ email: result.error || 'Login failed' })
+      }
+    } catch (error) {
+      setErrors({ email: error.message || 'An error occurred' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -76,7 +96,7 @@ const LoginModal = ({ onClose, onLogin }) => {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
-            <div className="input-wrapper">
+            <div className={`input-wrapper ${errors.email ? 'error' : ''}`}>
               <Mail size={20} className="input-icon" />
               <input
                 type="email"
@@ -85,7 +105,7 @@ const LoginModal = ({ onClose, onLogin }) => {
                 placeholder="your.email@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? 'error' : ''}
+                disabled={isLoading}
               />
             </div>
             {errors.email && <span className="error-message">{errors.email}</span>}
@@ -93,7 +113,7 @@ const LoginModal = ({ onClose, onLogin }) => {
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <div className="input-wrapper">
+            <div className={`input-wrapper ${errors.password ? 'error' : ''}`}>
               <Lock size={20} className="input-icon" />
               <input
                 type="password"
@@ -102,7 +122,7 @@ const LoginModal = ({ onClose, onLogin }) => {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
-                className={errors.password ? 'error' : ''}
+                disabled={isLoading}
               />
             </div>
             {errors.password && <span className="error-message">{errors.password}</span>}
@@ -113,9 +133,10 @@ const LoginModal = ({ onClose, onLogin }) => {
             className="login-btn"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={isLoading}
           >
-            <LogIn size={20} />
-            <span>Log In</span>
+            {isLoading ? <Loader2 size={20} className="spinning" /> : <LogIn size={20} />}
+            <span>{isLoading ? 'Logging in...' : 'Log In'}</span>
           </motion.button>
         </form>
 

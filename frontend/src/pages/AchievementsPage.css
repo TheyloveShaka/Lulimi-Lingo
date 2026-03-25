@@ -1,0 +1,151 @@
+.achievements-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.achievements-header {
+  margin-bottom: 2rem;
+}
+
+.achievements-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.achievements-header p {
+  margin: 0.5rem 0 1.5rem;
+  color: #666;
+}
+
+.progress-summary {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.progress-summary p {
+  margin: 0 0 0.8rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.achievement-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.achievement-card.unlocked {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #48bb78;
+}
+
+.achievement-card.unlocked:hover {
+  box-shadow: 0 8px 20px rgba(72, 187, 120, 0.2);
+}
+
+.achievement-card.locked {
+  background: #f5f5f5;
+  opacity: 0.7;
+}
+
+.achievement-icon {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.achievement-card.unlocked .achievement-icon {
+  background: rgba(72, 187, 120, 0.1);
+}
+
+.star-icon {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  color: #ffd700;
+  background: #fff;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.lock-icon {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  color: #999;
+  background: #fff;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.emoji-locked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.achievement-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0 0 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.unlock-date {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #48bb78;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .achievements-page {
+    padding: 1rem;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}

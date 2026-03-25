@@ -1,0 +1,745 @@
+[
+  {
+    "language": "Luganda",
+    "class": "S1",
+    "term": 1,
+    "week": "1-9",
+    "topic": "Family (Amaka)",
+    "objectives": [
+      "Pronounce, listen to, read and write the Luganda alphabet [cite: 148]",
+      "Differentiate between Luganda alphabet and English alphabet [cite: 149]",
+      "Use vowel length correctly (Short vs Long vowels) [cite: 149]",
+      "Describe family genealogy and relationships (Extended family) [cite: 160]",
+      "Write numerals and tell time [cite: 165, 184]",
+      "Greet and bid farewell observing time, gender, and age [cite: 189]"
+    ],
+    "vocabulary": [
+      "Taata (Father)",
+      "Maama (Mother)",
+      "Senga (Paternal Aunt)",
+      "Kojja (Maternal Uncle)",
+      "Jjajja (Grandparent)",
+      "Muganda wange (My sibling)",
+      "Wasuze otya (Good morning)",
+      "Osiibye otya (Good afternoon)",
+      "Sawa (Time/Hour)",
+      "Olunaku (Day)"
+    ],
+    "grammar_focus": [
+      "The Alphabet (A B C D...)",
+      "Vowel Length (e.g., Kula vs Kuula) [cite: 156]",
+      "Cardinal numbers (Omu, Bbiri, Satu...) [cite: 166]",
+      "Ordinal numbers (Owookubiri, Owookusatu...) [cite: 170]"
+    ],
+    "cultural_notes": [
+      "Use of specific greeting gestures like kneeling for women [cite: 195]",
+      "Addressing elders with plural forms for respect [cite: 189]",
+      "Importance of extended family connections (Kojja/Senga roles)"
+    ],
+    "assessment_types": [
+      "transcription",
+      "family_tree_drawing",
+      "dialogue_writing",
+      "riddles"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S1",
+    "term": 1,
+    "week": "10-12",
+    "topic": "Life at Home (Obulamu awaka)",
+    "objectives": [
+      "Tell roles of different people at home [cite: 211]",
+      "Name objects found at home in singular and plural [cite: 233]",
+      "Appreciate the value of lullabies and traditional rhymes [cite: 229]",
+      "Identify traditional objects/crafts and how they are made [cite: 235]",
+      "Explain taboos related to domestic objects [cite: 246]"
+    ],
+    "vocabulary": [
+      "Esefuliya (Saucepan)",
+      "Ekijiko (Spoon)",
+      "Ekyoto (Fireplace)",
+      "Olugoye (Cloth/Dress)",
+      "Engoye (Clothes)",
+      "Okweyanzi (Gratitude)",
+      "Omuziro (Taboo)",
+      "Oluyimba (Song)"
+    ],
+    "grammar_focus": [
+      "Singular and Plural formation (e.g., Ekitabo -> Ebitabo) [cite: 233]",
+      "Nouns related to household items"
+    ],
+    "cultural_notes": [
+      "Taboos regarding misuse of traditional objects like mortars (Ekinu) [cite: 222]",
+      "Traditional moral beauty vs physical beauty [cite: 244]",
+      "Gender roles in traditional settings"
+    ],
+    "assessment_types": [
+      "object_naming",
+      "lullaby_composition",
+      "translation",
+      "process_description"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S1",
+    "term": 2,
+    "week": "1-8",
+    "topic": "Crops, Plants, and Foods",
+    "objectives": [
+      "Categorise food crops, non-food crops and wild plants [cite: 253]",
+      "Differentiate seasons and impact on agriculture [cite: 264]",
+      "Use appropriate vocabulary for planting and harvesting [cite: 270]",
+      "Describe food preparation processes and menus [cite: 285, 294]",
+      "Use a dictionary to find synonyms, antonyms and homophones [cite: 297]"
+    ],
+    "vocabulary": [
+      "Emmere (Food)",
+      "Enva (Sauce/Relish)",
+      "Matooke (Plantains)",
+      "Lumonde (Sweet potatoes)",
+      "Okusiga (To plant)",
+      "Okukungula (To harvest)",
+      "Enkuba (Rain)",
+      "Omusana (Sunshine/Drought)",
+      "Ekyemisana (Lunch)"
+    ],
+    "grammar_focus": [
+      "Synonyms (Ebigambo ebirina amakulu agafaanagana)",
+      "Antonyms (Ebigambo ebirina amakulu agakontana) [cite: 300]",
+      "Homophones (Ebigambo ebiwulirwa obumu) [cite: 300]",
+      "Imperative verbs for recipes"
+    ],
+    "cultural_notes": [
+      "Taboos regarding planting and harvesting seasons [cite: 275]",
+      "Traditional food preservation methods [cite: 289]",
+      "Table manners and serving etiquette"
+    ],
+    "assessment_types": [
+      "recipe_writing",
+      "menu_creation",
+      "process_description",
+      "multiple_choice"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S1",
+    "term": 2,
+    "week": "9-12",
+    "topic": "Animal Rearing",
+    "objectives": [
+      "Name domestic animals, birds, and their products [cite: 305]",
+      "Identify symptoms and traditional treatment of animal diseases [cite: 325]",
+      "Differentiate punctuation marks and their functions [cite: 318]",
+      "Explain taboos related to domestic animals [cite: 321]"
+    ],
+    "vocabulary": [
+      "Embuzi (Goat)",
+      "Ente (Cow)",
+      "Embiizi (Pig)",
+      "Enkoko (Chicken)",
+      "Amata (Milk)",
+      "Ennyama (Meat)",
+      "Eddagala (Medicine)",
+      "Obulunzi (Animal husbandry)"
+    ],
+    "grammar_focus": [
+      "Punctuation Marks (Ntonnyeze, Kabonero k'abuuza) [cite: 318]",
+      "Noun-Adjective agreement"
+    ],
+    "cultural_notes": [
+      "Role of animals in dowry/bride price",
+      "Relationship between animals and specific communities in Uganda [cite: 332]"
+    ],
+    "assessment_types": [
+      "punctuation_exercises",
+      "essay_writing",
+      "vocabulary_matching"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S1",
+    "term": 3,
+    "week": "1-6",
+    "topic": "Personal and Community Hygiene",
+    "objectives": [
+      "Name internal and external body parts prone to disease [cite: 349]",
+      "Translate words and short sentences related to health [cite: 352]",
+      "Explain prevention of diseases using traditional and modern methods [cite: 357]",
+      "Compose simple songs and poems about hygiene [cite: 361]"
+    ],
+    "vocabulary": [
+      "Omutwe (Head)",
+      "Omukono (Arm/Hand)",
+      "Olubuto (Stomach)",
+      "Amagulu (Legs)",
+      "Obuyonjo (Hygiene)",
+      "Endwadde (Diseases)",
+      "Okunaaba (To bathe)",
+      "Kasasiro (Rubbish)"
+    ],
+    "grammar_focus": [
+      "Translation techniques (Literal vs Semantic) [cite: 352]",
+      "Possessive pronouns regarding body parts"
+    ],
+    "cultural_notes": [
+      "Community responsibility in hygiene (Bulungi bwansi)",
+      "Use of herbal medicine [cite: 360]"
+    ],
+    "assessment_types": [
+      "labeling_diagrams",
+      "translation",
+      "song_composition"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S2",
+    "term": 1,
+    "week": "1-7",
+    "topic": "Establishing and Managing Relationships",
+    "objectives": [
+      "Describe adolescence changes and their effects [cite: 368]",
+      "Identify challenges of peer pressure and drug abuse [cite: 384, 393]",
+      "Use verbs correctly [cite: 382]",
+      "Explain the importance of keeping a diary [cite: 403]"
+    ],
+    "vocabulary": [
+      "Obuvubuka (Adolescence)",
+      "Omukwano (Friendship)",
+      "Okukula (Growth)",
+      "Ebiragalalagala (Drugs)",
+      "Okusalawo (Decision making)",
+      "Empisa (Manners/Character)",
+      "Ekitabo ky'ebijjukizo (Diary)"
+    ],
+    "grammar_focus": [
+      "Verbs (Ebikolwa) [cite: 382]",
+      "Tenses in diary writing [cite: 409]"
+    ],
+    "cultural_notes": [
+      "Role of Senga and Kojja in guidance during adolescence",
+      "Respectful language in relationships"
+    ],
+    "assessment_types": [
+      "diary_entry",
+      "persuasive_dialogue",
+      "comprehension_questions"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S2",
+    "term": 1,
+    "week": "8-12",
+    "topic": "School Environment",
+    "objectives": [
+      "Describe the school environment and routine [cite: 416, 431]",
+      "Use adverbs correctly [cite: 429]",
+      "Identify sources of news and present news [cite: 436]",
+      "Fill in forms and identity cards [cite: 442]",
+      "Identify types and causes of strikes [cite: 451]"
+    ],
+    "vocabulary": [
+      "Ekibiina (Classroom)",
+      "Olukiiko (Assembly/Meeting)",
+      "Amawulire (News)",
+      "Ebiragiro (Rules)",
+      "Akediimo (Strike)",
+      "Omuwandiisi (Secretary)"
+    ],
+    "grammar_focus": [
+      "Adverbs (Emirumirizo) - Time, Manner, Place [cite: 429]",
+      "Descriptive composition writing [cite: 423]"
+    ],
+    "cultural_notes": [
+      "Hierarchy and respect in school settings",
+      "Community/School rules and regulations"
+    ],
+    "assessment_types": [
+      "news_presentation",
+      "form_filling",
+      "descriptive_writing"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S2",
+    "term": 2,
+    "week": "1-7",
+    "topic": "Public Places",
+    "objectives": [
+      "Use vocabulary for shops, markets, and hospitals [cite: 462]",
+      "Write a dialogue for buying and selling [cite: 479]",
+      "Use tenses correctly [cite: 483]",
+      "Describe an incident witnessed in a public place [cite: 500]"
+    ],
+    "vocabulary": [
+      "Akatale (Market)",
+      "Eddwaliro (Hospital)",
+      "Omusuubuzi (Trader)",
+      "Omuguzi (Buyer)",
+      "Okuseiga (To bargain)",
+      "Sente (Money)",
+      "Omusawo (Doctor)"
+    ],
+    "grammar_focus": [
+      "Tenses (Ebiro) - Present, Past, Future [cite: 483]",
+      "Dialogue structure"
+    ],
+    "cultural_notes": [
+      "Bargaining culture in markets",
+      "Dress codes for different public professions [cite: 496]"
+    ],
+    "assessment_types": [
+      "role_play",
+      "dialogue_writing",
+      "incident_report"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S2",
+    "term": 2,
+    "week": "8-12",
+    "topic": "Traditional Ceremonies: Naming",
+    "objectives": [
+      "Explain how people acquire names [cite: 508]",
+      "Identify surnames and their origins (Clans) [cite: 513]",
+      "Form nouns and verbs [cite: 529]",
+      "Identify songs and proverbs related to naming [cite: 526, 535]"
+    ],
+    "vocabulary": [
+      "Omwana (Child)",
+      "Erinnya (Name)",
+      "Okwalula (Naming ceremony)",
+      "Omusika (Heir)",
+      "Jjajja (Ancestor)",
+      "Olubuto (Pregnancy/Womb)"
+    ],
+    "grammar_focus": [
+      "Noun and Verb formation (e.g., Sika -> Omusika) [cite: 529]",
+      "Word roots"
+    ],
+    "cultural_notes": [
+      "The Kwalula ceremony in Buganda",
+      "Naming twins (Balongo) and special titles (Salongo, Nalongo)",
+      "Rituals of 'Kuwona' or 'Kukaza' (Baptism/Naming) [cite: 518]"
+    ],
+    "assessment_types": [
+      "classification_exercise",
+      "proverb_analysis",
+      "song_performance"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S2",
+    "term": 3,
+    "week": "1-12",
+    "topic": "Occupations and Careers",
+    "objectives": [
+      "Identify professions, titles, and places of work [cite: 541, 557]",
+      "Write a CV, application letter, and apology letter [cite: 561, 567, 571]",
+      "Use personal pronouns [cite: 580]",
+      "Describe comedy and its characteristics [cite: 574]"
+    ],
+    "vocabulary": [
+      "Omusomesa (Teacher)",
+      "Omusawo (Doctor)",
+      "Omulamuzi (Judge)",
+      "Omulimu (Job)",
+      "Okusaba omulimu (To apply for a job)",
+      "Okwetonda (To apologize)"
+    ],
+    "grammar_focus": [
+      "Personal Pronouns (Nze, Ggwe, Ye, Ffe, Mmwe, Bo) [cite: 580]",
+      "Formal writing register"
+    ],
+    "cultural_notes": [
+      "Respectful titles for professionals",
+      "The role of comedy in society [cite: 578]"
+    ],
+    "assessment_types": [
+      "cv_writing",
+      "formal_letter_writing",
+      "matching_exercise"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 1,
+    "week": "1-5",
+    "topic": "Games, Sports and Leisure",
+    "objectives": [
+      "Identify traditional and modern games [cite: 586]",
+      "Use possessive and demonstrative pronouns [cite: 600]",
+      "Explain disadvantages of gambling [cite: 603]",
+      "Write a biography of a sports hero [cite: 614]",
+      "Write an argumentative composition [cite: 619]"
+    ],
+    "vocabulary": [
+      "Omupiira (Football)",
+      "Omweso (Board game)",
+      "Okwepena (Dodgeball)",
+      "Omuzannyi (Player)",
+      "Ebiwumulo (Leisure)",
+      "Okuwuga (Swimming)"
+    ],
+    "grammar_focus": [
+      "Possessive Pronouns (Kyange, Kyaffe) [cite: 600]",
+      "Demonstrative Pronouns (Ono, Oyo, Bali) [cite: 600]",
+      "Argumentative writing structure"
+    ],
+    "cultural_notes": [
+      "Traditional wrestling (Ekigwo)",
+      "Social aspects of Omweso"
+    ],
+    "assessment_types": [
+      "argumentative_essay",
+      "biography_writing",
+      "debate"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 1,
+    "week": "6-10",
+    "topic": "Indigenous Tourism",
+    "objectives": [
+      "Identify wildlife in zoos and parks [cite: 635]",
+      "Understand Noun Classes 1-4 [cite: 641]",
+      "Appreciate cultural heritage sites [cite: 644]",
+      "Articulate tourism vocabulary [cite: 627]"
+    ],
+    "vocabulary": [
+      "Ebisolo (Animals)",
+      "Ebinyonyi (Birds)",
+      "Ebyobulambuzi (Tourism)",
+      "Ekikuuku (Park)",
+      "Masiro (Tombs)",
+      "Embuga (Palace)"
+    ],
+    "grammar_focus": [
+      "Noun Classes 1-4 (Mu-Ba, Mu-Mi, Li-Ma, Ki-Bi) [cite: 641]"
+    ],
+    "cultural_notes": [
+      "Significance of Royal Tombs (Masiro)",
+      "Totems and wildlife conservation"
+    ],
+    "assessment_types": [
+      "brochure_creation",
+      "grammar_exercises",
+      "role_play"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 2,
+    "week": "1-5",
+    "topic": "Clans (Ebika)",
+    "objectives": [
+      "Name clans and their totems [cite: 658, 666]",
+      "Understand Noun Classes 5-10 [cite: 669]",
+      "Write an invitation letter [cite: 672]",
+      "Discuss 'If' beliefs (Superstitions) [cite: 675]"
+    ],
+    "vocabulary": [
+      "Ekika (Clan)",
+      "Omuziro (Totem)",
+      "Akabbiro (Secondary Totem)",
+      "Omutaka (Clan Head)",
+      "Olulyo (Lineage)",
+      "Obulombolombo (Traditions/Rituals)"
+    ],
+    "grammar_focus": [
+      "Noun Classes 5-10 (N-N, Lu-N, Ka-Bu, Gu-Ga, Ku-Ma) [cite: 670]"
+    ],
+    "cultural_notes": [
+      "The clan system in Buganda",
+      "Taboos regarding eating one's totem",
+      "Meaning of 'If' beliefs (e.g., Ow's hooting means death) [cite: 679]"
+    ],
+    "assessment_types": [
+      "family_tree_mapping",
+      "invitation_writing",
+      "totem_identification"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 2,
+    "week": "6-10",
+    "topic": "Wealth Creation",
+    "objectives": [
+      "Explain wealth creation and productive use [cite: 691, 699]",
+      "Use adjectives to talk about wealth [cite: 696]",
+      "Identify proverbs and idioms related to wealth [cite: 705]"
+    ],
+    "vocabulary": [
+      "Obugagga (Wealth)",
+      "Obwavu (Poverty)",
+      "Okutereka (Saving)",
+      "Amagoba (Profit)",
+      "Ettaka (Land)"
+    ],
+    "grammar_focus": [
+      "Adjectives (Nakongezalinnya) [cite: 696]",
+      "Similes and Metaphors [cite: 706]"
+    ],
+    "cultural_notes": [
+      "Proverbs about hard work (e.g., 'Akatono kazira mu liiso')",
+      "Traditional land ownership concepts"
+    ],
+    "assessment_types": [
+      "proverb_analysis",
+      "essay_writing",
+      "debate"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 3,
+    "week": "1-5",
+    "topic": "Environmental Awareness",
+    "objectives": [
+      "Explain causes of environmental degradation [cite: 723]",
+      "Write or make an announcement [cite: 731]",
+      "Use prepositions and postpositions [cite: 734]",
+      "Compose poems about environment [cite: 740]"
+    ],
+    "vocabulary": [
+      "Obutonde bw'ensi (Environment)",
+      "Okwonoona (Degradation)",
+      "Omuddo (Vegetation)",
+      "Emyala (Drainage channels)",
+      "Okusimba (To plant)"
+    ],
+    "grammar_focus": [
+      "Prepositions (Ku, Mu, E) [cite: 734]",
+      "Postpositions",
+      "Announcement format"
+    ],
+    "cultural_notes": [
+      "Community responsibility for environment",
+      "Traditional conservation methods"
+    ],
+    "assessment_types": [
+      "announcement_writing",
+      "poem_composition",
+      "translation"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S3",
+    "term": 3,
+    "week": "6-10",
+    "topic": "Water",
+    "objectives": [
+      "Study comprehension on safe/unsafe water [cite: 750]",
+      "Summarise a passage [cite: 759]",
+      "Describe water creatures using adjectives [cite: 769]",
+      "Translate large texts [cite: 766]"
+    ],
+    "vocabulary": [
+      "Amazzi (Water)",
+      "Enzizi (Wells)",
+      "Ebinnyanja (Lakes)",
+      "Emigga (Rivers)",
+      "Enfuvu (Hippo)",
+      "Goonya (Crocodile)"
+    ],
+    "grammar_focus": [
+      "Summary writing skills [cite: 760]",
+      "Adjectives (Comparative and Superlative) [cite: 771]"
+    ],
+    "cultural_notes": [
+      "Water source maintenance (Bulungi bwansi)",
+      "Safety of water (Okufumba amazzi)"
+    ],
+    "assessment_types": [
+      "summary_writing",
+      "translation",
+      "comprehension_questions"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S4",
+    "term": 1,
+    "week": "1-5",
+    "topic": "Migration and Settlement",
+    "objectives": [
+      "Trace origin stories and myths [cite: 775, 785]",
+      "Use conjunctions, interjections and ideophones [cite: 782, 789]",
+      "Write a narrative story of origin [cite: 778]"
+    ],
+    "vocabulary": [
+      "Okuwanganguka (Migration)",
+      "Ensibuko (Origin)",
+      "Olugero (Myth/Story)",
+      "Abasenze (Settlers)",
+      "Ebyafaayo (History)"
+    ],
+    "grammar_focus": [
+      "Conjunctions (Naye, Kubanga, Era) [cite: 782]",
+      "Interjections (Woowe, Maama) [cite: 789]",
+      "Ideophones (Descriptive sound words) [cite: 789]"
+    ],
+    "cultural_notes": [
+      "Legend of Kintu and Nambi",
+      "Migration stories of the Bantu"
+    ],
+    "assessment_types": [
+      "narrative_writing",
+      "storytelling",
+      "map_interpretation"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S4",
+    "term": 1,
+    "week": "6-10",
+    "topic": "Traditional Ceremonies: Initiation, Marriage, Funeral",
+    "objectives": [
+      "Explain marriage and funeral rites [cite: 802, 831]",
+      "Write a Will (Ekiraamo) [cite: 845]",
+      "Take minutes of a meeting [cite: 826]",
+      "Conjugate verbs [cite: 848]"
+    ],
+    "vocabulary": [
+      "Kwanjula (Introduction ceremony)",
+      "Embaga (Wedding)",
+      "Olumbe (Funeral rites)",
+      "Ekiraamo (Will)",
+      "Omusika (Heir)",
+      "Omuko (In-law)"
+    ],
+    "grammar_focus": [
+      "Verb Conjugation [cite: 848]",
+      "Minute writing format [cite: 827]"
+    ],
+    "cultural_notes": [
+      "Bridewealth (Mutwalo)",
+      "Last funeral rites (Okwabya olumbe)",
+      "Chants and Incantations [cite: 842]"
+    ],
+    "assessment_types": [
+      "will_writing",
+      "minute_taking",
+      "verb_conjugation_exercise"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S4",
+    "term": 2,
+    "week": "1-5",
+    "topic": "Cultural Values, Morals and Ethics",
+    "objectives": [
+      "Identify role models and dress codes [cite: 861, 865]",
+      "Explain corruption (forms, causes, effects) [cite: 872, 878]",
+      "Use verb extensions 4-6 [cite: 870]",
+      "Use noun classes 11-14 and compound nouns [cite: 888, 889]"
+    ],
+    "vocabulary": [
+      "Empisa (Morals)",
+      "Obulyake (Corruption)",
+      "Enguzi (Bribe)",
+      "Ekyokulabirako (Role model)",
+      "Obuntubulamu (Integrity)"
+    ],
+    "grammar_focus": [
+      "Verb Extensions (e.g., Kolakola, Kolerera) [cite: 871]",
+      "Noun Classes 11-14 [cite: 888]",
+      "Compound Nouns [cite: 889]"
+    ],
+    "cultural_notes": [
+      "Decency in dressing (Gomesi/Kanzu) [cite: 867]",
+      "Respect and gratitude (Okweyanzi) [cite: 854]"
+    ],
+    "assessment_types": [
+      "debate_corruption",
+      "composition_writing",
+      "grammar_exercises"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S4",
+    "term": 2,
+    "week": "6-10",
+    "topic": "Leadership and Citizenship",
+    "objectives": [
+      "Comprehend leadership structures [cite: 894]",
+      "Appreciate electoral processes [cite: 910]",
+      "Use noun classes 19-23 [cite: 903]",
+      "Use verb extensions 7-9 [cite: 921]"
+    ],
+    "vocabulary": [
+      "Kabaka (King)",
+      "Katikkiro (Prime Minister)",
+      "Omubaka (Representative)",
+      "Okulonda (To vote)",
+      "Obutuuze (Citizenship)",
+      "Demokulase (Democracy)"
+    ],
+    "grammar_focus": [
+      "Noun Classes 19-23 (Locatives e.g., Gh- class variants) [cite: 903]",
+      "Verb Extensions 7-9 (e.g., Kolagana) [cite: 922]"
+    ],
+    "cultural_notes": [
+      "Traditional hierarchy (Kabaka -> Katikkiro -> Bataka)",
+      "Roles of citizens [cite: 918]"
+    ],
+    "assessment_types": [
+      "campaign_speech",
+      "organogram_drawing",
+      "manifesto_writing"
+    ]
+  },
+  {
+    "language": "Luganda",
+    "class": "S4",
+    "term": 3,
+    "week": "1-8",
+    "topic": "Human Rights",
+    "objectives": [
+      "State fundamental human rights [cite: 927]",
+      "Know rights of children, workers, and PWDs [cite: 944, 948, 952]",
+      "Use noun classes 15-18 [cite: 940]",
+      "Know how words are reduplicated [cite: 957]"
+    ],
+    "vocabulary": [
+      "Eddembe ly'obuntu (Human rights)",
+      "Eddembe ly'abaana (Children's rights)",
+      "Okutulugunya (Abuse/Torture)",
+      "Obwenkanya (Justice)",
+      "Abakozi (Workers)"
+    ],
+    "grammar_focus": [
+      "Noun Classes 15-18 (Ku- infinitive and Locatives) [cite: 941]",
+      "Reduplication (e.g., Mpolampola, Katono katono) [cite: 957]"
+    ],
+    "cultural_notes": [
+      "Traditional protection of vulnerable groups",
+      "Modern legal frameworks vs cultural practices"
+    ],
+    "assessment_types": [
+      "report_writing",
+      "translation_legal_text",
+      "case_study_analysis"
+    ]
+  }
+]

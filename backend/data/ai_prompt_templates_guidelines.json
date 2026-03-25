@@ -1,0 +1,282 @@
+{
+  "ai_prompt_templates_and_guidelines": {
+    "overview": "This file contains the specific prompts and templates for the AI (Gemini/OpenAI) to generate educational content, quizzes, and practice exercises based on the Luganda curriculum structure.",
+
+    "content_generation_prompts": {
+      "lesson_generation": {
+        "system_prompt": "You are an expert Luganda language teacher and curriculum designer. You create engaging, culturally-appropriate educational content for students learning Luganda. You understand the progression from foundational to advanced levels and incorporate authentic scenarios that reflect Ugandan/Lugandan contexts.",
+
+        "template": {
+          "variables": [
+            "{class_level}",
+            "{term}",
+            "{milestone_name}",
+            "{topic}",
+            "{core_skills}",
+            "{difficulty_type}"
+          ],
+          "prompt": "Create an engaging Luganda lesson for {class_level} {term} on the topic: {topic}\n\nMilestone: {milestone_name}\nCore Skills to Focus On: {core_skills}\nDifficulty Level: {difficulty_type}\n\nLesson Structure:\n1. OPENING SCENARIO (2-3 sentences): Present a real-life Ugandan context/situation where this topic is used\n2. VOCABULARY & EXPLANATIONS: Introduce 10-15 key words/phrases with English translations\n3. GRAMMAR/RULES (if applicable): Explain the grammar rule clearly\n4. GUIDED PRACTICE: Provide 3 worked examples showing how to use the content\n5. SCENARIO-BASED PRACTICE: Create 4 different real-world scenarios where students must apply the skill\n6. CULTURAL NOTES: Include 2-3 important cultural insights related to the topic\n7. COMMON MISTAKES: List 2-3 frequent errors students make\n\nForm your response in clear, structured sections. Use both Luganda and English. Make scenarios authentic to Ugandan context."
+        },
+
+        "examples": [
+          {
+            "class": "S1",
+            "term": "Term 1",
+            "topic": "Greetings & Introductions",
+            "core_skill": "Speaking",
+            "prompt": "Create lesson for S1 Term 1 on 'Greetings & Introductions' (Speaking skill). Opening: Show a photo of two people meeting at a market in Kampala. Scenario 1: Greet your neighbor early morning. Scenario 2: Introduce yourself to a new classmate. Scenario 3: Meet an elderly person respectfully. Scenario 4: Respond to a greeting in a school setting."
+          },
+          {
+            "class": "S2",
+            "term": "Term 2",
+            "topic": "Market Negotiations",
+            "core_skill": "Speaking & Listening",
+            "prompt": "Create lesson for S2 Term 2 on 'Market Negotiations' (Speaking & Listening). Opening: You're at Kampala Central Market buying vegetables. Include phrases for bargaining, understanding prices, and closing deals. Scenario 1: Negotiate price of matoke. Scenario 2: Ask about quality of tomatoes. Scenario 3: Make counteroffers. Scenario 4: Complete transaction with thanks."
+          },
+          {
+            "class": "S3",
+            "term": "Term 3",
+            "topic": "Poetry Analysis: Imagery & Symbolism",
+            "core_skill": "Literature & Reading",
+            "prompt": "Create lesson for S3 Term 3 on 'Poetry Analysis: Imagery & Symbolism'. Include 2 Luganda poems (authentic or high-quality modern). Explain imagery and symbolism with examples from the poems. Scenario 1: Identify imagery in poem excerpt. Scenario 2: Explain symbolic meaning. Scenario 3: Compare imagery across poems. Scenario 4: Write analysis of poetic device."
+          }
+        ]
+      },
+
+      "quiz_generation": {
+        "system_prompt": "You are an expert in creating fair, comprehensive assessments. Your quizzes test different levels of learning: recall, understanding, application, and analysis. You include scenario-based questions that reflect real Ugandan contexts.",
+
+        "template": {
+          "variables": [
+            "{class_level}",
+            "{term}",
+            "{topic}",
+            "{question_count}"
+          ],
+          "prompt": "Create a {question_count}-question quiz for {class_level} {term} on: {topic}\n\nQuestion Type Distribution:\n- Recall Questions (30%): Multiple choice, fill-in-blank, vocabulary matching\n- Comprehension Questions (30%): True/false, short answer, matching definitions\n- Scenario-Based Application (25%): Real-world situations requiring skill application\n- Analysis Questions (15%): Critical thinking, comparison, interpretation\n\nFormat each section clearly:\n\nRECALL QUESTIONS:\n[List all recall questions with A/B/C/D options]\n\nCOMPREHENSION QUESTIONS:\n[List comprehension questions]\n\nSCENARIO-BASED QUESTIONS:\n[Each scenario: Context (2-3 sentences) → Questions requiring response in Luganda]\n\nANALYSIS QUESTIONS:\n[Questions requiring interpretation/comparison]\n\nANSWER KEY:\nProvide answers for all questions with brief explanations.\n\nImportant: Make scenarios authentic to Uganda (markets, homes, schools, community gatherings). Use Luganda where appropriate with English translations."
+        },
+
+        "examples": [
+          {
+            "class": "S1",
+            "term": "Term 1",
+            "topic": "Numbers 1-20 & Basic Counting",
+            "count": 15,
+            "prompt": "15-question quiz for S1 Term 1 on Numbers 1-20: 5 recall (identify number word from numeral), 5 comprehension (listen & repeat, match written to spoken), 4 scenarios (count items at home, market, classroom, counting money), 1 analysis (counting in different contexts)."
+          },
+          {
+            "class": "S2",
+            "term": "Term 1",
+            "topic": "Past Tense Usage",
+            "count": 12,
+            "prompt": "12-question quiz for S2 Term 1 on Past Tense: 4 recall (identify correct past form), 4 comprehension (fill blanks with past forms), 3 scenarios (describe what happened yesterday - at school, at home, at market), 1 analysis (compare past vs present in paragraph)."
+          }
+        ]
+      },
+
+      "practice_generation": {
+        "system_prompt": "You are an expert in creating progressive, scaffolded language practice. Start with guided practice, move to semi-independent, then fully independent. Each practice includes immediate feedback and cultural context.",
+
+        "template": {
+          "variables": [
+            "{class_level}",
+            "{topic}",
+            "{core_skills}",
+            "{scenario_count}"
+          ],
+          "prompt": "Create {scenario_count} progressive scenario-based practice exercises for {class_level} on {topic} ({core_skills} skills).\n\nFor EACH scenario:\n1. CONTEXT (2-3 sentences): Set the scene in an authentic Ugandan situation\n2. GUIDED VERSION: Provide sentence starters/model language to complete\n3. SEMI-GUIDED VERSION: Provide situation and 3 key vocabulary words, student constructs response\n4. INDEPENDENT VERSION: Only situation given, student creates full response\n5. FEEDBACK: Provide model answer and explanation of any grammar/cultural notes\n\nProgressively increase difficulty across scenarios. Scenario 1 should be most scaffolded, final scenario least scaffolded.\n\nInclude: Pronunciation guides (phonetic Luganda), cultural appropriateness tips, common errors to avoid."
+        },
+
+        "examples": [
+          {
+            "class": "S1",
+            "term": "Term 1",
+            "topic": "Basic Introductions (My Name Is...)",
+            "skills": "Speaking",
+            "count": 4,
+            "prompt": "4 scenarios on basic introductions for S1 Term 1:\nScenario 1 (Guided): Introduce yourself to your teacher - provided sentence starter\nScenario 2 (Semi-guided): Meet a new student - given scenario + 3 key phrases\nScenario 3 (Independent): Introduce yourself at a community gathering\nScenario 4 (Challenge): Introduce a family member to a friend"
+          }
+        ]
+      },
+
+      "resource_generation": {
+        "system_prompt": "You are expert in creating comprehensive supplementary learning resources. Your resources improve vocabulary, provide cultural context, explain grammar clearly, and extend learning beyond the basic lesson.",
+
+        "template": {
+          "variables": [
+            "{resource_type}",
+            "{class_level}",
+            "{topic}"
+          ],
+          "prompt": "Create a comprehensive {resource_type} resource for {class_level} on {topic}.\n\nInclude:\n1. VOCABULARY LIST: 20-30 key words/phrases with: Luganda word → Pronunciation (phonetic) → English meaning → Example sentence in Luganda with English translation\n2. CONJUGATION/USAGE PATTERNS (if grammar): Show regular patterns and common exceptions\n3. CULTURAL CONTEXT: Explain when/how this language is used in real Ugandan life\n4. VISUAL AIDS DESCRIPTIONS: Describe images/diagrams that could enhance learning\n5. PRONUNCIATION GUIDE: Detailed phonetic guidance (especially for challenging sounds)\n6. EXTENSION ACTIVITIES: 3-4 suggested activities for deeper learning\n7. COMMON VARIATIONS: Show regional or contextual variations in Luganda usage\n8. AUTHENTIC EXAMPLES: Include examples from real Lugandan conversations, stories, or media\n\nFormat clearly with sections and subsections. Use tables where appropriate."
+        }
+      }
+    },
+
+    "implementation_guidelines": {
+      "for_lesson_generation": {
+        "step1": "Identify target class level (S1-S4) and determine language complexity",
+        "step2": "Select milestone and specific topic from curriculum",
+        "step3": "Identify core skills from milestone definition",
+        "step4": "Choose 3-4 authentic Ugandan scenarios relevant to topic",
+        "step5": "Create vocabulary list (10-15 words for S1, 15-25 for S3/S4)",
+        "step6": "Provide grammar explanation with clear rules",
+        "step7": "Generate 3 worked examples showing correct usage",
+        "step8": "Create 4 scenario-based practice activities with increasing difficulty",
+        "step9": "Add 2-3 cultural notes explaining context and appropriateness",
+        "step10": "List common student errors with corrections"
+      },
+
+      "for_quiz_generation": {
+        "step1": "Count available minutes/points for assessment",
+        "step2": "Design question type distribution (recall 30%, comprehension 30%, application 25%, analysis 15%)",
+        "step3": "Create recall questions testing vocabulary and basic concepts",
+        "step4": "Create comprehension questions testing understanding",
+        "step5": "Create 3-4 scenario-based questions with authentic contexts",
+        "step6": "Create 1-2 analysis questions requiring critical thinking/comparison",
+        "step7": "Provide answer key with brief explanations",
+        "step8": "Include difficulty rating for each question",
+        "step9": "Ensure variety in question types (not all multiple choice)",
+        "step10": "Verify scenarios are culturally appropriate and realistic"
+      },
+
+      "for_practice_generation": {
+        "step1": "Select 4-6 related scenarios under one topic",
+        "step2": "Order scenarios from simple to complex",
+        "step3": "For each scenario: Create 3 versions (guided → semi-guided → independent)",
+        "step4": "Provide model answers for each version",
+        "step5": "Add pronunciation guides for all Luganda text",
+        "step6": "Include cultural tips (e.g., 'Use respectful form for elders')",
+        "step7": "Highlight common student mistakes in feedback",
+        "step8": "Vary skills across scenarios (some listening-focused, some speaking, etc.)",
+        "step9": "Make scenarios progressive in difficulty",
+        "step10": "Ensure all scenarios are authentic and relevant to student interests"
+      }
+    },
+
+    "scenario_bank": {
+      "family_scenarios": [
+        "Greeting family members at different times of day",
+        "Describing family members and their roles",
+        "Discussing family meals and food preferences",
+        "Explaining family relationships and connections",
+        "Planning family gatherings or celebrations",
+        "Discussing household chores and responsibilities",
+        "Addressing family conflicts respectfully"
+      ],
+
+      "school_scenarios": [
+        "Asking for and giving classroom instructions",
+        "Discussing school subjects and preferences",
+        "Asking for help with schoolwork",
+        "Explaining school rules and expectations",
+        "Describing school day and daily routines",
+        "Participating in class discussions and debates",
+        "Writing excuse notes for absence"
+      ],
+
+      "market_scenarios": [
+        "Asking for specific items by name",
+        "Negotiating prices for goods",
+        "Judging quality of products",
+        "Making purchases and handling money",
+        "Asking about product origin and freshness",
+        "Returning unsatisfactory purchases",
+        "Comparing prices across different vendors"
+      ],
+
+      "community_scenarios": [
+        "Greeting neighbors and community members",
+        "Discussing community events and gatherings",
+        "Asking for directions in community",
+        "Discussing community roles and responsibilities",
+        "Participating in community celebrations",
+        "Offering help to community members",
+        "Discussing community traditions and customs"
+      ],
+
+      "health_scenarios": [
+        "Describing symptoms to a healthcare provider",
+        "Discussing treatment and medication",
+        "Explaining health conditions to family",
+        "Sharing wellness tips and practices",
+        "Discussing traditional and modern medicine",
+        "Asking for health advice",
+        "Discussing preventive health measures"
+      ]
+    },
+
+    "assessment_scenario_examples": {
+      "S1_Term1_Assessment": {
+        "topic": "Greetings and Basic Introductions",
+        "scenario1": "Your neighbor greets you 'Wasuze otya?' (How did you sleep/Are you fine?). How do you respond? Provide 2 different appropriate responses.",
+        "scenario2": "You meet a new student at school. Introduce yourself with your name, class, and school. Use complete sentences in Luganda.",
+        "scenario3": "You see your grandmother in the morning. How do you greet her respectfully? Explain the cultural significance.",
+        "scenario4": "You're introducing your friend to someone older (showing respect). How would your introduction differ from introducing them to a peer?"
+      },
+
+      "S2_Term2_Assessment": {
+        "topic": "Describing Past Events",
+        "scenario1": "Write 5 sentences about what you did yesterday. Use past tense consistently. Include: morning activity, school activity, evening activity.",
+        "scenario2": "Listen to someone's story about visiting a market. Answer: What did they buy? Why? How much did they spend?",
+        "scenario3": "Compare your day today with yesterday. What was the same? What was different? Write using past and present tense.",
+        "scenario4": "Read a short paragraph about a community celebration. Answer comprehension questions about when it happened, who participated, what happened."
+      },
+
+      "S3_Term1_Assessment": {
+        "topic": "Writing Academic Essays",
+        "scenario1": "Write 3-paragraph essay: 'The Importance of Preserving Lugandan Culture'. Topic sentence, 2 supporting details, conclusion.",
+        "scenario2": "Analyze why certain Lugandan proverbs are still relevant today. Support your argument with 3 proverbs and explanations.",
+        "scenario3": "Compare traditional Lugandan education with modern education. Use comparison language and specific examples.",
+        "scenario4": "Evaluate the impact of language on cultural identity. Provide examples and evidence from Lugandan context."
+      },
+
+      "S4_Term2_Assessment": {
+        "topic": "Advanced Functional Writing",
+        "scenario1": "Write formal letter requesting educational opportunity or position. Follow business letter format in Luganda.",
+        "scenario2": "Summarize complex article (250+ words) in 100-word summary maintaining key ideas.",
+        "scenario3": "Create comprehensive report on Lugandan cultural practice including: history, significance, current status, your analysis.",
+        "scenario4": "Translate complex English passage to Luganda maintaining tone, meaning, and register."
+      }
+    },
+
+    "quality_assurance_checklist": {
+      "content_quality": [
+        "Content is accurate in Luganda language usage",
+        "Grammar and orthography are correct",
+        "Vocabulary is appropriate for class level",
+        "Examples are clear and relatable",
+        "Scenarios are authentic to Ugandan context",
+        "Cultural information is respectful and accurate",
+        "Content follows curriculum standards"
+      ],
+
+      "engagement_quality": [
+        "Content is interesting and relevant to students",
+        "Scenarios connect to student experiences",
+        "Language is engaging and not boring",
+        "Right balance of challenge and support",
+        "Content encourages active participation",
+        "Real-world applications are clear"
+      ],
+
+      "scenario_quality": [
+        "Scenarios depict realistic Ugandan situations",
+        "Multiple perspectives/contexts represented",
+        "Scenarios are inclusive and culturally sensitive",
+        "Language used is natural and authentic",
+        "Scenarios require actual language use (not just recognition)",
+        "Difficulty appropriate for class level"
+      ],
+
+      "assessment_quality": [
+        "Questions clearly test learning outcomes",
+        "Multiple question types included",
+        "Answers are unambiguous and correct",
+        "Difficulty is appropriately mixed",
+        "Scenario-based questions are well-designed",
+        "Answer key provides helpful explanations"
+      ]
+    }
+  }
+}

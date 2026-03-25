@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, GraduationCap, Github, Chrome } from 'lucide-react'
+import { User, Mail, Lock, GraduationCap, Loader2 } from 'lucide-react'
+import { signupUser } from '../../services/userService'
 import './SignupCard.css'
 
 const SignupCard = ({ onSignup, onShowLogin }) => {
@@ -8,12 +9,18 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
     name: '',
     email: '',
     password: '',
-    class: 'S1'
+    class: 'S1',
+    language: 'luganda'
   })
 
   const [errors, setErrors] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
 
   const classes = ['S1', 'S2', 'S3', 'S4']
+  const languages = [
+    { value: 'luganda', label: 'Luganda' },
+    { value: 'runyankole', label: 'Runyankole' }
+  ]
 
   const handleChange = (e) => {
     setFormData({
@@ -51,7 +58,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
     return newErrors
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const newErrors = validate()
@@ -60,7 +67,33 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
       return
     }
     
-    onSignup(formData)
+    setIsLoading(true)
+    try {
+      const result = await signupUser(formData)
+      
+      if (result.success && result.user) {
+        // Store user data (without password)
+        const userData = {
+          _id: result.user._id,
+          name: result.user.name,
+          email: result.user.email,
+          classLevel: result.user.classLevel,
+          language: result.user.language,
+          completedLessons: result.user.completedLessons || [],
+          completedTopics: result.user.completedTopics || [],
+          progressPercentage: result.user.progressPercentage || 0
+        }
+        localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(userData))
+        
+        onSignup(userData)
+      } else {
+        setErrors({ email: result.error || 'Failed to create account' })
+      }
+    } catch (error) {
+      setErrors({ email: error.message || 'An error occurred' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -78,7 +111,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
       <form onSubmit={handleSubmit} className="signup-form">
         <div className="form-group">
           <label htmlFor="name">Full Name</label>
-          <div className="input-wrapper">
+          <div className={`input-wrapper ${errors.name ? 'error' : ''}`}>
             <User size={20} className="input-icon" />
             <input
               type="text"
@@ -87,7 +120,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
               placeholder="Enter your name"
               value={formData.name}
               onChange={handleChange}
-              className={errors.name ? 'error' : ''}
+              disabled={isLoading}
             />
           </div>
           {errors.name && <span className="error-message">{errors.name}</span>}
@@ -95,7 +128,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
 
         <div className="form-group">
           <label htmlFor="email">Email Address</label>
-          <div className="input-wrapper">
+          <div className={`input-wrapper ${errors.email ? 'error' : ''}`}>
             <Mail size={20} className="input-icon" />
             <input
               type="email"
@@ -104,7 +137,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
               placeholder="your.email@example.com"
               value={formData.email}
               onChange={handleChange}
-              className={errors.email ? 'error' : ''}
+              disabled={isLoading}
             />
           </div>
           {errors.email && <span className="error-message">{errors.email}</span>}
@@ -112,7 +145,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <div className="input-wrapper">
+          <div className={`input-wrapper ${errors.password ? 'error' : ''}`}>
             <Lock size={20} className="input-icon" />
             <input
               type="password"
@@ -121,7 +154,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
               placeholder="Create a strong password"
               value={formData.password}
               onChange={handleChange}
-              className={errors.password ? 'error' : ''}
+              disabled={isLoading}
             />
           </div>
           {errors.password && <span className="error-message">{errors.password}</span>}
@@ -136,6 +169,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
               name="class"
               value={formData.class}
               onChange={handleChange}
+              disabled={isLoading}
             >
               {classes.map((cls) => (
                 <option key={cls} value={cls}>
@@ -146,13 +180,33 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
           </div>
         </div>
 
+        <div className="form-group">
+          <label htmlFor="language">Select Language</label>
+          <div className="input-wrapper">
+            <GraduationCap size={20} className="input-icon" />
+            <select
+              id="language"
+              name="language"
+              value={formData.language}
+              onChange={handleChange}
+              disabled={isLoading}
+            >
+              {languages.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <motion.button
           type="submit"
           className="submit-btn"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          disabled={isLoading}
         >
-          Create Account
+          {isLoading ? <Loader2 size={20} className="spinning" /> : null}
+          <span>{isLoading ? 'Creating Account...' : 'Create Account'}</span>
         </motion.button>
       </form>
 
@@ -163,11 +217,11 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
       <div className="social-login">
         <motion.button
           className="social-btn"
+          disabled={isLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Chrome size={20} />
-          <span>Google</span>
+          <span>Coming Soon</span>
         </motion.button>
       </div>
 

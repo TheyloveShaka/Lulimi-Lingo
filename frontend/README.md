@@ -1,4 +1,4 @@
-# 🎓 Local Language Learning Web App
+#  Local Language Learning Web App
 
 A modern, gamified language-learning platform for Uganda's local languages, designed for students in classes S1-S4.
 
@@ -7,9 +7,9 @@ A modern, gamified language-learning platform for Uganda's local languages, desi
 
 ---
 
-## 🌟 Features
+##  Features
 
-### ✨ Modern, Beautiful UI
+###  Modern, Beautiful UI
 
 - **Duolingo-inspired design** with playful animations
 - **Candy Crush-style level ladder** for intuitive navigation
@@ -17,7 +17,7 @@ A modern, gamified language-learning platform for Uganda's local languages, desi
 - **Smooth animations** and micro-interactions
 - **Gradient-rich interface** with floating vector shapes
 
-### 🎮 Gamified Learning Experience
+###  Gamified Learning Experience
 
 - Progress tracking with visual indicators
 - Streak counter and achievements
@@ -25,14 +25,14 @@ A modern, gamified language-learning platform for Uganda's local languages, desi
 - Interactive learning path
 - Completion celebrations
 
-### 🤖 AI-Powered (Ready for Integration)
+###  AI-Powered (Ready for Integration)
 
 - Chatbot dock for instant help
 - Adaptive learning paths (placeholder)
 - Personalized quiz generation (placeholder)
 - Real-time feedback system (placeholder)
 
-### 📚 Curriculum-Aligned
+###  Curriculum-Aligned
 
 - Based on Uganda NCDC syllabus
 - Classes S1-S4 coverage
@@ -41,7 +41,7 @@ A modern, gamified language-learning platform for Uganda's local languages, desi
 
 ---
 
-## 🛠️ Tech Stack
+## ️ Tech Stack
 
 ### Frontend
 
@@ -60,7 +60,7 @@ A modern, gamified language-learning platform for Uganda's local languages, desi
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 LLAi project/
@@ -87,13 +87,12 @@ LLAi project/
 ├── index.html
 ├── vite.config.js
 ├── package.json
-├── CHECKLIST.md
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -137,7 +136,7 @@ npm run preview
 
 ---
 
-## 📖 Usage Guide
+##  Usage Guide
 
 ### Landing Page
 
@@ -149,19 +148,16 @@ npm run preview
 ### Dashboard
 
 1. **Sidebar:** Navigate between different sections
-
    - Toggle expand/collapse with the arrow button
    - Click menu items to navigate (placeholder functionality)
 
 2. **Level Ladder:** Main learning interface
-
    - Select your class (S1-S4)
    - Choose a term (Term 1-3)
    - Click unlocked week nodes to open learning content
    - Hover over nodes to see tooltips with details
 
 3. **Week Modal:** Learning content viewer
-
    - Overview tab shows what you'll learn
    - Lecture, Quiz, and Practice tabs (placeholders)
    - Close modal to return to ladder
@@ -174,7 +170,7 @@ npm run preview
 
 ---
 
-## 🎨 Design Principles
+##  Design Principles
 
 ### Visual Hierarchy
 
@@ -203,7 +199,7 @@ npm run preview
 
 ---
 
-## 📚 Curriculum Structure
+##  Curriculum Structure
 
 The app follows the Uganda NCDC local language syllabus:
 
@@ -226,9 +222,9 @@ See `docs/SYLLABUS_STRUCTURE.md` for complete curriculum breakdown.
 
 ---
 
-## 🔄 Current Status
+##  Current Status
 
-### ✅ Completed
+###  Completed
 
 - Complete frontend UI/UX
 - Landing page with signup
@@ -240,13 +236,13 @@ See `docs/SYLLABUS_STRUCTURE.md` for complete curriculum breakdown.
 - Responsive design
 - Animation system
 
-### 🚧 In Progress
+###  In Progress
 
 - Backend API development
 - User authentication
 - Database setup
 
-### 📋 Planned
+###  Planned
 
 - AI lesson generation
 - Quiz engine
@@ -258,7 +254,7 @@ See `docs/SYLLABUS_STRUCTURE.md` for complete curriculum breakdown.
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 This is a personal/educational project. Contributions, ideas, and feedback are welcome!
 
@@ -272,19 +268,19 @@ This is a personal/educational project. Contributions, ideas, and feedback are w
 
 ---
 
-## 📝 License
+##  License
 
 This project is for educational purposes. All rights reserved.
 
 ---
 
-## 👤 Author
+##  Author
 
-Created with ❤️ for Uganda's students
+Created with ️ for Uganda's students
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Duolingo** - UI/UX inspiration
 - **Uganda NCDC** - Curriculum standards
@@ -293,17 +289,17 @@ Created with ❤️ for Uganda's students
 
 ---
 
-## 📞 Support
+##  Support
 
 For issues or questions, please check:
 
-1. `CHECKLIST.md` - Current project status
+1. `README.md` - Frontend setup and architecture
 2. `docs/SYLLABUS_STRUCTURE.md` - Curriculum details
 3. Component comments - Implementation details
 
 ---
 
-## 🔮 Future Vision
+##  Future Vision
 
 This platform aims to:
 
@@ -314,4 +310,4 @@ This platform aims to:
 
 ---
 
-**Built with modern web technologies and a passion for education** 🚀
+**Built with modern web technologies and a passion for education** 
