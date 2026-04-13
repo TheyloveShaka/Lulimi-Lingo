@@ -1,13 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Home, TrendingUp, BookOpen, Brain, Trophy, 
   BookMarked, Award, Settings, HelpCircle, User,
-  ChevronLeft, ChevronRight, Sparkles, LogOut
+  ChevronLeft, ChevronRight, Sparkles, LogOut, Menu, X
 } from 'lucide-react'
 import './Sidebar.css'
 
 const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024
+      setIsMobile(mobile)
+      // Auto-collapse sidebar on mobile
+      if (mobile && expanded) {
+        onToggle()
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [expanded, onToggle])
   const menuItems = [
     { id: 'home', label: 'Home', icon: <Home size={22} /> },
     { id: 'progress', label: 'My Progress', icon: <TrendingUp size={22} /> },
@@ -26,6 +42,11 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
   ]
 
   const handleMenuClick = (itemId, isLogout) => {
+    // Close mobile menu after selection
+    if (isMobile) {
+      setMobileMenuOpen(false)
+    }
+    
     if (isLogout) {
       // Clear user session with correct localStorage keys
       localStorage.removeItem('authToken')
@@ -37,11 +58,39 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
     }
   }
 
+  // Mobile hamburger menu handler
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
+  }
+
   return (
-    <motion.aside
-      className={`sidebar ${expanded ? 'expanded' : 'collapsed'}`}
-      animate={{ width: expanded ? 280 : 80 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+    <>
+      {/* Mobile Hamburger Button */}
+      {isMobile && (
+        <button className="mobile-menu-btn" onClick={toggleMobileMenu}>
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      )}
+
+      {/* Mobile Overlay */}
+      {isMobile && mobileMenuOpen && (
+        <motion.div
+          className="mobile-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <motion.aside
+        className={`sidebar ${expanded ? 'expanded' : 'collapsed'} ${isMobile && mobileMenuOpen ? 'mobile-open' : ''}`}
+        animate={{ 
+          width: isMobile ? (mobileMenuOpen ? 280 : 0) : (expanded ? 280 : 80),
+          x: isMobile && mobileMenuOpen ? 0 : 0
+        }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <div className="sidebar-content">
         {/* Header */}
@@ -142,6 +191,7 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
         </nav>
       </div>
     </motion.aside>
+    </>
   )
 }
 

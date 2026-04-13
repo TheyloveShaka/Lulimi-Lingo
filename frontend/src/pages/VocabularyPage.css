@@ -179,13 +179,142 @@
     padding: 1rem;
   }
 
+  .vocab-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .vocab-controls {
+    gap: 1rem;
+  }
+
+  .search-box input {
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    font-size: 1rem;
+  }
+
+  .category-filters {
+    gap: 0.6rem;
+  }
+
+  .category-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
   .vocab-item {
+    padding: 1rem;
     flex-direction: column;
+  }
+
+  .vocab-item h3 {
+    font-size: 1.1rem;
   }
 
   .vocab-right {
     margin-top: 1rem;
     justify-content: space-between;
     width: 100%;
+  }
+
+  .btn-audio {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vocabulary-page {
+    padding: 0.75rem;
+    max-width: 100%;
+  }
+
+  .vocab-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .vocab-header p {
+    font-size: 0.9rem;
+  }
+
+  .vocab-controls {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box svg {
+    left: 0.75rem;
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-box input {
+    padding: 0.5rem 0.75rem 0.5rem 2.3rem;
+    font-size: 0.95rem;
+    min-height: 40px;
+  }
+
+  .category-filters {
+    gap: 0.5rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .category-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .vocab-list {
+    gap: 0.75rem;
+  }
+
+  .vocab-item {
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .vocab-item h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .pronunciation {
+    font-size: 0.85rem;
+  }
+
+  .definition {
+    font-size: 0.9rem;
+  }
+
+  .vocab-right {
+    margin-top: 0;
+    gap: 0.75rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .category-badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .btn-audio {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+
+  .no-results {
+    padding: 2rem 1rem;
+    font-size: 0.95rem;
   }
 }
