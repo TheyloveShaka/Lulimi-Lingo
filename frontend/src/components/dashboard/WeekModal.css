@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: var(--spacing-lg);
+  padding: clamp(8px, 2vw, 20px);
 }
 
 .week-modal {
@@ -19,7 +19,7 @@
   box-shadow: var(--shadow-xl);
   max-width: 900px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 92vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -47,53 +47,91 @@
 .modal-header {
   background: var(--gradient-primary);
   color: white;
-  padding: var(--spacing-sm);
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-xs);
+  align-items: center;
+  margin-bottom: 0.3rem;
 }
 
 .week-info {
   flex: 1;
 }
 
+.week-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .week-number {
   display: inline-block;
   background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
+  padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 0.2rem;
+}
+
+.topics-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.topics-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.topics-toggle-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.topics-toggle-icon.open {
+  transform: rotate(180deg);
 }
 
 .week-info h2 {
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-sm);
+  font-size: 1rem;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
 }
 
 .topics-list {
   display: flex;
-  gap: var(--spacing-xs);
-  flex-wrap: wrap;
+  gap: 0.3rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  margin-top: 0.15rem;
 }
 
 .topic-tag {
   background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
+  padding: 2px 8px;
   border-radius: var(--radius-md);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  white-space: nowrap;
   backdrop-filter: blur(10px);
 }
 
 .close-btn {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -113,24 +151,24 @@
 
 /* Progress */
 .week-progress {
-  margin-top: var(--spacing-lg);
+  margin-top: 0.35rem;
 }
 
 .progress-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
-  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .progress-percentage {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
 }
 
 .progress-bar-modal {
   width: 100%;
-  height: 12px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -373,13 +411,13 @@
 
 @media (max-width: 768px) {
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
+    padding: 10px;
+    align-items: center;
   }
 
   .week-modal {
     max-height: 95vh;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: var(--radius-xl);
   }
 
   .modal-header {
@@ -387,7 +425,11 @@
   }
 
   .week-info h2 {
-    font-size: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .topic-tag {
+    font-size: 0.64rem;
   }
 
   .modal-tabs {

@@ -10,6 +10,7 @@ import './WeekModal.css'
 const WeekModal = ({ week, onClose }) => {
   const [activeTab, setActiveTab] = useState('lecture')
   const [isLearningMode, setIsLearningMode] = useState(false)
+  const [showTopics, setShowTopics] = useState(false)
   const { completedLessons, quizScores, setCurrentWeek, setCurrentTopic } = useLearning()
 
   const tabs = [
@@ -29,6 +30,7 @@ const WeekModal = ({ week, onClose }) => {
     setCurrentWeek(week.id)
     setCurrentTopic(week.topics[0])
     setActiveTab(mode)
+    setShowTopics(false)
     setIsLearningMode(true)
   }
 
@@ -36,6 +38,7 @@ const WeekModal = ({ week, onClose }) => {
   const exitLearningMode = () => {
     setIsLearningMode(false)
     setActiveTab('lecture')
+    setShowTopics(false)
   }
 
   // Exit fullscreen on Escape key
@@ -86,13 +89,28 @@ const WeekModal = ({ week, onClose }) => {
           <div className="modal-header">
             <div className="header-content">
               <div className="week-info">
-                <span className="week-number">{week.id}</span>
-                <h2>{week.title}</h2>
-                <div className="topics-list">
-                  {week.topics.map((topic, index) => (
-                    <span key={index} className="topic-tag">{topic}</span>
-                  ))}
+                <div className="week-meta-row">
+                  <span className="week-number">{week.id}</span>
+                  {Array.isArray(week.topics) && week.topics.length > 0 && (
+                    <button
+                      type="button"
+                      className="topics-toggle-btn"
+                      onClick={() => setShowTopics((prev) => !prev)}
+                      aria-expanded={showTopics}
+                    >
+                      {showTopics ? 'Hide topics' : 'Topics'}
+                      <span className={`topics-toggle-icon ${showTopics ? 'open' : ''}`}>▾</span>
+                    </button>
+                  )}
                 </div>
+                <h2>{week.title}</h2>
+                {showTopics && (
+                  <div className="topics-list">
+                    {week.topics.map((topic, index) => (
+                      <span key={index} className="topic-tag">{topic}</span>
+                    ))}
+                  </div>
+                )}
               </div>
               <button className="close-btn" onClick={onClose}>
                 <X size={24} />
@@ -122,7 +140,10 @@ const WeekModal = ({ week, onClose }) => {
               <motion.button
                 key={tab.id}
                 className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  setShowTopics(false)
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
