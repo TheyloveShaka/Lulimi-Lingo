@@ -115,10 +115,6 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-.back-btn {
-  margin-left: var(--spacing-md);
-}
-
 /* Messages */
 .chatbot-messages {
   flex: 1;
@@ -251,6 +247,26 @@
 .chatbot-input textarea:focus {
   border-color: var(--primary-500);
   outline: none;
+}
+
+.collapse-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: var(--radius-md);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+  background: var(--gray-200);
+  color: var(--gray-900);
 }
 
 .send-btn {

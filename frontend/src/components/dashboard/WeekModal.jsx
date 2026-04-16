@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, BookOpen, Brain, Dumbbell, Play, CheckCircle, Lock, ArrowLeft } from 'lucide-react'
+import { X, BookOpen, Brain, Dumbbell, Play } from 'lucide-react'
 import { useLearning } from '../../context/LearningContext'
 import LessonView from '../learning/LessonView'
 import PracticeView from '../learning/PracticeView'
@@ -8,12 +8,11 @@ import QuizView from '../learning/QuizView'
 import './WeekModal.css'
 
 const WeekModal = ({ week, onClose }) => {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('lecture')
   const [isLearningMode, setIsLearningMode] = useState(false)
   const { completedLessons, quizScores, setCurrentWeek, setCurrentTopic } = useLearning()
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <BookOpen size={18} /> },
     { id: 'lecture', label: 'Lecture', icon: <BookOpen size={18} /> },
     { id: 'quiz', label: 'Quiz', icon: <Brain size={18} /> },
     { id: 'practice', label: 'Practice', icon: <Dumbbell size={18} /> },
@@ -36,7 +35,7 @@ const WeekModal = ({ week, onClose }) => {
   // Exit learning mode
   const exitLearningMode = () => {
     setIsLearningMode(false)
-    setActiveTab('overview')
+    setActiveTab('lecture')
   }
 
   // Exit fullscreen on Escape key
@@ -136,7 +135,6 @@ const WeekModal = ({ week, onClose }) => {
           {/* Content */}
           <div className="modal-content">
             <AnimatePresence mode="wait">
-              {activeTab === 'overview' && <OverviewTab week={week} onStartLearning={startLearning} isLessonComplete={isLessonComplete} isQuizComplete={isQuizComplete} />}
               {activeTab === 'lecture' && (
                 isLearningMode ? (
                   <LessonView 
@@ -193,86 +191,6 @@ const WeekModal = ({ week, onClose }) => {
     </AnimatePresence>
   )
 }
-
-// Overview Tab
-const OverviewTab = ({ week, onStartLearning, isLessonComplete, isQuizComplete }) => (
-  <motion.div
-    key="overview"
-    className="tab-content"
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: 20 }}
-    transition={{ duration: 0.3 }}
-  >
-    <h3>What You'll Learn</h3>
-    <div className="learning-objectives">
-      {week.topics.map((topic, index) => (
-        <div key={index} className="objective-card">
-          <CheckCircle size={20} />
-          <span>{topic}</span>
-        </div>
-      ))}
-    </div>
-
-    <div className="sections-overview">
-      <h3>Learning Sections</h3>
-      <div className="section-cards">
-        <div className="section-card" onClick={() => onStartLearning('lecture')}>
-          <div className="section-icon lecture">
-            <BookOpen size={32} />
-          </div>
-          <h4>Lecture</h4>
-          <p>Interactive lessons with AI-powered content</p>
-          {isLessonComplete ? (
-            <span className="status-badge completed">✓ Completed</span>
-          ) : (
-            <motion.button 
-              className="start-btn"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Play size={16} /> Start Lesson
-            </motion.button>
-          )}
-        </div>
-
-        <div className="section-card" onClick={() => onStartLearning('quiz')}>
-          <div className="section-icon quiz">
-            <Brain size={32} />
-          </div>
-          <h4>Quiz</h4>
-          <p>Test your knowledge with adaptive questions</p>
-          {isQuizComplete ? (
-            <span className="status-badge completed">✓ Completed</span>
-          ) : (
-            <motion.button 
-              className="start-btn"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Play size={16} /> Take Quiz
-            </motion.button>
-          )}
-        </div>
-
-        <div className="section-card" onClick={() => onStartLearning('practice')}>
-          <div className="section-icon practice">
-            <Dumbbell size={32} />
-          </div>
-          <h4>Practice</h4>
-          <p>Reinforce learning with interactive exercises</p>
-          <motion.button 
-            className="start-btn"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Play size={16} /> Practice Now
-          </motion.button>
-        </div>
-      </div>
-    </div>
-  </motion.div>
-)
 
 // Lecture Preview (before starting)
 const LecturePreview = ({ onStart, isComplete }) => (

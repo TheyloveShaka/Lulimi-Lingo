@@ -21,7 +21,10 @@ import {
 // API Configuration - Node Backend
 const AI_CONFIG = {
   // Node.js backend endpoint
-  backendUrl: import.meta.env.VITE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app',
+  backendUrl:
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_NODE_BACKEND_URL ||
+    'https://lulimi-lingo-production.up.railway.app',
   
   // Fallback to mock responses if backend is down
   useMockResponses: false
@@ -32,8 +35,10 @@ const AI_CONFIG = {
  */
 const callBackend = async (endpoint, payload) => {
   if (AI_CONFIG.useMockResponses) {
-    console.log('🤖 Using mock AI responses (backend not configured)');
-    return generateMockResponse(payload, endpoint);
+    return {
+      success: false,
+      error: 'Mock responses are disabled. Connect a live backend and AI provider keys.'
+    };
   }
 
   try {
@@ -62,11 +67,6 @@ const callBackend = async (endpoint, payload) => {
     };
   } catch (error) {
     console.error('❌ Backend Service Error:', error);
-    // Fallback to mock if backend is down
-    if (error.message.includes('Failed to fetch')) {
-      console.log('⚠️ Backend unreachable, using mock responses');
-      return generateMockResponse(payload, endpoint);
-    }
     return {
       success: false,
       error: error.message,
@@ -87,11 +87,15 @@ export const generateLesson = async ({ classLevel, term, week, topic, objectives
     objectives: objectives || []
   });
 
-  if (result.success && result.lesson) {
+  const lessonPayload = result.lesson || result.data;
+
+  if (result.success && lessonPayload) {
     return {
       success: true,
-      lesson: typeof result.lesson === 'string' ? parseLesson(result.lesson) : result.lesson,
-      raw: result.lesson
+      lesson: typeof lessonPayload === 'string' ? parseLesson(lessonPayload) : lessonPayload,
+      raw: lessonPayload,
+      cached: Boolean(result.cached),
+      provider: result.provider || 'openai'
     };
   }
   return result;
@@ -107,11 +111,15 @@ export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes
     common_mistakes: commonMistakes || []
   });
 
-  if (result.success && result.questions) {
+  const questionsPayload = result.questions || result.practice?.questions || result.data?.questions;
+
+  if (result.success && questionsPayload) {
     return {
       success: true,
-      questions: Array.isArray(result.questions) ? result.questions : parsePracticeQuestions(result.questions),
-      raw: result.questions
+      questions: Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload),
+      raw: questionsPayload,
+      cached: Boolean(result.cached),
+      provider: result.provider || 'openai'
     };
   }
   return result;
@@ -127,11 +135,15 @@ export const generateQuiz = async ({ topic, numberOfQuestions, assessmentCriteri
     assessment_criteria: assessmentCriteria || []
   });
 
-  if (result.success && result.quiz) {
+  const quizPayload = result.quiz || result.data;
+
+  if (result.success && quizPayload) {
     return {
       success: true,
-      quiz: typeof result.quiz === 'object' ? result.quiz : parseQuiz(result.quiz),
-      raw: result.quiz
+      quiz: typeof quizPayload === 'object' ? quizPayload : parseQuiz(quizPayload),
+      raw: quizPayload,
+      cached: Boolean(result.cached),
+      provider: result.provider || 'openai'
     };
   }
   return result;
@@ -203,6 +215,7 @@ export const chatWithTutor = async ({ message, completedTopics, conversationHist
     success: result.success !== false,
     response: result.response || result.content || "I'm here to help you learn Luganda!",
     encouragement: result.encouragement || (Math.random() > 0.7 ? getEncouragement() : null),
+    provider: result.provider || 'openai',
     error: result.error
   };
 };

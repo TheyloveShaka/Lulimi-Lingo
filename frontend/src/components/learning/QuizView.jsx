@@ -27,12 +27,21 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCached, setIsCached] = useState(false);
+  const [provider, setProvider] = useState('openai');
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState([]);
   const [quizState, setQuizState] = useState('taking'); // 'taking', 'reviewing', 'results'
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [feedback, setFeedback] = useState(null);
+
+  const loadingMessages = [
+    'Challenge improves mastery.',
+    'Strong foundations come from steady revision.',
+    'You are training your memory and confidence.'
+  ];
 
   // Timer
   useEffect(() => {
@@ -55,6 +64,14 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   useEffect(() => {
     loadQuiz();
   }, [topic]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 1300);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   const loadQuiz = async () => {
     setLoading(true);
@@ -79,6 +96,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
           : { questions: generateMockQuizQuestions(topic, numberOfQuestions) };
         
         setQuiz(quizData);
+        setIsCached(Boolean(result.cached));
+        setProvider(result.provider || 'openai');
         // Set timer: 2 minutes per question
         setTimeRemaining(quizData.questions.length * 120);
       } else {
@@ -247,6 +266,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
           <RefreshCw size={32} />
         </motion.div>
         <p>Preparing your quiz...</p>
+        <span className="quiz-loading-message">{loadingMessages[loadingMessageIndex]}</span>
       </div>
     );
   }
@@ -378,6 +398,10 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
           <div>
             <h2>Quiz: {topic?.title || topic}</h2>
             <span className="quiz-subtitle">🧪 Quiz Mode</span>
+            <div className="quiz-meta-tags">
+              <span className="quiz-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
+              {isCached && <span className="quiz-meta-tag cached">Reused from library</span>}
+            </div>
           </div>
         </div>
         <div className="quiz-timer">

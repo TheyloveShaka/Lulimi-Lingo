@@ -26,14 +26,31 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCached, setIsCached] = useState(false);
+  const [provider, setProvider] = useState('openai');
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
+  const loadingMessages = [
+    'Practice builds confidence.',
+    'Every attempt sharpens your language skills.',
+    'Consistency today, fluency tomorrow.'
+  ];
+
   useEffect(() => {
     loadPractice();
   }, [topic]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 1300);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   const loadPractice = async () => {
     setLoading(true);
@@ -57,6 +74,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
           ? result.questions 
           : generateMockQuestions(topic);
         setQuestions(parsedQuestions);
+        setIsCached(Boolean(result.cached));
+        setProvider(result.provider || 'openai');
       } else {
         setError(result.error || 'Failed to generate practice');
       }
@@ -187,6 +206,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
           <RefreshCw size={32} />
         </motion.div>
         <p>Preparing practice questions...</p>
+        <span className="practice-loading-message">{loadingMessages[loadingMessageIndex]}</span>
       </div>
     );
   }
@@ -214,6 +234,10 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
           <div>
             <h2>Practice Time</h2>
             <span className="practice-subtitle">✍🏾 Practice Mode</span>
+            <div className="practice-meta-tags">
+              <span className="practice-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
+              {isCached && <span className="practice-meta-tag cached">Reused from library</span>}
+            </div>
           </div>
         </div>
         <div className="practice-progress">

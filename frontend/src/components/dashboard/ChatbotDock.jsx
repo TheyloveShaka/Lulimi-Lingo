@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, ArrowLeft, Send, Sparkles, Loader2 } from 'lucide-react'
+import { MessageCircle, Minimize2, Send, Sparkles, Loader2 } from 'lucide-react'
 import { useLearning } from '../../context/LearningContext'
 import { chatWithTutor } from '../../services/aiService'
 import './ChatbotDock.css'
@@ -173,15 +173,6 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
                   </span>
                 </div>
               </div>
-              <motion.button
-                className="header-btn back-btn"
-                onClick={onToggle}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                title="Close chat"
-              >
-                <ArrowLeft size={20} />
-              </motion.button>
             </div>
 
             {/* Messages */}
@@ -254,6 +245,15 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
 
             {/* Input */}
             <div className="chatbot-input">
+              <motion.button
+                className="collapse-btn"
+                onClick={onToggle}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Collapse chat"
+              >
+                <Minimize2 size={18} />
+              </motion.button>
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}

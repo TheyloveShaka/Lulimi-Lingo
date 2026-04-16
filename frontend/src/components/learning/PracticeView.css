@@ -55,6 +55,15 @@
   margin-bottom: 1.5rem;
 }
 
+.practice-loading-message {
+  font-size: 0.85rem;
+  color: #334155;
+  background: rgba(236, 72, 153, 0.1);
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(236, 72, 153, 0.22);
+}
+
 .practice-error p {
   color: #ef4444;
 }
@@ -119,6 +128,27 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.8);
   margin-top: 0.25rem;
+}
+
+.practice-meta-tags {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.practice-meta-tag {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.practice-meta-tag.cached {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: rgba(16, 185, 129, 0.48);
 }
 
 .practice-progress {

@@ -26,8 +26,17 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCached, setIsCached] = useState(false);
+  const [provider, setProvider] = useState('openai');
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [currentSection, setCurrentSection] = useState(0);
   const [sectionsCompleted, setSectionsCompleted] = useState([]);
+
+  const loadingMessages = [
+    'Knowledge grows with every question.',
+    'Small steps become language fluency.',
+    'Your next Luganda breakthrough is loading.'
+  ];
 
   const sections = [
     { id: 'introduction', title: 'Introduction', icon: BookOpen },
@@ -39,6 +48,14 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
   useEffect(() => {
     loadLesson();
   }, [topic]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 1300);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   const loadLesson = async () => {
     setLoading(true);
@@ -57,6 +74,8 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
 
       if (result.success) {
         setLesson(result.lesson || { raw: result.raw });
+        setIsCached(Boolean(result.cached));
+        setProvider(result.provider || 'openai');
       } else {
         setError(result.error || 'Failed to generate lesson');
       }
@@ -96,6 +115,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
         </motion.div>
         <p>Preparing your lesson...</p>
         <span className="loading-hint">Our AI teacher is creating personalized content for you</span>
+        <span className="loading-message-rotator">{loadingMessages[loadingMessageIndex]}</span>
       </div>
     );
   }
@@ -120,6 +140,10 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
           <div>
             <h2>{topic?.title || 'Lesson'}</h2>
             <span className="lesson-subtitle">📘 Lesson Mode</span>
+            <div className="lesson-meta-tags">
+              <span className="lesson-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
+              {isCached && <span className="lesson-meta-tag cached">Reused from library</span>}
+            </div>
           </div>
         </div>
         <div className="lesson-progress">
