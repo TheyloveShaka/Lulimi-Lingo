@@ -45,6 +45,38 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
     { id: 'culturalNote', title: 'Cultural Note', icon: Volume2 }
   ];
 
+  const normalizeExample = (example) => {
+    if (typeof example === 'string') {
+      const [lugandaText, englishText = ''] = example.split(' - ');
+      return {
+        lugandaText: lugandaText || example,
+        englishText
+      };
+    }
+
+    if (example && typeof example === 'object') {
+      const lugandaText =
+        example.luganda ||
+        example.lugandaText ||
+        example.example ||
+        example.text ||
+        String(example.raw || '');
+
+      const englishText =
+        example.english ||
+        example.translation ||
+        example.meaning ||
+        '';
+
+      return { lugandaText, englishText };
+    }
+
+    return {
+      lugandaText: String(example || ''),
+      englishText: ''
+    };
+  };
+
   useEffect(() => {
     loadLesson();
   }, [topic]);
@@ -212,24 +244,27 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
               <h3>📝 Examples</h3>
               <div className="examples-list">
                 {(lesson?.examples || []).length > 0 ? (
-                  lesson.examples.map((example, index) => (
-                    <motion.div
-                      key={index}
-                      className="example-card"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <span className="example-number">{index + 1}</span>
-                      <div className="example-content">
-                        <p className="luganda-text">{example.split(' - ')[0] || example}</p>
-                        <p className="english-text">{example.split(' - ')[1] || ''}</p>
-                      </div>
-                      <button className="audio-btn" title="Listen">
-                        <Volume2 size={16} />
-                      </button>
-                    </motion.div>
-                  ))
+                  lesson.examples.map((example, index) => {
+                    const parsedExample = normalizeExample(example);
+                    return (
+                      <motion.div
+                        key={index}
+                        className="example-card"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <span className="example-number">{index + 1}</span>
+                        <div className="example-content">
+                          <p className="luganda-text">{parsedExample.lugandaText}</p>
+                          <p className="english-text">{parsedExample.englishText}</p>
+                        </div>
+                        <button className="audio-btn" title="Listen">
+                          <Volume2 size={16} />
+                        </button>
+                      </motion.div>
+                    );
+                  })
                 ) : (
                   <div className="content-text">
                     {lesson?.raw?.split('**Examples**')[1]?.split('**')[0] || 'Examples will appear here...'}

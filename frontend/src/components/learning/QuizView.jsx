@@ -43,6 +43,64 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     'You are training your memory and confidence.'
   ];
 
+  const normalizeQuestionType = (type, questionText = '', options = []) => {
+    const raw = String(type || '').toLowerCase().replace(/[\s_]+/g, '-');
+    const prompt = String(questionText || '').toLowerCase();
+
+    if (raw.includes('multiple') || raw.includes('choice') || raw === 'mcq') return 'multiple-choice';
+    if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
+    if (raw.includes('translate') || raw.includes('translation')) return 'translate';
+    if (raw.includes('reorder') || raw.includes('arrange')) return 'reorder';
+
+    if (prompt.includes('translate')) return 'translate';
+    if (prompt.includes('fill') || prompt.includes('blank')) return 'fill-blank';
+    if (Array.isArray(options) && options.length > 0) return 'multiple-choice';
+    return 'translate';
+  };
+
+  const normalizeQuestion = (question, index) => {
+    const options =
+      question?.options ||
+      question?.choices ||
+      question?.answerOptions ||
+      question?.answer_options ||
+      [];
+
+    const normalizedOptions = Array.isArray(options)
+      ? options.map((opt) => String(opt))
+      : [];
+
+    const correctAnswer =
+      question?.correctAnswer ??
+      question?.correct_answer ??
+      question?.answer ??
+      question?.correct ??
+      '';
+
+    return {
+      id: question?.id || index + 1,
+      type: normalizeQuestionType(question?.type || question?.questionType || question?.question_type, question?.question, normalizedOptions),
+      question: String(question?.question || question?.prompt || `Question ${index + 1}`),
+      options: normalizedOptions,
+      correctAnswer: String(correctAnswer),
+      acceptableAnswers: Array.isArray(question?.acceptableAnswers)
+        ? question.acceptableAnswers
+        : Array.isArray(question?.acceptable_answers)
+          ? question.acceptable_answers
+          : undefined,
+      points: Number(question?.points || 1),
+      explanation: question?.explanation || ''
+    };
+  };
+
+  const normalizeQuiz = (quizData) => {
+    const sourceQuestions = Array.isArray(quizData?.questions) ? quizData.questions : [];
+    return {
+      ...quizData,
+      questions: sourceQuestions.map((q, idx) => normalizeQuestion(q, idx))
+    };
+  };
+
   // Timer
   useEffect(() => {
     if (quizState !== 'taking' || !timeRemaining) return;
@@ -91,8 +149,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       });
 
       if (result.success) {
-        const quizData = result.quiz?.questions?.length > 0 
-          ? result.quiz 
+        const quizData = result.quiz?.questions?.length > 0
+          ? normalizeQuiz(result.quiz)
           : { questions: generateMockQuizQuestions(topic, numberOfQuestions) };
         
         setQuiz(quizData);
@@ -473,7 +531,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
               </div>
             )}
 
-            {question.type === 'translate' && (
+            {(question.type === 'translate' || question.type === 'reorder') && (
               <div className="translate-answer">
                 <input
                   type="text"

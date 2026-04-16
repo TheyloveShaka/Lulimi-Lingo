@@ -33,12 +33,62 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   const [userAnswers, setUserAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const loadingMessages = [
     'Practice builds confidence.',
     'Every attempt sharpens your language skills.',
     'Consistency today, fluency tomorrow.'
   ];
+
+  const normalizeQuestionType = (type, questionText = '', options = []) => {
+    const raw = String(type || '').toLowerCase().replace(/[\s_]+/g, '-');
+    const prompt = String(questionText || '').toLowerCase();
+
+    if (raw.includes('multiple') || raw.includes('choice') || raw === 'mcq') return 'multiple-choice';
+    if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
+    if (raw.includes('translate') || raw.includes('translation')) return 'translate';
+    if (raw.includes('reorder') || raw.includes('arrange')) return 'reorder';
+
+    if (prompt.includes('translate')) return 'translate';
+    if (prompt.includes('fill') || prompt.includes('blank')) return 'fill-blank';
+    if (Array.isArray(options) && options.length > 0) return 'multiple-choice';
+    return 'translate';
+  };
+
+  const normalizeQuestion = (question, index) => {
+    const options =
+      question?.options ||
+      question?.choices ||
+      question?.answerOptions ||
+      question?.answer_options ||
+      [];
+
+    const normalizedOptions = Array.isArray(options)
+      ? options.map((opt) => String(opt))
+      : [];
+
+    const correctAnswer =
+      question?.correctAnswer ??
+      question?.correct_answer ??
+      question?.answer ??
+      question?.correct ??
+      '';
+
+    return {
+      id: question?.id || index + 1,
+      type: normalizeQuestionType(question?.type || question?.questionType || question?.question_type, question?.question, normalizedOptions),
+      question: String(question?.question || question?.prompt || `Practice question ${index + 1}`),
+      options: normalizedOptions,
+      correctAnswer: String(correctAnswer),
+      acceptableAnswers: Array.isArray(question?.acceptableAnswers)
+        ? question.acceptableAnswers
+        : Array.isArray(question?.acceptable_answers)
+          ? question.acceptable_answers
+          : undefined,
+      hint: question?.hint || question?.clue || 'Think about common Luganda usage.'
+    };
+  };
 
   useEffect(() => {
     loadPractice();
@@ -58,6 +108,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     setUserAnswers({});
     setCurrentQuestion(0);
     setShowResult(false);
+    setShowSummary(false);
 
     const context = getSyllabusContext();
 
@@ -71,7 +122,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
       if (result.success) {
         // Parse questions or use mock data
         const parsedQuestions = result.questions?.length > 0 
-          ? result.questions 
+          ? result.questions.map((q, idx) => normalizeQuestion(q, idx))
           : generateMockQuestions(topic);
         setQuestions(parsedQuestions);
         setIsCached(Boolean(result.cached));
@@ -193,7 +244,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   };
 
   const allAnswered = Object.keys(userAnswers).length === questions.length;
-  const isComplete = allAnswered && currentQuestion === questions.length - 1 && showResult;
+  const isComplete = showSummary && allAnswered;
 
   if (loading) {
     return (
@@ -255,6 +306,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
       </div>
 
       {/* Question Card */}
+      {!showSummary && question && (
       <AnimatePresence mode="wait">
         <motion.div
           key={currentQuestion}
@@ -300,7 +352,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               </div>
             )}
 
-            {question.type === 'translate' && (
+            {(question.type === 'translate' || question.type === 'reorder') && (
               <div className="translate-input">
                 <input
                   type="text"
@@ -388,13 +440,14 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                 Next Question <ChevronRight size={16} />
               </button>
             ) : (
-              <button className="finish-btn" onClick={() => setCurrentQuestion(questions.length)}>
+              <button className="finish-btn" onClick={() => setShowSummary(true)}>
                 See Results <Award size={16} />
               </button>
             )}
           </div>
         </motion.div>
       </AnimatePresence>
+      )}
 
       {/* Results Summary */}
       {isComplete && (

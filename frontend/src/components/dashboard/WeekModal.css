@@ -223,10 +223,14 @@
   overflow-y: auto;
   padding: 0;
   width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   box-sizing: border-box;
 }
 
 .week-modal.fullscreen .modal-content {
+  max-width: 100%;
+  width: 100%;
   padding: calc(var(--spacing-lg) * 1.5);
   height: 100%;
 }
