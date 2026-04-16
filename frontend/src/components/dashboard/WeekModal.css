@@ -47,7 +47,7 @@
 .modal-header {
   background: var(--gradient-primary);
   color: white;
-  padding: 0.35rem 0.75rem;
+  padding: 0.18rem 0.38rem;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
@@ -186,7 +186,7 @@
 .modal-tabs {
   display: flex;
   gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
+  padding: calc(var(--spacing-lg) / 2);
   border-bottom: 2px solid var(--gray-100);
   overflow-x: auto;
 }
@@ -221,7 +221,9 @@
 .modal-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-xl);
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .week-modal.fullscreen .modal-content {
@@ -250,6 +252,7 @@
 
 .tab-content {
   animation: fadeIn 0.3s ease-in;
+  width: 100%;
 }
 
 .tab-content h3 {
@@ -433,11 +436,11 @@
   }
 
   .modal-tabs {
-    padding: var(--spacing-md);
+    padding: calc(var(--spacing-md) / 2);
   }
 
-  .modal-content {
-    padding: var(--spacing-md);
+  .week-modal:not(.fullscreen) .modal-content {
+    padding: 8px;
   }
 
   .section-cards {
