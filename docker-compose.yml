@@ -26,6 +26,8 @@ services:
       context: ./backend_node
       dockerfile: Dockerfile
     container_name: lulimi-backend
+    env_file:
+      - ./backend_node/.env
     ports:
       - "5000:5000"
     environment:
@@ -33,6 +35,10 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/lulimi-lingo
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       CORS_ORIGIN: http://localhost:3000
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
     depends_on:
       mongodb:
         condition: service_healthy

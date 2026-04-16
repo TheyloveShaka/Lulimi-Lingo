@@ -1,10 +1,56 @@
+import crypto from 'crypto'
 import lessonGeneratorService from '../services/lessonGeneratorService.js'
 import quizGeneratorService from '../services/quizGeneratorService.js'
 import practiceGeneratorService from '../services/practiceGeneratorService.js'
-import geminiService from '../services/geminiService.js'
+import { chat as tutorChat } from '../services/aiService.js'
 import Conversation from '../models/Conversation.js'
 import Progress from '../models/Progress.js'
-import User from '../models/User.js'
+import GeneratedContent from '../models/GeneratedContent.js'
+
+const normalizeText = (value) => String(value || '').trim().toLowerCase()
+
+const buildRequestKey = (contentType, payload = {}) => {
+  const keyPayload = {
+    contentType,
+    topic: normalizeText(payload.topic),
+    classLevel: normalizeText(payload.classLevel),
+    term: normalizeText(payload.term),
+    week: normalizeText(payload.week),
+    numQuestions: Number(payload.numQuestions || 5),
+    proficiencyLevel: normalizeText(payload.proficiencyLevel),
+    objectives: Array.isArray(payload.objectives) ? payload.objectives.map(normalizeText).sort() : [],
+    criteria: Array.isArray(payload.criteria) ? payload.criteria.map(normalizeText).sort() : [],
+    commonMistakes: Array.isArray(payload.commonMistakes) ? payload.commonMistakes.map(normalizeText).sort() : []
+  }
+
+  return crypto.createHash('sha256').update(JSON.stringify(keyPayload)).digest('hex')
+}
+
+const loadFromCache = async (contentType, requestKey) => {
+  const cached = await GeneratedContent.findOne({ contentType, requestKey })
+  if (!cached) return null
+
+  cached.hitCount += 1
+  cached.lastAccessedAt = new Date()
+  await cached.save()
+  return cached
+}
+
+const saveToCache = async ({ contentType, requestKey, requestMeta, content, provider }) => {
+  await GeneratedContent.findOneAndUpdate(
+    { contentType, requestKey },
+    {
+      contentType,
+      requestKey,
+      requestMeta,
+      content,
+      provider: provider || 'unknown',
+      lastAccessedAt: new Date(),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  )
+}
 
 /**
  * Generate a lesson using AI
@@ -13,7 +59,7 @@ import User from '../models/User.js'
 export const generateLesson = async (req, res) => {
   try {
     const {
-      classLevel = 'S1',
+      classLevel = req.body.class_level || 'S1',
       term = 'Term 1',
       week = 'Week 1',
       topic,
@@ -27,6 +73,21 @@ export const generateLesson = async (req, res) => {
       })
     }
 
+    const requestMeta = { classLevel, term, week, topic, objectives }
+    const requestKey = buildRequestKey('lesson', requestMeta)
+    const cached = await loadFromCache('lesson', requestKey)
+
+    if (cached) {
+      return res.json({
+        success: true,
+        lesson: cached.content,
+        data: cached.content,
+        cached: true,
+        provider: cached.provider,
+        source: 'mongo-cache'
+      })
+    }
+
     const lesson = await lessonGeneratorService.generate({
       classLevel,
       term,
@@ -35,9 +96,20 @@ export const generateLesson = async (req, res) => {
       objectives
     })
 
+    await saveToCache({
+      contentType: 'lesson',
+      requestKey,
+      requestMeta,
+      content: lesson,
+      provider: lesson?.provider || 'openai'
+    })
+
     return res.json({
       success: true,
-      data: lesson
+      lesson,
+      data: lesson,
+      cached: false,
+      provider: lesson?.provider || 'openai'
     })
   } catch (error) {
     console.error('Lesson generation error:', error)
@@ -56,8 +128,8 @@ export const generateQuiz = async (req, res) => {
   try {
     const {
       topic,
-      numQuestions = 5,
-      criteria = []
+      numQuestions = req.body.number_of_questions || 5,
+      criteria = req.body.assessment_criteria || []
     } = req.body
 
     if (!topic) {
@@ -67,15 +139,41 @@ export const generateQuiz = async (req, res) => {
       })
     }
 
+    const requestMeta = { topic, numQuestions, criteria }
+    const requestKey = buildRequestKey('quiz', requestMeta)
+    const cached = await loadFromCache('quiz', requestKey)
+
+    if (cached) {
+      return res.json({
+        success: true,
+        quiz: cached.content,
+        data: cached.content,
+        cached: true,
+        provider: cached.provider,
+        source: 'mongo-cache'
+      })
+    }
+
     const quiz = await quizGeneratorService.generate({
       topic,
       numQuestions: Math.min(numQuestions, 10), // Cap at 10
       criteria
     })
 
+    await saveToCache({
+      contentType: 'quiz',
+      requestKey,
+      requestMeta,
+      content: quiz,
+      provider: quiz?.provider || 'openai'
+    })
+
     return res.json({
       success: true,
-      data: quiz
+      quiz,
+      data: quiz,
+      cached: false,
+      provider: quiz?.provider || 'openai'
     })
   } catch (error) {
     console.error('Quiz generation error:', error)
@@ -94,8 +192,8 @@ export const generatePractice = async (req, res) => {
   try {
     const {
       topic,
-      proficiencyLevel = 'beginner',
-      commonMistakes = []
+      proficiencyLevel = req.body.proficiency_level || 'beginner',
+      commonMistakes = req.body.common_mistakes || []
     } = req.body
 
     if (!topic) {
@@ -105,15 +203,43 @@ export const generatePractice = async (req, res) => {
       })
     }
 
+    const requestMeta = { topic, proficiencyLevel, commonMistakes }
+    const requestKey = buildRequestKey('practice', requestMeta)
+    const cached = await loadFromCache('practice', requestKey)
+
+    if (cached) {
+      return res.json({
+        success: true,
+        practice: cached.content,
+        questions: cached.content?.questions || [],
+        data: cached.content,
+        cached: true,
+        provider: cached.provider,
+        source: 'mongo-cache'
+      })
+    }
+
     const practice = await practiceGeneratorService.generate({
       topic,
       proficiencyLevel,
       commonMistakes
     })
 
+    await saveToCache({
+      contentType: 'practice',
+      requestKey,
+      requestMeta,
+      content: practice,
+      provider: practice?.provider || 'openai'
+    })
+
     return res.json({
       success: true,
-      data: practice
+      practice,
+      questions: practice?.questions || [],
+      data: practice,
+      cached: false,
+      provider: practice?.provider || 'openai'
     })
   } catch (error) {
     console.error('Practice generation error:', error)
@@ -133,7 +259,7 @@ export const chatWithTutor = async (req, res) => {
     const {
       userId,
       message,
-      conversationHistory = []
+      conversationHistory = req.body.conversation_history || []
     } = req.body
 
     if (!message) {
@@ -143,11 +269,12 @@ export const chatWithTutor = async (req, res) => {
       })
     }
 
-    // Load user progress for context
+    // Load user progress for context and keep prompt short
     const progress = userId ? await Progress.findOne({ user: userId }).lean() : null
 
-    // Call AI service
-    const reply = await geminiService.chat(message, conversationHistory)
+    // GPT-4o first, Gemini fallback
+    const aiResult = await tutorChat(message, { progress, conversationHistory })
+    const reply = aiResult.response
 
     // Persist conversation
     if (userId) {
@@ -156,8 +283,8 @@ export const chatWithTutor = async (req, res) => {
         if (!conv) {
           conv = await Conversation.create({ user: userId, messages: [] })
         }
-        conv.messages.push({ role: 'user', content: message, timestamp: new Date() })
-        conv.messages.push({ role: 'assistant', content: reply, timestamp: new Date() })
+        conv.messages.push({ role: 'user', content: message })
+        conv.messages.push({ role: 'assistant', content: reply })
         conv.updatedAt = new Date()
         await conv.save()
       } catch (error) {
@@ -167,7 +294,8 @@ export const chatWithTutor = async (req, res) => {
 
     return res.json({
       success: true,
-      response: reply
+      response: reply,
+      provider: aiResult.provider || 'openai'
     })
   } catch (error) {
     console.error('Chat error:', error)

@@ -4,6 +4,7 @@
  */
 
 import geminiService from './geminiService.js';
+import { callOpenAIChat } from './aiService.js';
 
 class QuizGeneratorService {
   constructor() {
@@ -45,19 +46,26 @@ Make questions progressively harder (start easy, end harder).
 Return ONLY valid JSON.`;
 
     try {
-      if (this.aiService.isEnabled()) {
-        const response = await this.aiService.generateContent(prompt);
-        return this._parseQuiz(response, topic, numQuestions);
-      } else {
-        return this._mockQuiz(topic, numQuestions);
-      }
+      const openAiResponse = await callOpenAIChat([
+        { role: 'system', content: 'You are an expert assessment designer. Return only valid JSON, no markdown.' },
+        { role: 'user', content: prompt }
+      ], 850)
+      return this._parseQuiz(openAiResponse, topic, numQuestions, 'openai')
     } catch (error) {
-      console.error('Quiz generation error:', error);
-      return this._mockQuiz(topic, numQuestions);
+      console.error('Quiz generation OpenAI error:', error)
+      try {
+        if (this.aiService.isEnabled()) {
+          const response = await this.aiService.generateContent(prompt)
+          return this._parseQuiz(response, topic, numQuestions, 'gemini')
+        }
+      } catch (geminiError) {
+        console.error('Quiz generation Gemini fallback error:', geminiError)
+      }
+      throw new Error('No AI provider available for quiz generation')
     }
   }
 
-  _parseQuiz(content, topic, numQuestions) {
+  _parseQuiz(content, topic, numQuestions, provider = 'unknown') {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -67,6 +75,7 @@ Return ONLY valid JSON.`;
             topic,
             numQuestions: parsed.questions.length,
             questions: parsed.questions,
+            provider,
             timestamp: new Date().toISOString()
           };
         }

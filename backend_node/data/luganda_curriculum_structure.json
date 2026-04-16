@@ -1,0 +1,833 @@
+{
+  "curriculum": {
+    "language": "Luganda",
+    "program_name": "Luganda Language Learning Program",
+    "grade_levels": ["S1", "S2", "S3", "S4"],
+    "core_skills": [
+      "Speaking",
+      "Reading",
+      "Writing",
+      "Literature",
+      "Cultural Understanding"
+    ],
+    "progression_model": "Spiral Curriculum - Skills repeat with increasing complexity",
+    "difficulty_levels": {
+      "S1": "Foundational",
+      "S2": "Intermediate",
+      "S3": "Advanced",
+      "S4": "Mastery & Integration"
+    },
+
+    "classes": {
+      "S1": {
+        "level_name": "Senior One",
+        "level_description": "Foundation building - introducing alphabet, basic sounds, vocabulary",
+        "terms": {
+          "Term1": {
+            "term_name": "Term 1",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S1T1M1",
+                "milestone_name": "Orthography Mastery",
+                "topics": [
+                  "Alphabet and Sounds",
+                  "Letter Recognition",
+                  "Pronunciation Rules",
+                  "Spelling Basics"
+                ],
+                "learning_outcomes": [
+                  "Identify and correctly use letters and sounds in Luganda",
+                  "Pronounce words correctly",
+                  "Form simple words using correct spelling"
+                ],
+                "core_skills_focus": ["Speaking", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Introduce yourself with correct pronunciation",
+                  "Scenario: Spell your name correctly in Luganda",
+                  "Scenario: Identify sounds in common greetings"
+                ],
+                "ai_prompt_template": "Create a lesson on {topic} at foundational level for S1 students focusing on {core_skill}. Include pronunciation guides, audio cues, and 3 real-life scenarios."
+              },
+              {
+                "id": "S1T1M2",
+                "milestone_name": "Basic Vocabulary Building",
+                "topics": [
+                  "Numbers (1-10)",
+                  "Everyday Objects",
+                  "Family Members",
+                  "Days and Time"
+                ],
+                "learning_outcomes": [
+                  "Build basic vocabulary for everyday communication",
+                  "Use words in context",
+                  "Recall vocabulary in conversations"
+                ],
+                "core_skills_focus": ["Speaking", "Reading", "Cultural Understanding"],
+                "scenario_examples": [
+                  "Scenario: Count items in a marketplace",
+                  "Scenario: Identify family members in a photo",
+                  "Scenario: Tell time in Luganda in daily situations"
+                ],
+                "ai_prompt_template": "Generate vocabulary lesson for {topic} with 15-20 core words. Include cultural context, usage examples, and 4 scenario-based practice exercises. Focus on {core_skill}."
+              },
+              {
+                "id": "S1T1M3",
+                "milestone_name": "Listening & Speaking Basics",
+                "topics": [
+                  "Simple Greetings",
+                  "Basic Instructions",
+                  "Classroom Commands",
+                  "Simple Conversations"
+                ],
+                "learning_outcomes": [
+                  "Listen and respond to simple instructions",
+                  "Participate in basic conversations",
+                  "Understand and follow classroom commands"
+                ],
+                "core_skills_focus": ["Speaking", "Listening"],
+                "scenario_examples": [
+                  "Scenario: Respond appropriately to greetings in different contexts",
+                  "Scenario: Follow 5 classroom instructions in Luganda",
+                  "Scenario: Have a simple 3-turn conversation with a speaker"
+                ],
+                "ai_prompt_template": "Create interactive listening and speaking exercises for {topic}. Include audio transcripts, comprehension questions, and 5 scenario-based speaking prompts. Target {core_skill} development."
+              }
+            ]
+          },
+          "Term2": {
+            "term_name": "Term 2",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S1T2M1",
+                "milestone_name": "Basic Grammar Foundation",
+                "topics": [
+                  "Nouns (Singular/Plural)",
+                  "Pronouns (I, You, He/She)",
+                  "Verbs (Present Simple)",
+                  "Adjectives (Colors, Sizes)"
+                ],
+                "learning_outcomes": [
+                  "Identify parts of speech (nouns, verbs, pronouns)",
+                  "Use basic grammar correctly in sentences",
+                  "Understand noun classes in Luganda"
+                ],
+                "core_skills_focus": ["Writing", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Identify nouns and verbs in a short story",
+                  "Scenario: Change singular nouns to plural in context",
+                  "Scenario: Use correct pronouns in dialogue"
+                ],
+                "ai_prompt_template": "Create grammar lesson on {topic} with clear rules and examples. Design 6 progressive exercises moving from identification → usage → application in {core_skill}."
+              },
+              {
+                "id": "S1T2M2",
+                "milestone_name": "Simple Sentence Construction",
+                "topics": [
+                  "Subject-Verb-Object Order",
+                  "Affirmative Sentences",
+                  "Negative Sentences",
+                  "Simple Questions"
+                ],
+                "learning_outcomes": [
+                  "Construct simple sentences correctly",
+                  "Form questions and negatives",
+                  "Maintain proper word order"
+                ],
+                "core_skills_focus": ["Writing", "Speaking"],
+                "scenario_examples": [
+                  "Scenario: Build sentences describing family members",
+                  "Scenario: Ask and answer questions about daily activities",
+                  "Scenario: Write negative statements about preferences"
+                ],
+                "ai_prompt_template": "Generate sentence construction exercises for {topic}. Include pattern examples, scaffolded practice (fill-blanks → translate → create), and 4 scenario-based writing tasks."
+              },
+              {
+                "id": "S1T2M3",
+                "milestone_name": "Reading Simple Texts",
+                "topics": [
+                  "Short Stories (50-100 words)",
+                  "Picture Stories",
+                  "Comprehension Questions",
+                  "Prediction & Inference"
+                ],
+                "learning_outcomes": [
+                  "Read and understand simple texts",
+                  "Answer comprehension questions",
+                  "Make simple predictions"
+                ],
+                "core_skills_focus": ["Reading", "Cultural Understanding"],
+                "scenario_examples": [
+                  "Scenario: Read a Luganda folktale and answer who, what, where questions",
+                  "Scenario: Look at pictures and read matching captions",
+                  "Scenario: Predict what happens next in a story"
+                ],
+                "ai_prompt_template": "Create culturally relevant short story (80-100 words) for {topic}. Include: original story, vocabulary glossary, 5 comprehension Q&As, and 3 prediction scenarios."
+              }
+            ]
+          },
+          "Term3": {
+            "term_name": "Term 3",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S1T3M1",
+                "milestone_name": "Writing Fundamentals",
+                "topics": [
+                  "Sentence Writing",
+                  "Paragraph Structure",
+                  "Capitalization & Punctuation",
+                  "Spelling in Context"
+                ],
+                "learning_outcomes": [
+                  "Write short sentences and paragraphs",
+                  "Use correct punctuation",
+                  "Express ideas clearly in writing"
+                ],
+                "core_skills_focus": ["Writing"],
+                "scenario_examples": [
+                  "Scenario: Write 5 sentences describing your family",
+                  "Scenario: Write a short paragraph about your day",
+                  "Scenario: Correct spelling and punctuation errors"
+                ],
+                "ai_prompt_template": "Design writing lessons for {topic} with: writing models, step-by-step guides, correction feedback templates, and 4 scaffolded writing scenarios progressing from guided → semi-free → free writing."
+              },
+              {
+                "id": "S1T3M2",
+                "milestone_name": "Oral Literature Introduction",
+                "topics": [
+                  "Traditional Stories & Folktales",
+                  "Songs & Rhymes",
+                  "Riddles & Proverbs",
+                  "Cultural Narratives"
+                ],
+                "learning_outcomes": [
+                  "Identify oral literature forms",
+                  "Understand cultural messages in stories",
+                  "Retell stories in own words"
+                ],
+                "core_skills_focus": ["Literature", "Cultural Understanding", "Speaking"],
+                "scenario_examples": [
+                  "Scenario: Listen to a traditional Luganda story and retell it",
+                  "Scenario: Learn a traditional song and understand its meaning",
+                  "Scenario: Guess the answer to traditional riddles"
+                ],
+                "ai_prompt_template": "Create oral literature unit on {topic} including: authentic Luganda text, English translation, cultural context, character analysis, and 5 retelling scenarios for {core_skill} development."
+              }
+            ]
+          }
+        }
+      },
+
+      "S2": {
+        "level_name": "Senior Two",
+        "level_description": "Intermediate level - expanding grammar complexity, deeper reading, more fluent speaking",
+        "terms": {
+          "Term1": {
+            "term_name": "Term 1",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S2T1M1",
+                "milestone_name": "Advanced Grammar Structures",
+                "topics": [
+                  "Tenses (Past, Present, Future)",
+                  "Pluralization Rules",
+                  "Possessive Forms",
+                  "Agreement Rules"
+                ],
+                "learning_outcomes": [
+                  "Use complex grammatical structures correctly",
+                  "Apply tense rules appropriately",
+                  "Demonstrate understanding of agreement patterns"
+                ],
+                "core_skills_focus": ["Writing", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Rewrite stories in different tenses",
+                  "Scenario: Correct agreement errors in passages",
+                  "Scenario: Use possessives correctly in narrative"
+                ],
+                "ai_prompt_template": "Generate intermediate grammar lesson on {topic} with: rule explanations, comparative examples, 8 progressive drills, and 5 scenario-based application tasks in {core_skill}."
+              },
+              {
+                "id": "S2T1M2",
+                "milestone_name": "Vocabulary Expansion",
+                "topics": [
+                  "Thematic Vocabulary (Food, Clothing, Work)",
+                  "Verb Variations",
+                  "Synonyms & Antonyms",
+                  "Context-Based Word Meanings"
+                ],
+                "learning_outcomes": [
+                  "Expand vocabulary in different contexts",
+                  "Use words accurately in various situations",
+                  "Understand nuanced meanings"
+                ],
+                "core_skills_focus": ["Speaking", "Writing", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Order meals at a market using food vocabulary",
+                  "Scenario: Describe clothing in different contexts",
+                  "Scenario: Use work-related terms in job interviews"
+                ],
+                "ai_prompt_template": "Create thematic vocabulary unit for {topic} with: 25-30 core terms, usage examples, cultural notes, and 6 scenario-based practice exercises for authentic {core_skill} application."
+              },
+              {
+                "id": "S2T1M3",
+                "milestone_name": "Conversational Fluency",
+                "topics": [
+                  "Extended Conversations",
+                  "Turn-Taking & Discussion",
+                  "Clarification Strategies",
+                  "Expressing Opinions"
+                ],
+                "learning_outcomes": [
+                  "Participate in conversations and discussions",
+                  "Ask clarifying questions",
+                  "Demonstrate improved pronunciation and fluency"
+                ],
+                "core_skills_focus": ["Speaking"],
+                "scenario_examples": [
+                  "Scenario: Discuss a current event with proper turn-taking",
+                  "Scenario: Ask for clarification when you don't understand",
+                  "Scenario: Share and defend an opinion respectfully"
+                ],
+                "ai_prompt_template": "Design conversational exercises for {topic} with: dialogue models, audio recordings, comprehension checks, and 5 role-play scenarios requiring {core_skill} in realistic contexts."
+              }
+            ]
+          },
+          "Term2": {
+            "term_name": "Term 2",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S2T2M1",
+                "milestone_name": "Extended Reading & Comprehension",
+                "topics": [
+                  "Longer Stories (200-300 words)",
+                  "Multi-Paragraph Texts",
+                  "Identifying Main Ideas",
+                  "Extracting Details & Supporting Ideas"
+                ],
+                "learning_outcomes": [
+                  "Read longer texts and extract meaning",
+                  "Identify main ideas and supporting details",
+                  "Summarize information accurately"
+                ],
+                "core_skills_focus": ["Reading"],
+                "scenario_examples": [
+                  "Scenario: Read a Luganda article and extract 5 key points",
+                  "Scenario: Identify main idea and 3 supporting details",
+                  "Scenario: Summarize a story in bullet points"
+                ],
+                "ai_prompt_template": "Create comprehensive reading lesson for {topic} including: 250+ word text, vocabulary pre-teaching, comprehension Q&As (literal, inferential, evaluative), and 4 summarization scenarios."
+              },
+              {
+                "id": "S2T2M2",
+                "milestone_name": "Functional Writing Skills",
+                "topics": [
+                  "Personal Letters",
+                  "Short Messages & Notes",
+                  "Simple Reports",
+                  "Information Organization"
+                ],
+                "learning_outcomes": [
+                  "Write functional texts (letters, messages)",
+                  "Organize information logically",
+                  "Communicate effectively for specific purposes"
+                ],
+                "core_skills_focus": ["Writing"],
+                "scenario_examples": [
+                  "Scenario: Write a thank-you letter in Luganda",
+                  "Scenario: Compose a message explaining your absence",
+                  "Scenario: Summarize a meeting in writing"
+                ],
+                "ai_prompt_template": "Generate functional writing unit for {topic} with: format models, writing frameworks, revision checklists, and 5 real-world writing scenarios with feedback templates."
+              }
+            ]
+          },
+          "Term3": {
+            "term_name": "Term 3",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S2T3M1",
+                "milestone_name": "Oral Literature Analysis",
+                "topics": [
+                  "Story Elements (Characters, Plot, Setting)",
+                  "Themes & Messages",
+                  "Cultural Significance",
+                  "Performance & Storytelling"
+                ],
+                "learning_outcomes": [
+                  "Identify and explain forms of oral literature",
+                  "Analyze themes and messages",
+                  "Perform storytelling with expression"
+                ],
+                "core_skills_focus": ["Literature", "Speaking", "Cultural Understanding"],
+                "scenario_examples": [
+                  "Scenario: Analyze a Luganda folktale's theme and cultural message",
+                  "Scenario: Identify character motivations and plot development",
+                  "Scenario: Perform a story with appropriate intonation and expression"
+                ],
+                "ai_prompt_template": "Create oral literature analysis lesson for {topic} with: original story text, character profiles, theme explanation, cultural notes, and 5 analysis/performance scenarios."
+              },
+              {
+                "id": "S2T3M2",
+                "milestone_name": "Creative Writing Introduction",
+                "topics": [
+                  "Story Development",
+                  "Character Creation",
+                  "Descriptive Writing",
+                  "Dialogue in Stories"
+                ],
+                "learning_outcomes": [
+                  "Write creative compositions (stories, descriptions)",
+                  "Develop characters and plots",
+                  "Use descriptive language effectively"
+                ],
+                "core_skills_focus": ["Writing", "Literature"],
+                "scenario_examples": [
+                  "Scenario: Write a short story inspired by a picture",
+                  "Scenario: Create a character description",
+                  "Scenario: Write dialogue between two characters"
+                ],
+                "ai_prompt_template": "Design creative writing unit for {topic} with: writing prompts, story structure guides, vocabulary for description, revision frameworks, and 4 scaffolded creative writing scenarios."
+              }
+            ]
+          }
+        }
+      },
+
+      "S3": {
+        "level_name": "Senior Three",
+        "level_description": "Advanced level - analyzing complex texts, critical thinking, sophisticated composition",
+        "terms": {
+          "Term1": {
+            "term_name": "Term 1",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S3T1M1",
+                "milestone_name": "Advanced Grammar Mastery",
+                "topics": [
+                  "Complex Sentence Structures",
+                  "Conditionals & Subjunctives",
+                  "Passive Voice",
+                  "Advanced Agreement"
+                ],
+                "learning_outcomes": [
+                  "Apply advanced grammar rules correctly",
+                  "Use complex structures naturally",
+                  "Demonstrate grammatical precision"
+                ],
+                "core_skills_focus": ["Writing", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Identify and correct complex sentence errors",
+                  "Scenario: Convert active sentences to passive voice",
+                  "Scenario: Use conditionals appropriately in discussions"
+                ],
+                "ai_prompt_template": "Create advanced grammar unit for {topic} with: detailed explanations, comparison with simple forms, 10 progressive exercises, error analysis, and 6 application scenarios in authentic contexts."
+              },
+              {
+                "id": "S3T1M2",
+                "milestone_name": "Structured Academic Writing",
+                "topics": [
+                  "Essay Structure",
+                  "Thesis Statements",
+                  "Paragraph Development",
+                  "Editing & Revision"
+                ],
+                "learning_outcomes": [
+                  "Write structured compositions with clear organization",
+                  "Develop coherent arguments",
+                  "Edit and improve written work"
+                ],
+                "core_skills_focus": ["Writing"],
+                "scenario_examples": [
+                  "Scenario: Write a 3-paragraph essay on a cultural topic",
+                  "Scenario: Create a strong thesis and support it with evidence",
+                  "Scenario: Peer review and revise an essay"
+                ],
+                "ai_prompt_template": "Generate academic writing lesson for {topic} with: essay models, planning worksheets, topic-specific prompts, feedback rubrics, and 4 full essay writing scenarios with revision guides."
+              }
+            ]
+          },
+          "Term2": {
+            "term_name": "Term 2",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S3T2M1",
+                "milestone_name": "Prose Analysis & Interpretation",
+                "topics": [
+                  "Prose Works (Short Stories, Novels)",
+                  "Literary Devices (Metaphor, Symbolism)",
+                  "Character Analysis",
+                  "Theme Interpretation"
+                ],
+                "learning_outcomes": [
+                  "Read and analyze prose texts deeply",
+                  "Identify themes, characters, and messages",
+                  "Interpret meaning and literary techniques"
+                ],
+                "core_skills_focus": ["Literature", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Analyze a Luganda prose excerpt for literary devices",
+                  "Scenario: Trace character development through a story",
+                  "Scenario: Write critical interpretation of themes"
+                ],
+                "ai_prompt_template": "Create literature analysis unit for {topic} including: full text or lengthy excerpt, background context, annotation guides, comprehension questions, device analysis prompts, and 5 critical thinking scenarios."
+              },
+              {
+                "id": "S3T2M2",
+                "milestone_name": "Reading & Critical Analysis",
+                "topics": [
+                  "Comparative Analysis",
+                  "Author's Purpose & Style",
+                  "Evidence-Based Interpretation",
+                  "Academic Argumentation"
+                ],
+                "learning_outcomes": [
+                  "Interpret meaning from texts critically",
+                  "Analyze author's techniques and choices",
+                  "Develop critical thinking skills"
+                ],
+                "core_skills_focus": ["Reading", "Writing"],
+                "scenario_examples": [
+                  "Scenario: Compare themes in two Luganda texts",
+                  "Scenario: Analyze how author's style conveys meaning",
+                  "Scenario: Write analysis supporting interpretation with textual evidence"
+                ],
+                "ai_prompt_template": "Design critical analysis lesson for {topic} with: paired texts, analysis frameworks, comparative questions, evidence-gathering guides, and 4 research-based analysis scenarios."
+              }
+            ]
+          },
+          "Term3": {
+            "term_name": "Term 3",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S3T3M1",
+                "milestone_name": "Poetry Study & Interpretation",
+                "topics": [
+                  "Poetry Forms (Traditional & Modern)",
+                  "Poetic Devices (Rhythm, Rhyme, Imagery)",
+                  "Meaning & Interpretation",
+                  "Performance & Expression"
+                ],
+                "learning_outcomes": [
+                  "Identify elements of poetry",
+                  "Interpret poems and their meanings",
+                  "Perform poetry with appropriate expression"
+                ],
+                "core_skills_focus": ["Literature", "Speaking"],
+                "scenario_examples": [
+                  "Scenario: Analyze poetic devices in a Luganda poem",
+                  "Scenario: Interpret symbolism and imagery",
+                  "Scenario: Perform poem with proper intonation and pacing"
+                ],
+                "ai_prompt_template": "Create poetry unit for {topic} with: authentic poems, line-by-line analysis, device identification guides, meaning interpretation questions, performance notes, and 5 analysis/performance scenarios."
+              },
+              {
+                "id": "S3T3M2",
+                "milestone_name": "Oral Expression & Presentation",
+                "topics": [
+                  "Formal Presentations",
+                  "Speech Writing",
+                  "Persuasive Speaking",
+                  "Audience Awareness"
+                ],
+                "learning_outcomes": [
+                  "Express ideas creatively through oral language",
+                  "Deliver organized presentations",
+                  "Persuade and engage audiences"
+                ],
+                "core_skills_focus": ["Speaking"],
+                "scenario_examples": [
+                  "Scenario: Deliver a 3-minute prepared speech",
+                  "Scenario: Present an argument with supporting evidence",
+                  "Scenario: Adapt language based on audience"
+                ],
+                "ai_prompt_template": "Design oral presentation unit for {topic} with: speech structures, persuasion techniques, speaker notes, delivery tips, evaluation rubrics, and 4 real-world presentation scenarios."
+              }
+            ]
+          }
+        }
+      },
+
+      "S4": {
+        "level_name": "Senior Four",
+        "level_description": "Mastery level - integrating all skills, critical analysis, exam preparation, advanced literature",
+        "terms": {
+          "Term1": {
+            "term_name": "Term 1",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S4T1M1",
+                "milestone_name": "Advanced Literature Analysis",
+                "topics": [
+                  "Drama & Plays",
+                  "Literary Criticism",
+                  "Narrative Techniques",
+                  "Historical & Cultural Context"
+                ],
+                "learning_outcomes": [
+                  "Analyze literary texts in depth",
+                  "Identify themes, styles, and techniques",
+                  "Interpret meaning critically"
+                ],
+                "core_skills_focus": ["Literature", "Reading", "Writing"],
+                "scenario_examples": [
+                  "Scenario: Analyze a Luganda play's dramatic structure",
+                  "Scenario: Compare techniques in classical vs. modern texts",
+                  "Scenario: Write critical essay supporting interpretation"
+                ],
+                "ai_prompt_template": "Generate advanced literature unit for {topic} with: complete text or major excerpt, critical frameworks, scholarly context, analysis prompts, comparative questions, and 5 deep textual analysis scenarios."
+              },
+              {
+                "id": "S4T1M2",
+                "milestone_name": "Critical Analysis & Argumentation",
+                "topics": [
+                  "Constructing Arguments",
+                  "Evidence Evaluation",
+                  "Counter-Arguments",
+                  "Academic Writing"
+                ],
+                "learning_outcomes": [
+                  "Present structured arguments",
+                  "Support claims with evidence",
+                  "Evaluate and respond to opposing views"
+                ],
+                "core_skills_focus": ["Writing", "Reading"],
+                "scenario_examples": [
+                  "Scenario: Build argument supported by textual evidence",
+                  "Scenario: Evaluate strength of evidence in passages",
+                  "Scenario: Write rebuttal to opposing literary interpretation"
+                ],
+                "ai_prompt_template": "Create argumentation unit for {topic} with: argument structures, evidence types, logical fallacies, counter-argument strategies, academic language, and 4 essay writing scenarios requiring skilled argumentation."
+              }
+            ]
+          },
+          "Term2": {
+            "term_name": "Term 2",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S4T2M1",
+                "milestone_name": "Professional & Functional Writing",
+                "topics": [
+                  "Formal Correspondence",
+                  "Reports & Proposals",
+                  "Information Transfer",
+                  "Multiple Formats"
+                ],
+                "learning_outcomes": [
+                  "Write formal and informal texts effectively",
+                  "Summarize and interpret information",
+                  "Communicate ideas in different formats"
+                ],
+                "core_skills_focus": ["Writing"],
+                "scenario_examples": [
+                  "Scenario: Write formal business letter",
+                  "Scenario: Create comprehensive report",
+                  "Scenario: Adapt same content for different audiences"
+                ],
+                "ai_prompt_template": "Design professional writing unit for {topic} with: format guidelines, tone conventions, language registers, template examples, feedback checklists, and 5 professional writing scenarios with varying contexts."
+              },
+              {
+                "id": "S4T2M2",
+                "milestone_name": "Information Processing & Translation",
+                "topics": [
+                  "Text Summarization",
+                  "Concept Transformation",
+                  "Code-Switching (Luganda ↔ English)",
+                  "Information Synthesis"
+                ],
+                "learning_outcomes": [
+                  "Translate and transfer information",
+                  "Synthesize information from multiple sources",
+                  "Adapt language for different purposes"
+                ],
+                "core_skills_focus": ["Reading", "Writing"],
+                "scenario_examples": [
+                  "Scenario: Summarize complex text in different lengths",
+                  "Scenario: Translate Luganda text maintaining meaning",
+                  "Scenario: Combine info from multiple texts into coherent summary"
+                ],
+                "ai_prompt_template": "Create information processing unit for {topic} with: source materials, summarization frameworks, translation guidelines, synthesis strategies, and 5 comprehensive information transfer scenarios."
+              }
+            ]
+          },
+          "Term3": {
+            "term_name": "Term 3",
+            "duration": "12 weeks",
+            "milestones": [
+              {
+                "id": "S4T3M1",
+                "milestone_name": "Comprehensive Skill Integration & Revision",
+                "topics": [
+                  "Integrated Speaking & Listening",
+                  "Integrated Reading & Writing",
+                  "Exam Revision Techniques",
+                  "Holistic Language Use"
+                ],
+                "learning_outcomes": [
+                  "Integrate listening, speaking, reading, writing",
+                  "Apply knowledge across different topics",
+                  "Demonstrate mastery of language use"
+                ],
+                "core_skills_focus": ["All Skills"],
+                "scenario_examples": [
+                  "Scenario: Listen to Luganda lecture, take notes, summarize in writing",
+                  "Scenario: Read text, discuss interpretation, write analysis",
+                  "Scenario: Integrated exam-style activities combining multiple skills"
+                ],
+                "ai_prompt_template": "Create comprehensive revision unit for {topic} with: mixed-skill activities, timed exercises, full sample exams, answer keys, error analysis, and 6 integrated scenario-based assessment tasks."
+              },
+              {
+                "id": "S4T3M2",
+                "milestone_name": "Final Assessment & Mastery Demonstration",
+                "topics": [
+                  "Capstone Projects",
+                  "Portfolio Development",
+                  "Performance Assessment",
+                  "Preparation for Final Exams"
+                ],
+                "learning_outcomes": [
+                  "Demonstrate comprehensive language mastery",
+                  "Apply learning in complex contexts",
+                  "Prepare for final summative assessments"
+                ],
+                "core_skills_focus": ["All Skills"],
+                "scenario_examples": [
+                  "Scenario: Complete capstone project demonstrating all skills",
+                  "Scenario: Compile portfolio of best work",
+                  "Scenario: Perform in mock exam conditions"
+                ],
+                "ai_prompt_template": "Design capstone assessment unit for {topic} with: project guidelines, portfolio rubrics, mock exams (multiple formats), detailed answer keys, performance feedback templates, and 3 comprehensive final assessment scenarios."
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    "ai_content_generation_framework": {
+      "content_types": {
+        "lesson": {
+          "description": "Interactive lessons for teaching new content",
+          "structure": {
+            "introduction": "Hook with scenario or real-world application",
+            "content_explanation": "Clear explanation with examples",
+            "guided_practice": "Worked examples and scaffolded exercises",
+            "independent_practice": "Student-driven scenario activities",
+            "real_world_application": "Authentic Luganda usage scenarios",
+            "cultural_notes": "Contextual cultural information"
+          },
+          "prompt_template": "Create a lesson on {topic} for {class_level} in Term {term}. Include: scenario-based introduction, clear explanation, 3 guided examples, 4 practice scenarios covering {core_skill_focus}. Use {language_level} language."
+        },
+
+        "practice": {
+          "description": "Scenario-based practice exercises with immediate feedback",
+          "structure": {
+            "warm_up": "Quick recall of prerequisite knowledge",
+            "scenario_setup": "Real-world context for practice",
+            "guided_activities": "Structured exercises with support",
+            "independent_tasks": "Challenge activities",
+            "feedback_mechanism": "Error correction and explanation"
+          },
+          "prompt_template": "Generate 5 scenario-based practice exercises for {topic} at {class_level}. Each scenario should: present a real Luganda context, require application of {skills}, include 3 difficulty levels, and provide corrective feedback."
+        },
+
+        "quiz": {
+          "description": "Assessments with various question types including scenario-based questions",
+          "structure": {
+            "recall_questions": "30% - Basic knowledge recall (multiple choice, fill-blanks)",
+            "comprehension_questions": "30% - Understanding (true/false, matching, short answer)",
+            "application_questions": "25% - Scenario-based application (situation analysis, problem-solving)",
+            "analysis_questions": "15% - Critical thinking (compare, analyze, evaluate)"
+          },
+          "prompt_template": "Create quiz for {topic} in {class_level} with 15 questions: 5 recall (multiple choice), 5 comprehension (mixed types), 4 scenario-based (real contexts), 1 analysis. Include answer key with explanations."
+        },
+
+        "resource": {
+          "description": "Supplementary materials for deeper learning",
+          "structure": {
+            "vocabulary_lists": "Themed word banks with usage examples",
+            "reference_guides": "Grammar rules, pronunciation guides, cultural notes",
+            "cultural_materials": "Stories, traditions, authentic texts",
+            "visual_aids": "Descriptions for images, diagrams, infographics",
+            "extension_materials": "Advanced topics, research suggestions"
+          },
+          "prompt_template": "Create {resource_type} resource for {topic} including: core vocabulary (20-30 items), contextual usage examples, cultural background, visual descriptions, and 3 extension readings for deeper learning."
+        }
+      },
+
+      "scenario_generation_guidelines": {
+        "scenario_qualities": [
+          "Authentic - Based on real Lugandan life and contexts",
+          "Relevant - Connected to student experiences and interests",
+          "Progressive - Simple in early terms, complex in later terms",
+          "Action-oriented - Requiring active language use, not passive recognition",
+          "Cultural - Reflecting Lugandan culture, values, and traditions",
+          "Immediate - Focused on practical, immediate language use"
+        ],
+
+        "scenario_contexts": [
+          "Family & Home Life (greetings, family roles, daily routines)",
+          "School & Education (classroom interactions, learning, studying)",
+          "Market & Commerce (buying, selling, bargaining, prices)",
+          "Community & Social Life (celebrations, gatherings, events)",
+          "Health & Wellness (illness, health advice, wellness practices)",
+          "Work & Livelihood (job descriptions, workplace interactions)",
+          "Culture & Tradition (ceremonies, traditions, storytelling)",
+          "Travel & Movement (directions, transportation, exploration)"
+        ],
+
+        "scenario_structures": {
+          "problem_solving": "Present problem → student suggests solutions in Luganda",
+          "role_play": "Assigned roles → students act out dialogue/interaction",
+          "case_study": "Describe situation → students answer questions about it",
+          "narrative": "Story context → students retell, analyze, or continue",
+          "simulation": "Realistic scenario → students respond/decide appropriately",
+          "dialogue_completion": "Partial conversation → students complete exchanges"
+        }
+      },
+
+      "ai_prompt_usage_examples": {
+        "lesson_example": "Create lesson on 'Market Negotiations' for S2 Term 1 covering Vocabulary. Include: hook scenario (visiting a market in Kampala), explanation of bargaining phrases, 3 guided dialogue examples, 4 practice scenarios where student negotiates prices, 1 cultural note about local market customs.",
+
+        "quiz_example": "Generate quiz for 'Family Members & Relationships' in S1 Term 1: 5 multiple-choice naming family members, 5 fill-in-blanks with pronouns, 4 scenario questions (e.g., 'Your grandfather visits - how do you greet him?'), 1 cultural knowledge question. Include Luganda answer key.",
+
+        "practice_example": "Create 5 scenario practice exercises for 'Food & Cooking' at S2: Scenario 1 (Ordering at restaurant - reading-based), Scenario 2 (Discussing recipes - speaking), Scenario 3 (Describing meal preparation - writing), Scenario 4 (Reading menu - reading), Scenario 5 (Explaining importance of food culturally - analysis). Each with 3 difficulty levels and feedback.",
+
+        "resource_example": "Make vocabulary resource for 'Animal Names & Characteristics' (S1): List 25 animals in Luganda with English, pronunciation, usage in sentences, cultural significance (herding, hunting, folklore), 5 riddles about animals, visual descriptions for matching activities."
+      }
+    },
+
+    "assessment_methods": {
+      "formative_assessment": {
+        "scenario_based_practice": "Students apply skills in realistic Lugandan contexts",
+        "peer_assessment": "Students evaluate each other's language use",
+        "self_reflection": "Students analyze their own progress and challenges",
+        "portfolio_collection": "Ongoing collection of work samples"
+      },
+
+      "summative_assessment": {
+        "scenario_based_exams": "Applying skills in complex, integrated scenarios",
+        "oral_performance": "Speaking and presentation skills in authentic contexts",
+        "written_composition": "Extended writing demonstrating language mastery",
+        "comprehension_tests": "Reading and listening with analysis questions",
+        "integrated_projects": "Capstone projects combining all four skills"
+      }
+    },
+
+    "differentiation_strategies": {
+      "for_advanced_students": "Scenario complexity, higher-order thinking tasks, research extensions, peer teaching",
+      "for_struggling_students": "Scaffolded scenarios, vocabulary pre-teaching, model dialogues, visual supports, extended practice",
+      "for_mixed_ability": "Tiered scenario difficulty levels, choice in activity format, flexible grouping based on scenarios"
+    }
+  }
+}

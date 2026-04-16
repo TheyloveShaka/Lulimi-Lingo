@@ -9,30 +9,88 @@ dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Resolve path to data directory (works from backend_node)
-const DATA_DIR = path.resolve(__dirname, '..', '..', '..', 'backend', 'data')
+const DATA_DIR_CANDIDATES = [
+  process.env.CURRICULUM_DATA_DIR,
+  path.resolve(__dirname, '..', '..', 'data'),
+  path.resolve(__dirname, '..', '..', '..', 'backend', 'data'),
+  '/app/data',
+  '/backend/data'
+].filter(Boolean)
+
+function resolveDataFile(fileName) {
+  for (const dir of DATA_DIR_CANDIDATES) {
+    const candidate = path.join(dir, fileName)
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
+  }
+
+  return path.join(DATA_DIR_CANDIDATES[0], fileName)
+}
+
+const normalizeClassLevel = (classLevel = '') => String(classLevel).trim().toUpperCase()
+
+const normalizeTermCandidates = (term = '') => {
+  const raw = String(term || '').trim()
+  if (!raw) return []
+
+  const compact = raw.replace(/\s+/g, '').replace(/_/g, '')
+  const digits = compact.match(/\d+/)?.[0]
+
+  const candidates = [
+    raw,
+    compact,
+    compact.toLowerCase(),
+    compact.toUpperCase()
+  ]
+
+  if (digits) {
+    candidates.push(`Term${digits}`, `term${digits}`, `Term ${digits}`, `term ${digits}`, digits)
+  }
+
+  return [...new Set(candidates)]
+}
+
+function resolveClassData(curriculum, classLevel) {
+  const classes = curriculum?.curriculum?.classes || {}
+  const normalized = normalizeClassLevel(classLevel)
+  return classes[normalized] || classes[classLevel]
+}
+
+function resolveTermData(classData, term) {
+  if (!classData?.terms) return { key: null, data: null }
+
+  const candidates = normalizeTermCandidates(term)
+  for (const key of Object.keys(classData.terms)) {
+    if (candidates.includes(key) || candidates.includes(key.replace(/\s+/g, '').replace(/_/g, ''))) {
+      return { key, data: classData.terms[key] }
+    }
+  }
+
+  return { key: null, data: null }
+}
 
 // Load curriculum and templates
 function loadCurriculumData() {
   try {
-    const curriculumPath = path.join(DATA_DIR, 'luganda_curriculum_structure.json')
+    const curriculumPath = resolveDataFile('luganda_curriculum_structure.json')
     const data = fs.readFileSync(curriculumPath, 'utf8')
     return JSON.parse(data)
   } catch (err) {
     console.error('Error loading curriculum:', err.message)
-    console.error('Attempted path:', path.join(DATA_DIR, 'luganda_curriculum_structure.json'))
+    console.error('Attempted paths:', DATA_DIR_CANDIDATES.map((dir) => path.join(dir, 'luganda_curriculum_structure.json')).join(' | '))
     return null
   }
 }
 
 function loadPromptTemplates() {
   try {
-    const templatesPath = path.join(DATA_DIR, 'ai_prompt_templates_guidelines.json')
+    const templatesPath = resolveDataFile('ai_prompt_templates_guidelines.json')
     const data = fs.readFileSync(templatesPath, 'utf8')
     return JSON.parse(data)
   } catch (err) {
     console.error('Error loading prompt templates:', err.message)
-    console.error('Attempted path:', path.join(DATA_DIR, 'ai_prompt_templates_guidelines.json'))
+    console.error('Attempted paths:', DATA_DIR_CANDIDATES.map((dir) => path.join(dir, 'ai_prompt_templates_guidelines.json')).join(' | '))
     return null
   }
 }
@@ -41,11 +99,11 @@ function loadPromptTemplates() {
 function getMilestone(classLevel, term, milestoneId) {
   const curriculum = loadCurriculumData()
   if (!curriculum) return null
-  
-  const classData = curriculum.curriculum.classes[classLevel]
+
+  const classData = resolveClassData(curriculum, classLevel)
   if (!classData) return null
-  
-  const termData = classData.terms[term]
+
+  const { data: termData } = resolveTermData(classData, term)
   if (!termData) return null
   
   return termData.milestones.find(m => m.id === milestoneId)
@@ -273,8 +331,10 @@ Return ONLY valid JSON.
 // Main content generation function
 export async function generateContent(contentType, classLevel, term, milestoneId, topic, options = {}) {
   try {
-    const milestone = getMilestone(classLevel, term, milestoneId)
-    if (!milestone) {
+    const requiresMilestone = ['lesson', 'quiz', 'practice'].includes(contentType)
+    const milestone = requiresMilestone ? getMilestone(classLevel, term, milestoneId) : null
+
+    if (requiresMilestone && !milestone) {
       throw new Error(`Milestone not found: ${milestoneId}`)
     }
 
@@ -308,29 +368,43 @@ export async function generateContent(contentType, classLevel, term, milestoneId
 
     // Call AI
     let aiResponse = null
-    
-    // Try Gemini first
-    if (process.env.GEMINI_API_KEY) {
+    const preferOpenAi = contentType !== 'resource'
+    let provider = 'unknown'
+
+    if (preferOpenAi && process.env.OPENAI_API_KEY) {
+      try {
+        aiResponse = await callOpenAIChat([
+          { role: 'system', content: 'You are an expert Luganda language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.' },
+          { role: 'user', content: prompt }
+        ], 1000)
+        if (aiResponse) provider = 'openai'
+      } catch (err) {
+        console.error('OpenAI error:', err.message)
+      }
+    }
+
+    if (!aiResponse && process.env.GEMINI_API_KEY) {
       try {
         const resp = await callGemini(prompt)
         if (resp && resp.text) {
           aiResponse = resp.text
+          provider = 'gemini'
         }
       } catch (err) {
         console.error('Gemini error:', err.message)
       }
     }
 
-    // Fallback to OpenAI
-    if (!aiResponse && process.env.OPENAI_API_KEY) {
+    // Final fallback for heavy-resource mode when Gemini is unavailable
+    if (!aiResponse && !preferOpenAi && process.env.OPENAI_API_KEY) {
       try {
-        const resp = await callOpenAIChat([
-          { role: 'system', content: `You are an expert Luganda language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.` },
+        aiResponse = await callOpenAIChat([
+          { role: 'system', content: 'You are an expert Luganda language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.' },
           { role: 'user', content: prompt }
-        ], 2048)
-        aiResponse = resp
+        ], 1100)
+        if (aiResponse) provider = 'openai'
       } catch (err) {
-        console.error('OpenAI error:', err.message)
+        console.error('OpenAI fallback error:', err.message)
       }
     }
 
@@ -363,12 +437,13 @@ export async function generateContent(contentType, classLevel, term, milestoneId
     return {
       success: true,
       contentType,
-      classLevel,
+      classLevel: normalizeClassLevel(classLevel),
       term,
       milestoneId,
       topic,
-      milestone: milestone.milestone_name,
+      milestone: milestone?.milestone_name || null,
       content,
+      provider,
       timestamp: new Date().toISOString()
     }
 
@@ -425,8 +500,8 @@ export function getCurriculumOverview() {
 export function getClassCurriculum(classLevel) {
   const curriculum = loadCurriculumData()
   if (!curriculum) return null
-  
-  const classData = curriculum.curriculum.classes[classLevel]
+
+  const classData = resolveClassData(curriculum, classLevel)
   if (!classData) return null
 
   return {
@@ -440,14 +515,17 @@ export function getClassCurriculum(classLevel) {
 export function getTermCurriculum(classLevel, term) {
   const curriculum = loadCurriculumData()
   if (!curriculum) return null
-  
-  const classData = curriculum.curriculum.classes[classLevel]
+
+  const classData = resolveClassData(curriculum, classLevel)
   if (!classData) return null
-  
-  const termData = classData.terms[term]
+
+  const { key: resolvedTerm, data: termData } = resolveTermData(classData, term)
   if (!termData) return null
 
-  return termData
+  return {
+    ...termData,
+    resolvedTerm
+  }
 }
 
 // Get specific milestone details
@@ -457,7 +535,7 @@ export function getMilestoneDetails(classLevel, term, milestoneId) {
 
   return {
     ...milestone,
-    class_level: classLevel,
+    class_level: normalizeClassLevel(classLevel),
     term: term
   }
 }

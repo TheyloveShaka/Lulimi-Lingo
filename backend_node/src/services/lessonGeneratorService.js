@@ -4,6 +4,7 @@
  */
 
 import geminiService from './geminiService.js';
+import { callOpenAIChat } from './aiService.js';
 
 class LessonGeneratorService {
   constructor() {
@@ -57,19 +58,26 @@ Provide the lesson in this JSON structure:
 Return ONLY valid JSON.`;
 
     try {
-      if (this.aiService.isEnabled()) {
-        const response = await this.aiService.generateContent(prompt);
-        return this._parseLesson(response, topic);
-      } else {
-        return this._mockLesson(topic);
-      }
+      const openAiResponse = await callOpenAIChat([
+        { role: 'system', content: 'You are an expert Luganda teacher. Return only valid JSON, no markdown.' },
+        { role: 'user', content: prompt }
+      ], 900)
+      return this._parseLesson(openAiResponse, topic, 'openai')
     } catch (error) {
-      console.error('Lesson generation error:', error);
-      return this._mockLesson(topic);
+      console.error('Lesson generation OpenAI error:', error)
+      try {
+        if (this.aiService.isEnabled()) {
+          const response = await this.aiService.generateContent(prompt)
+          return this._parseLesson(response, topic, 'gemini')
+        }
+      } catch (geminiError) {
+        console.error('Lesson generation Gemini fallback error:', geminiError)
+      }
+      throw new Error('No AI provider available for lesson generation')
     }
   }
 
-  _parseLesson(content, topic) {
+  _parseLesson(content, topic, provider = 'unknown') {
     try {
       // Extract JSON from response (in case there's extra text)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -78,6 +86,7 @@ Return ONLY valid JSON.`;
         return {
           topic,
           ...parsed,
+          provider,
           timestamp: new Date().toISOString()
         };
       }

@@ -4,6 +4,7 @@
  */
 
 import geminiService from './geminiService.js';
+import { callOpenAIChat } from './aiService.js';
 
 class PracticeGeneratorService {
   constructor() {
@@ -57,19 +58,26 @@ Provide in JSON format:
 Return ONLY valid JSON.`;
 
     try {
-      if (this.aiService.isEnabled()) {
-        const response = await this.aiService.generateContent(prompt);
-        return this._parsePractice(response, topic);
-      } else {
-        return this._mockPractice(topic);
-      }
+      const openAiResponse = await callOpenAIChat([
+        { role: 'system', content: 'You are an expert Luganda tutor. Return only valid JSON, no markdown.' },
+        { role: 'user', content: prompt }
+      ], 780)
+      return this._parsePractice(openAiResponse, topic, 'openai')
     } catch (error) {
-      console.error('Practice generation error:', error);
-      return this._mockPractice(topic);
+      console.error('Practice generation OpenAI error:', error)
+      try {
+        if (this.aiService.isEnabled()) {
+          const response = await this.aiService.generateContent(prompt)
+          return this._parsePractice(response, topic, 'gemini')
+        }
+      } catch (geminiError) {
+        console.error('Practice generation Gemini fallback error:', geminiError)
+      }
+      throw new Error('No AI provider available for practice generation')
     }
   }
 
-  _parsePractice(content, topic) {
+  _parsePractice(content, topic, provider = 'unknown') {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -79,6 +87,7 @@ Return ONLY valid JSON.`;
             topic,
             totalQuestions: parsed.questions.length,
             questions: parsed.questions,
+            provider,
             timestamp: new Date().toISOString()
           };
         }
