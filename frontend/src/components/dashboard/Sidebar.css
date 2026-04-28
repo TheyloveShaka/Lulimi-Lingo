@@ -3,7 +3,7 @@
   left: 0;
   top: 0;
   height: 100vh;
-  background: white;
+  background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 50%, #e0e7ff 100%);
   box-shadow: var(--shadow-lg);
   z-index: 100;
   overflow: hidden;
