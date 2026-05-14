@@ -18,6 +18,7 @@ import {
   Award
 } from 'lucide-react';
 import { generatePractice } from '../../services/aiService';
+import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
 import './PracticeView.css';
 
@@ -34,6 +35,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [hasSavedSummary, setHasSavedSummary] = useState(false);
 
   const loadingMessages = [
     'Practice builds confidence.',
@@ -86,7 +88,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         : Array.isArray(question?.acceptable_answers)
           ? question.acceptable_answers
           : undefined,
-      hint: question?.hint || question?.clue || 'Think about common Luganda usage.'
+      hint: question?.hint || question?.clue || 'Think about common usage.',
+      explanation: question?.explanation || ''
     };
   };
 
@@ -116,7 +119,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
       const result = await generatePractice({
         topic: topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Practice',
         proficiencyLevel: context.proficiencyLevel,
-        commonMistakes: context.commonMistakes
+        commonMistakes: context.commonMistakes,
+        language: context.language
       });
 
       if (result.success) {
@@ -145,7 +149,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         question: 'Complete: "_____ otya?" (How are you?)',
         options: ['Oli', 'Gwe', 'Nze', 'Ye'],
         correctAnswer: 'Oli',
-        hint: 'This is the informal "you" in Luganda'
+        hint: 'This is the informal "you" in Luganda',
+        explanation: 'Use the singular informal "you" in this greeting.'
       },
       {
         id: 2,
@@ -153,7 +158,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         question: 'Translate to Luganda: "Good morning"',
         correctAnswer: 'Wasuze otya',
         acceptableAnswers: ['Wasuze otya', 'Wasuze otya?', 'wasuze otya'],
-        hint: 'It literally means "How did you sleep?"'
+        hint: 'It literally means "How did you sleep?"',
+        explanation: 'This is the standard Luganda morning greeting.'
       },
       {
         id: 3,
@@ -161,7 +167,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         question: 'What is the correct response to "Oli otya?"',
         options: ['Webale', 'Gyendi', 'Wasuze otya', 'Nze'],
         correctAnswer: 'Gyendi',
-        hint: 'It means "I\'m fine"'
+        hint: 'It means "I\'m fine"',
+        explanation: '"Gyendi" is the polite response to "How are you?"'
       },
       {
         id: 4,
@@ -169,7 +176,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         question: 'Complete: "Gyebale _____" (Thank you for your work)',
         options: ['ko', 'nyo', 'nnyo', 'otya'],
         correctAnswer: 'ko',
-        hint: 'This is a common polite expression'
+        hint: 'This is a common polite expression',
+        explanation: '"Gyebale ko" thanks someone for their effort.'
       },
       {
         id: 5,
@@ -177,7 +185,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         question: 'When would you use "Osiibye otya?"',
         options: ['In the morning', 'In the afternoon/evening', 'At midnight', 'Never'],
         correctAnswer: 'In the afternoon/evening',
-        hint: 'Think about what time of day this greeting refers to'
+        hint: 'Think about what time of day this greeting refers to',
+        explanation: 'This greeting is used later in the day.'
       }
     ];
   };
@@ -245,6 +254,38 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
 
   const allAnswered = Object.keys(userAnswers).length === questions.length;
   const isComplete = showSummary && allAnswered;
+
+  useEffect(() => {
+    if (!isComplete || hasSavedSummary) return;
+
+    const persistSummary = async () => {
+      try {
+        const context = getSyllabusContext();
+        const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
+        const score = calculateScore();
+
+        if (currentUser?._id) {
+          await upsertProgress(currentUser._id, {
+            weekId: context.week,
+            language: context.language,
+            proficiencyLevel: context.proficiencyLevel,
+            practiceAttempt: {
+              practiceId: topic?.id || topic?.title || topic || 'practice',
+              score: score.correct,
+              totalQuestions: score.total,
+              percentage: score.percentage
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Failed to persist practice attempt:', err);
+      } finally {
+        setHasSavedSummary(true);
+      }
+    };
+
+    persistSummary();
+  }, [isComplete, hasSavedSummary, getSyllabusContext, topic, userAnswers]);
 
   if (loading) {
     return (
@@ -421,6 +462,9 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                   <XCircle size={24} />
                   <span>Not quite. The correct answer is: <strong>{question.correctAnswer}</strong></span>
                 </>
+              )}
+              {!isCorrect && question.explanation && (
+                <span className="brief-explanation">{question.explanation}</span>
               )}
             </motion.div>
           )}

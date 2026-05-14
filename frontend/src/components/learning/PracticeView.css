@@ -447,6 +447,13 @@
   font-weight: 700;
 }
 
+.brief-explanation {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
 /* ============ Action Buttons ============ */
 .question-actions {
   display: flex;

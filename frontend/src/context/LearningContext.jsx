@@ -73,10 +73,11 @@ export const LearningProvider = ({ children }) => {
         }
       }
     }
-    // Load language from current user profile if available
+    // Load language/proficiency from current user profile if available
     try {
       const user = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
       if (user && user.language) setLanguage(user.language);
+      if (user && user.proficiencyLevel) setProficiencyLevel(user.proficiencyLevel);
     } catch (e) {
       // ignore
     }
@@ -129,6 +130,18 @@ export const LearningProvider = ({ children }) => {
       const user = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
       if (user) {
         user.language = lang;
+        localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(user));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const persistProficiency = (level) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
+      if (user) {
+        user.proficiencyLevel = level;
         localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(user));
       }
     } catch (e) {
@@ -224,13 +237,15 @@ export const LearningProvider = ({ children }) => {
     const recentScores = scoreValues.slice(-5);
     const avgPercentage = recentScores.reduce((sum, s) => sum + s.percentage, 0) / recentScores.length;
 
-    if (avgPercentage >= 80) {
-      setProficiencyLevel('intermediate');
-    } else if (avgPercentage >= 60) {
-      setProficiencyLevel('developing');
-    } else {
-      setProficiencyLevel('beginner');
+    let nextLevel = 'beginner';
+    if (avgPercentage >= 85) {
+      nextLevel = 'advanced';
+    } else if (avgPercentage >= 65) {
+      nextLevel = 'intermediate';
     }
+
+    setProficiencyLevel(nextLevel);
+    persistProficiency(nextLevel);
   };
 
   // Check if a topic is unlocked
@@ -273,6 +288,7 @@ export const LearningProvider = ({ children }) => {
       term: currentTerm,
       week: currentWeek,
       weekData,
+      language,
       completedTopics: getCompletedTopicsForAI(),
       proficiencyLevel,
       commonMistakes
@@ -297,6 +313,7 @@ export const LearningProvider = ({ children }) => {
     // Language
     language,
     setLanguage: (lang) => { setLanguage(lang); persistLanguage(lang); },
+    setProficiencyLevel: (level) => { setProficiencyLevel(level); persistProficiency(level); },
 
     // Progress data
     completedTopics,

@@ -381,6 +381,10 @@
     flex-direction: column;
   }
 
+  .connecting-svg {
+    display: none;
+  }
+
   .topic-node-container.left,
   .topic-node-container.right {
     justify-content: center;

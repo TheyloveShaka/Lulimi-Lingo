@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
   classLevel: { type: String, enum: ['S1', 'S2', 'S3', 'S4'], default: 'S1' },
   language: { type: String, default: 'luganda' },
+  proficiencyLevel: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
   completedLessons: [{ type: String }],
   completedTopics: [{ type: String }],
   progressPercentage: { type: Number, default: 0 },

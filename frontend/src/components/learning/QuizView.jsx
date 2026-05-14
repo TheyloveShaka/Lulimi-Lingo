@@ -19,6 +19,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { generateQuiz, generateFeedback } from '../../services/aiService';
+import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
 import './QuizView.css';
 
@@ -35,6 +36,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const [flaggedQuestions, setFlaggedQuestions] = useState([]);
   const [quizState, setQuizState] = useState('taking'); // 'taking', 'reviewing', 'results'
   const [timeRemaining, setTimeRemaining] = useState(null);
+  const [quizDuration, setQuizDuration] = useState(0);
   const [feedback, setFeedback] = useState(null);
 
   const loadingMessages = [
@@ -145,7 +147,9 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       const result = await generateQuiz({
         topic: topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Quiz',
         numberOfQuestions,
-        assessmentCriteria: context.weekData?.assessmentTypes || []
+        assessmentCriteria: context.weekData?.assessmentTypes || [],
+        language: context.language,
+        proficiencyLevel: context.proficiencyLevel
       });
 
       if (result.success) {
@@ -157,7 +161,9 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
         setIsCached(Boolean(result.cached));
         setProvider(result.provider || 'openai');
         // Set timer: 2 minutes per question
-        setTimeRemaining(quizData.questions.length * 120);
+        const duration = quizData.questions.length * 120;
+        setTimeRemaining(duration);
+        setQuizDuration(duration);
       } else {
         setError(result.error || 'Failed to generate quiz');
       }
@@ -239,6 +245,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     
     // Calculate score
     const results = calculateResults();
+    const context = getSyllabusContext();
     
     // Record score
     recordQuizScore(
@@ -247,12 +254,38 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       results.maxScore
     );
 
+    // Persist attempt
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
+      const timeSpent = quizDuration && timeRemaining !== null
+        ? Math.max(0, quizDuration - timeRemaining)
+        : null;
+
+      if (currentUser?._id) {
+        await upsertProgress(currentUser._id, {
+          weekId: context.week,
+          language: context.language,
+          proficiencyLevel: context.proficiencyLevel,
+          quizAttempt: {
+            quizId: topic?.id || topic?.title || topic || 'quiz',
+            score: results.score,
+            maxScore: results.maxScore,
+            percentage: results.percentage,
+            timeSpent
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist quiz attempt:', err);
+    }
+
     // Get AI feedback
     try {
       const feedbackResult = await generateFeedback({
         learnerAnswers: userAnswers,
         correctAnswers: quiz.questions.map(q => ({ question: q.question, answer: q.correctAnswer })),
-        topicObjectives: topic?.objectives || []
+        topicObjectives: topic?.objectives || [],
+        language: context.language
       });
 
       if (feedbackResult.success) {
@@ -285,6 +318,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
       if (isCorrect) score += points;
 
+      const explanation = q.explanation || (q.correctAnswer ? `Correct answer: ${q.correctAnswer}.` : 'Review this concept and try again.');
+
       details.push({
         question: q.question,
         userAnswer,
@@ -292,7 +327,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
         isCorrect,
         points: isCorrect ? points : 0,
         maxPoints: points,
-        explanation: q.explanation
+        explanation
       });
     });
 
@@ -411,7 +446,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
                   </div>
                 )}
               </div>
-              {detail.explanation && (
+              {!detail.isCorrect && detail.explanation && (
                 <div className="explanation">
                   <AlertCircle size={14} />
                   <span>{detail.explanation}</span>

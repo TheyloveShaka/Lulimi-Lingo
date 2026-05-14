@@ -225,6 +225,7 @@ const LevelLadder = ({ onWeekClick }) => {
           {/* SVG overlay for all connecting paths */}
           {paths.length > 0 && (
             <svg
+              className="connecting-svg"
               style={{
                 position: 'absolute',
                 top: 0,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileUp, Users, BarChart3, Settings, LogOut, ChevronDown, Upload, X, Eye, Download, Trash2, Printer, Search } from 'lucide-react'
+import { FileUp, Users, BarChart3, Settings, LogOut, ChevronDown, Upload, X, Eye, Download, Trash2, Printer, Search, Database } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './AdminDashboard.css'
 
@@ -12,6 +12,7 @@ const AdminDashboard = ({ user }) => {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [studentProgress, setStudentProgress] = useState(null)
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [showSeedModal, setShowSeedModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -23,6 +24,8 @@ const AdminDashboard = ({ user }) => {
     subject: 'Luganda',
     externalUrl: ''
   })
+
+  const defaultSubject = user?.language === 'runyankole' ? 'Runyankole' : 'Luganda'
 
   // Fetch resources
   const fetchResources = async () => {
@@ -95,12 +98,21 @@ const AdminDashboard = ({ user }) => {
     }
   }, [activeTab])
 
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      subject: prev.subject || defaultSubject
+    }))
+  }, [defaultSubject])
+
   const handleUploadResource = async () => {
     try {
       if (!formData.title || !formData.externalUrl) {
         alert('Please fill in all required fields')
         return
       }
+
+      const subject = formData.subject || defaultSubject
 
       const token = localStorage.getItem('authToken')
       const response = await fetch('/api/resources', {
@@ -111,6 +123,7 @@ const AdminDashboard = ({ user }) => {
         },
         body: JSON.stringify({
           ...formData,
+          subject,
           fileName: formData.title
         })
       })
@@ -123,7 +136,7 @@ const AdminDashboard = ({ user }) => {
           description: '',
           type: 'document',
           classLevel: 'S1',
-          subject: 'Luganda',
+          subject: defaultSubject,
           externalUrl: ''
         })
         fetchResources()
@@ -134,6 +147,37 @@ const AdminDashboard = ({ user }) => {
       console.error('Upload failed:', error)
       alert('Error uploading resource')
     }
+  }
+
+  const handleSeedResources = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('authToken')
+      const response = await fetch('/api/resources/seed', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        alert(`Seeded ${data.count || 0} resources.`)
+        fetchResources()
+      } else {
+        alert(data.error || 'Failed to seed resources')
+      }
+    } catch (error) {
+      console.error('Seed failed:', error)
+      alert('Error seeding resources')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConfirmSeed = async () => {
+    setShowSeedModal(false)
+    await handleSeedResources()
   }
 
   const handleDeleteResource = async (resourceId) => {
@@ -239,15 +283,28 @@ const AdminDashboard = ({ user }) => {
               >
                 <div className="section-header">
                   <h2>Educational Resources</h2>
-                  <motion.button
-                    className="btn-primary"
-                    onClick={() => setShowUploadModal(true)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Upload size={18} />
-                    Upload Resource
-                  </motion.button>
+                  <div className="section-actions">
+                    <motion.button
+                      className="btn-secondary"
+                      onClick={() => setShowSeedModal(true)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={loading}
+                    >
+                      <Database size={18} />
+                      Seed Resources
+                    </motion.button>
+                    <motion.button
+                      className="btn-primary"
+                      onClick={() => setShowUploadModal(true)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={loading}
+                    >
+                      <Upload size={18} />
+                      Upload Resource
+                    </motion.button>
+                  </div>
                 </div>
 
                 {/* Search */}
@@ -277,6 +334,44 @@ const AdminDashboard = ({ user }) => {
                         className="resource-card"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
+
+              <AnimatePresence>
+                {showSeedModal && (
+                  <motion.div
+                    className="modal-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowSeedModal(false)}
+                  >
+                    <motion.div
+                      className="modal-content seed-modal"
+                      initial={{ opacity: 0, scale: 0.96 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="modal-header">
+                        <h2>Seed Resources</h2>
+                        <button className="modal-close" onClick={() => setShowSeedModal(false)}>
+                          <X size={20} />
+                        </button>
+                      </div>
+                      <div className="modal-body">
+                        <p>This will import the default Luganda and Runyankole YouTube resources into the library.</p>
+                      </div>
+                      <div className="modal-actions">
+                        <button className="btn-secondary" onClick={() => setShowSeedModal(false)}>
+                          Cancel
+                        </button>
+                        <button className="btn-primary" onClick={handleConfirmSeed} disabled={loading}>
+                          Seed Now
+                        </button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
                         whileHover={{ scale: 1.02 }}
                       >
                         <div className="resource-header">

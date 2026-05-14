@@ -55,6 +55,7 @@ const LoginModal = ({ onClose, onLogin }) => {
           email: result.user.email,
           classLevel: result.user.classLevel,
           language: result.user.language,
+          proficiencyLevel: result.user.proficiencyLevel,
           completedLessons: result.user.completedLessons || [],
           completedTopics: result.user.completedTopics || [],
           progressPercentage: result.user.progressPercentage || 0

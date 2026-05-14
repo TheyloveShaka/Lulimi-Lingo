@@ -1,5 +1,5 @@
 import express from 'express'
-import { generateLesson, generatePractice, generateQuiz, chatWithTutor } from '../controllers/aiController.js'
+import { generateLesson, generatePractice, generateQuiz, chatWithTutor, generateFeedback } from '../controllers/aiController.js'
 import { getProgress, upsertProgress } from '../controllers/progressController.js'
 import { signup, login, getCurrentUser, updateProgress, teacherSignup } from '../controllers/userController.js'
 import { 
@@ -9,7 +9,8 @@ import {
   deleteResource, 
   getResource,
   getStudentProgress,
-  getTeacherStudents
+  getTeacherStudents,
+  seedResources
 } from '../controllers/resourceController.js'
 import {
   getCurriculum,
@@ -51,12 +52,14 @@ router.post('/lesson', generateLesson)
 router.post('/practice', generatePractice)
 router.post('/quiz', generateQuiz)
 router.post('/chat', chatWithTutor)
+router.post('/feedback', generateFeedback)
 
 // New AI endpoints (explicit naming)
 router.post('/ai/lesson', generateLesson)
 router.post('/ai/practice', generatePractice)
 router.post('/ai/quiz', generateQuiz)
 router.post('/ai/chat', chatWithTutor)
+router.post('/ai/feedback', generateFeedback)
 
 // Progress endpoints (optional - can use /auth/progress instead)
 router.get('/progress/:userId', getProgress)
@@ -68,6 +71,7 @@ router.get('/resources/:resourceId', getResource)
 router.get('/teacher/resources', authMiddleware, getTeacherResources)
 router.post('/resources', authMiddleware, uploadResource)
 router.delete('/resources/:resourceId', authMiddleware, deleteResource)
+router.post('/resources/seed', authMiddleware, seedResources)
 
 // Teacher dashboard endpoints
 router.get('/teacher/students', authMiddleware, getTeacherStudents)

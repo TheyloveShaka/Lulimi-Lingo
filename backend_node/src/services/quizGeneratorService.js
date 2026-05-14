@@ -19,14 +19,16 @@ class QuizGeneratorService {
    * @param {Array} params.criteria - Assessment criteria
    * @returns {Promise<Object>} Quiz with questions
    */
-  async generate({ topic, numQuestions = 5, criteria = [] }) {
+  async generate({ topic, numQuestions = 5, criteria = [], language = 'luganda', proficiencyLevel = 'beginner' }) {
+    const languageName = language?.toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
     const criteriaText = criteria.length 
       ? criteria.join(', ')
       : 'General knowledge';
 
-    const prompt = `Generate a ${numQuestions}-question multiple choice quiz for Luganda topic: "${topic}"
+    const prompt = `Generate a ${numQuestions}-question quiz for ${languageName} topic: "${topic}"
 
 Assessment criteria: ${criteriaText}
+Learner level: ${proficiencyLevel}
 
 For each question provide in JSON format:
 {
@@ -47,16 +49,16 @@ Return ONLY valid JSON.`;
 
     try {
       const openAiResponse = await callOpenAIChat([
-        { role: 'system', content: 'You are an expert assessment designer. Return only valid JSON, no markdown.' },
+        { role: 'system', content: `You are an expert ${languageName} assessment designer. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
       ], 850)
-      return this._parseQuiz(openAiResponse, topic, numQuestions, 'openai')
+      return this._parseQuiz(openAiResponse, topic, numQuestions, 'openai', languageName)
     } catch (error) {
       console.error('Quiz generation OpenAI error:', error)
       try {
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
-          return this._parseQuiz(response, topic, numQuestions, 'gemini')
+          return this._parseQuiz(response, topic, numQuestions, 'gemini', languageName)
         }
       } catch (geminiError) {
         console.error('Quiz generation Gemini fallback error:', geminiError)
@@ -65,7 +67,7 @@ Return ONLY valid JSON.`;
     }
   }
 
-  _parseQuiz(content, topic, numQuestions, provider = 'unknown') {
+  _parseQuiz(content, topic, numQuestions, provider = 'unknown', languageName = 'Luganda') {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -83,10 +85,27 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Failed to parse quiz JSON:', error);
     }
-    return this._mockQuiz(topic, numQuestions);
+    return this._mockQuiz(topic, numQuestions, languageName);
   }
 
-  _mockQuiz(topic, num = 5) {
+  _mockQuiz(topic, num = 5, languageName = 'Luganda') {
+    if (languageName !== 'Luganda') {
+      return {
+        topic,
+        numQuestions: num,
+        questions: [
+          {
+            id: 1,
+            question: `Choose the correct ${languageName} translation for: "Hello"`,
+            options: ["Option A", "Option B", "Option C", "Option D"],
+            correctAnswer: "Option A",
+            explanation: `"Option A" is the standard ${languageName} greeting.`,
+            difficulty: "easy"
+          }
+        ],
+        timestamp: new Date().toISOString()
+      };
+    }
     const allQuestions = [
       {
         id: 1,

@@ -21,17 +21,19 @@ class LessonGeneratorService {
    * @param {Array} params.objectives - Learning objectives
    * @returns {Promise<Object>} Structured lesson content
    */
-  async generate({ classLevel, term, week, topic, objectives = [] }) {
+  async generate({ classLevel, term, week, topic, objectives = [], language = 'luganda', proficiencyLevel = 'beginner' }) {
+    const languageName = language?.toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
     const objectivesText = objectives.length 
       ? objectives.join(', ')
       : 'General introduction to the topic';
 
-    const prompt = `Generate a Luganda lesson for:
+    const prompt = `Generate a ${languageName} lesson for:
 Class: ${classLevel}
 Term: ${term}
 Week: ${week}
 Topic: ${topic}
 Objectives: ${objectivesText}
+Learner level: ${proficiencyLevel}
 
 Provide the lesson in this JSON structure:
 {
@@ -59,16 +61,16 @@ Return ONLY valid JSON.`;
 
     try {
       const openAiResponse = await callOpenAIChat([
-        { role: 'system', content: 'You are an expert Luganda teacher. Return only valid JSON, no markdown.' },
+        { role: 'system', content: `You are an expert ${languageName} teacher. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
       ], 900)
-      return this._parseLesson(openAiResponse, topic, 'openai')
+      return this._parseLesson(openAiResponse, topic, 'openai', languageName)
     } catch (error) {
       console.error('Lesson generation OpenAI error:', error)
       try {
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
-          return this._parseLesson(response, topic, 'gemini')
+          return this._parseLesson(response, topic, 'gemini', languageName)
         }
       } catch (geminiError) {
         console.error('Lesson generation Gemini fallback error:', geminiError)
@@ -77,7 +79,7 @@ Return ONLY valid JSON.`;
     }
   }
 
-  _parseLesson(content, topic, provider = 'unknown') {
+  _parseLesson(content, topic, provider = 'unknown', languageName = 'Luganda') {
     try {
       // Extract JSON from response (in case there's extra text)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -93,21 +95,12 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Failed to parse lesson JSON:', error);
     }
-    return this._mockLesson(topic);
+    return this._mockLesson(topic, languageName);
   }
 
-  _mockLesson(topic) {
-    return {
-      topic,
-      introduction: `Welcome to today's lesson on ${topic}! In Luganda culture, this topic is very important for daily communication and building relationships.`,
-      explanation: `${topic} is an important part of Luganda language learning. Understanding this concept will help you communicate more effectively and show respect in social interactions.
-
-There are several key aspects to understanding ${topic}:
-1. Basic forms and usage
-2. Cultural context and proper etiquette
-3. Common variations and regional differences
-4. How to apply it in real conversations`,
-      examples: [
+  _mockLesson(topic, languageName = 'Luganda') {
+    const fallbackExamples = languageName === 'Luganda'
+      ? [
         {
           luganda: "Oli otya?",
           english: "How are you?",
@@ -133,8 +126,37 @@ There are several key aspects to understanding ${topic}:
           english: "I'm sorry",
           usage: "Expressing apology"
         }
-      ],
-      culturalNote: "In Luganda culture, it's essential to use proper greetings and respect forms. Always greet before starting a conversation. Younger people should initiate greetings with elders. Show respect through language choices.",
+      ]
+      : [
+        {
+          luganda: `${languageName} example phrase 1`,
+          english: "English translation",
+          usage: "Common greeting"
+        },
+        {
+          luganda: `${languageName} example phrase 2`,
+          english: "English translation",
+          usage: "Simple response"
+        },
+        {
+          luganda: `${languageName} example phrase 3`,
+          english: "English translation",
+          usage: "Polite expression"
+        }
+      ];
+
+    return {
+      topic,
+      introduction: `Welcome to today's lesson on ${topic}! In ${languageName} culture, this topic is very important for daily communication and building relationships.`,
+      explanation: `${topic} is an important part of ${languageName} language learning. Understanding this concept will help you communicate more effectively and show respect in social interactions.
+
+There are several key aspects to understanding ${topic}:
+1. Basic forms and usage
+2. Cultural context and proper etiquette
+3. Common variations and regional differences
+4. How to apply it in real conversations`,
+      examples: fallbackExamples,
+      culturalNote: `In ${languageName} culture, it's essential to use proper greetings and respect forms. Always greet before starting a conversation. Younger people should initiate greetings with elders. Show respect through language choices.`,
       keyPoints: [
         `Always use proper ${topic} in appropriate contexts`,
         "Consider the age and status of the person you're communicating with",

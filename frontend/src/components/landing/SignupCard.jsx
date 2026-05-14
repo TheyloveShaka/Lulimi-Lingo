@@ -10,7 +10,8 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
     email: '',
     password: '',
     class: 'S1',
-    language: 'luganda'
+    language: 'luganda',
+    proficiencyLevel: 'beginner'
   })
 
   const [errors, setErrors] = useState({})
@@ -20,6 +21,11 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
   const languages = [
     { value: 'luganda', label: 'Luganda' },
     { value: 'runyankole', label: 'Runyankole' }
+  ]
+  const proficiencyLevels = [
+    { value: 'beginner', label: 'Beginner' },
+    { value: 'intermediate', label: 'Intermediate' },
+    { value: 'advanced', label: 'Advanced' }
   ]
 
   const handleChange = (e) => {
@@ -79,6 +85,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
           email: result.user.email,
           classLevel: result.user.classLevel,
           language: result.user.language,
+          proficiencyLevel: result.user.proficiencyLevel,
           completedLessons: result.user.completedLessons || [],
           completedTopics: result.user.completedTopics || [],
           progressPercentage: result.user.progressPercentage || 0
@@ -193,6 +200,24 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
             >
               {languages.map((l) => (
                 <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="proficiencyLevel">Your Level</label>
+          <div className="input-wrapper">
+            <GraduationCap size={20} className="input-icon" />
+            <select
+              id="proficiencyLevel"
+              name="proficiencyLevel"
+              value={formData.proficiencyLevel}
+              onChange={handleChange}
+              disabled={isLoading}
+            >
+              {proficiencyLevels.map((level) => (
+                <option key={level.value} value={level.value}>{level.label}</option>
               ))}
             </select>
           </div>

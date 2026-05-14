@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
  * POST /api/auth/signup
  */
 export const signup = async (req, res) => {
-  const { name, email, password, classLevel, language } = req.body
+  const { name, email, password, classLevel, language, proficiencyLevel } = req.body
   
   try {
     // Validate required fields
@@ -17,6 +17,7 @@ export const signup = async (req, res) => {
     }
     
     if (password.length < 6) {
+        proficiencyLevel: user.proficiencyLevel,
       return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' })
     }
     
@@ -34,6 +35,7 @@ export const signup = async (req, res) => {
       role: 'student',
       classLevel: classLevel || 'S1',
       language: language || 'luganda',
+      proficiencyLevel: proficiencyLevel || 'beginner',
       completedLessons: [],
       completedTopics: []
     })
@@ -50,6 +52,7 @@ export const signup = async (req, res) => {
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
+        proficiencyLevel: user.proficiencyLevel,
         completedLessons: user.completedLessons,
         completedTopics: user.completedTopics,
         progressPercentage: user.progressPercentage
@@ -99,6 +102,7 @@ export const login = async (req, res) => {
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
+        proficiencyLevel: user.proficiencyLevel,
         completedLessons: user.completedLessons,
         completedTopics: user.completedTopics,
         progressPercentage: user.progressPercentage
@@ -131,6 +135,7 @@ export const getCurrentUser = async (req, res) => {
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
+        proficiencyLevel: user.proficiencyLevel,
         completedLessons: user.completedLessons,
         completedTopics: user.completedTopics,
         progressPercentage: user.progressPercentage
@@ -206,6 +211,7 @@ export const teacherSignup = async (req, res) => {
       role: 'teacher',
       classLevel: classLevels?.[0] || 'S1',
       language: 'luganda',
+      proficiencyLevel: 'beginner',
       completedLessons: [],
       completedTopics: [],
       assignedStudents: []

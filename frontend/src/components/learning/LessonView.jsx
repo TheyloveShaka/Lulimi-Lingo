@@ -18,6 +18,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { generateLesson } from '../../services/aiService';
+import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
 import './LessonView.css';
 
@@ -101,7 +102,9 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
         term: `Term ${context.term}`,
         week: `Week ${context.week}`,
         topic: topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Language Lesson',
-        objectives: topic?.objectives || context.weekData?.objectives || []
+        objectives: topic?.objectives || context.weekData?.objectives || [],
+        language: context.language,
+        proficiencyLevel: context.proficiencyLevel
       });
 
       if (result.success) {
@@ -130,6 +133,21 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
 
   const handleLessonComplete = () => {
     completeLesson(topic?.id || topic);
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
+      if (currentUser?._id) {
+        const context = getSyllabusContext();
+        upsertProgress(currentUser._id, {
+          weekId: context.week,
+          language: context.language,
+          proficiencyLevel: context.proficiencyLevel,
+          lessonCompleted: true,
+          lessonId: topic?.id || topic?.title || topic || 'lesson'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist lesson completion:', err);
+    }
     onComplete?.();
   };
 

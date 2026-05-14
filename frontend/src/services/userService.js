@@ -6,7 +6,7 @@ const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'https://lulim
 
 /**
  * Sign up new user
- * @param {Object} userData - { name, email, password, classLevel, language }
+ * @param {Object} userData - { name, email, password, classLevel, language, proficiencyLevel }
  * @returns {Promise<Object>} - { success, user, token }
  */
 export const signupUser = async (userData) => {
@@ -21,7 +21,8 @@ export const signupUser = async (userData) => {
         email: userData.email,
         password: userData.password,
         classLevel: userData.class || 'S1',
-        language: userData.language || 'luganda'
+        language: userData.language || 'luganda',
+        proficiencyLevel: userData.proficiencyLevel || 'beginner'
       })
     })
 

@@ -15,20 +15,22 @@ class PracticeGeneratorService {
    * Generate practice questions
    * @param {Object} params - Practice parameters
    * @param {string} params.topic - The topic to practice
-   * @param {string} params.proficiencyLevel - "beginner", "developing", or "intermediate"
+  * @param {string} params.proficiencyLevel - "beginner", "intermediate", or "advanced"
    * @param {Array} params.commonMistakes - Common mistakes to address
    * @returns {Promise<Array>} List of practice questions
    */
   async generate({ 
     topic, 
     proficiencyLevel = 'beginner', 
-    commonMistakes = [] 
+    commonMistakes = [],
+    language = 'luganda'
   }) {
+    const languageName = language?.toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
     const mistakesText = commonMistakes.length
       ? `Address these mistakes: ${commonMistakes.join(', ')}`
       : '';
 
-    const prompt = `Generate 5 varied practice questions for Luganda topic: "${topic}"
+    const prompt = `Generate 5 varied practice questions for ${languageName} topic: "${topic}"
 
 Proficiency level: ${proficiencyLevel}
 ${mistakesText}
@@ -59,16 +61,16 @@ Return ONLY valid JSON.`;
 
     try {
       const openAiResponse = await callOpenAIChat([
-        { role: 'system', content: 'You are an expert Luganda tutor. Return only valid JSON, no markdown.' },
+        { role: 'system', content: `You are an expert ${languageName} tutor. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
       ], 780)
-      return this._parsePractice(openAiResponse, topic, 'openai')
+      return this._parsePractice(openAiResponse, topic, 'openai', languageName)
     } catch (error) {
       console.error('Practice generation OpenAI error:', error)
       try {
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
-          return this._parsePractice(response, topic, 'gemini')
+          return this._parsePractice(response, topic, 'gemini', languageName)
         }
       } catch (geminiError) {
         console.error('Practice generation Gemini fallback error:', geminiError)
@@ -77,7 +79,7 @@ Return ONLY valid JSON.`;
     }
   }
 
-  _parsePractice(content, topic, provider = 'unknown') {
+  _parsePractice(content, topic, provider = 'unknown', languageName = 'Luganda') {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -95,10 +97,28 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Failed to parse practice JSON:', error);
     }
-    return this._mockPractice(topic);
+    return this._mockPractice(topic, languageName);
   }
 
-  _mockPractice(topic) {
+  _mockPractice(topic, languageName = 'Luganda') {
+    if (languageName !== 'Luganda') {
+      return {
+        topic,
+        totalQuestions: 5,
+        questions: [
+          {
+            id: 1,
+            type: "fill-blank",
+            question: `Complete the ${languageName} phrase for: "Hello"`,
+            options: ["Option A", "Option B", "Option C", "Option D"],
+            correctAnswer: "Option A",
+            hint: `Use a common ${languageName} greeting`,
+            explanation: `This is a standard ${languageName} greeting.`
+          }
+        ],
+        timestamp: new Date().toISOString()
+      }
+    }
     return {
       topic,
       totalQuestions: 5,

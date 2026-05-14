@@ -31,7 +31,7 @@ const AI_CONFIG = {
 };
 
 /**
- * Make an API call to the Python backend
+ * Make an API call to the Node backend
  */
 const callBackend = async (endpoint, payload) => {
   if (AI_CONFIG.useMockResponses) {
@@ -78,13 +78,15 @@ const callBackend = async (endpoint, payload) => {
 /**
  * Generate a lesson for a specific topic
  */
-export const generateLesson = async ({ classLevel, term, week, topic, objectives }) => {
+export const generateLesson = async ({ classLevel, term, week, topic, objectives, language, proficiencyLevel }) => {
   const result = await callBackend('lesson', {
     class_level: classLevel,
     term: term,
     week: week,
     topic: topic,
-    objectives: objectives || []
+    objectives: objectives || [],
+    language: language,
+    proficiency_level: proficiencyLevel
   });
 
   const lessonPayload = result.lesson || result.data;
@@ -104,11 +106,12 @@ export const generateLesson = async ({ classLevel, term, week, topic, objectives
 /**
  * Generate practice questions
  */
-export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes }) => {
+export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes, language }) => {
   const result = await callBackend('practice', {
     topic: topic,
     proficiency_level: proficiencyLevel || 'beginner',
-    common_mistakes: commonMistakes || []
+    common_mistakes: commonMistakes || [],
+    language: language
   });
 
   const questionsPayload = result.questions || result.practice?.questions || result.data?.questions;
@@ -128,11 +131,13 @@ export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes
 /**
  * Generate a quiz
  */
-export const generateQuiz = async ({ topic, numberOfQuestions, assessmentCriteria }) => {
+export const generateQuiz = async ({ topic, numberOfQuestions, assessmentCriteria, language, proficiencyLevel }) => {
   const result = await callBackend('quiz', {
     topic: topic,
     number_of_questions: numberOfQuestions || 5,
-    assessment_criteria: assessmentCriteria || []
+    assessment_criteria: assessmentCriteria || [],
+    language: language,
+    proficiency_level: proficiencyLevel
   });
 
   const quizPayload = result.quiz || result.data;
@@ -152,11 +157,12 @@ export const generateQuiz = async ({ topic, numberOfQuestions, assessmentCriteri
 /**
  * Generate feedback for learner answers
  */
-export const generateFeedback = async ({ learnerAnswers, correctAnswers, topicObjectives }) => {
+export const generateFeedback = async ({ learnerAnswers, correctAnswers, topicObjectives, language }) => {
   const result = await callBackend('feedback', {
     learner_answers: learnerAnswers || {},
     correct_answers: correctAnswers || {},
-    topic_objectives: topicObjectives || []
+    topic_objectives: topicObjectives || [],
+    language: language
   });
 
   if (result.success && result.feedback) {
@@ -197,11 +203,13 @@ export const generateOverview = async ({ topic, completedLessons, keyObjectives 
 /**
  * Chat with the AI tutor
  */
-export const chatWithTutor = async ({ message, completedTopics, conversationHistory = [] }) => {
+export const chatWithTutor = async ({ message, completedTopics, conversationHistory = [], language, proficiencyLevel }) => {
   const payload = {
     message: message,
     completed_topics: completedTopics || [],
-    conversation_history: conversationHistory.slice(-5) // Last 5 messages
+    conversation_history: conversationHistory.slice(-5), // Last 5 messages
+    language,
+    proficiency_level: proficiencyLevel
   };
 
   console.log('🎤 Chat payload:', payload);
@@ -247,7 +255,7 @@ export const translateText = async (text, sourceLang = 'en', targetLang = 'lg') 
 };
 
 /**
- * Validate Luganda text (using Python backend)
+ * Validate Luganda text
  */
 export const validateLuganda = async (text) => {
   try {
