@@ -334,44 +334,6 @@ const AdminDashboard = ({ user }) => {
                         className="resource-card"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-
-              <AnimatePresence>
-                {showSeedModal && (
-                  <motion.div
-                    className="modal-overlay"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setShowSeedModal(false)}
-                  >
-                    <motion.div
-                      className="modal-content seed-modal"
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="modal-header">
-                        <h2>Seed Resources</h2>
-                        <button className="modal-close" onClick={() => setShowSeedModal(false)}>
-                          <X size={20} />
-                        </button>
-                      </div>
-                      <div className="modal-body">
-                        <p>This will import the default Luganda and Runyankole YouTube resources into the library.</p>
-                      </div>
-                      <div className="modal-actions">
-                        <button className="btn-secondary" onClick={() => setShowSeedModal(false)}>
-                          Cancel
-                        </button>
-                        <button className="btn-primary" onClick={handleConfirmSeed} disabled={loading}>
-                          Seed Now
-                        </button>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
                         whileHover={{ scale: 1.02 }}
                       >
                         <div className="resource-header">
@@ -411,6 +373,44 @@ const AdminDashboard = ({ user }) => {
                     ))
                   )}
                 </div>
+
+                <AnimatePresence>
+                  {showSeedModal && (
+                    <motion.div
+                      className="modal-overlay"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setShowSeedModal(false)}
+                    >
+                      <motion.div
+                        className="modal-content seed-modal"
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="modal-header">
+                          <h2>Seed Resources</h2>
+                          <button className="modal-close" onClick={() => setShowSeedModal(false)}>
+                            <X size={20} />
+                          </button>
+                        </div>
+                        <div className="modal-body">
+                          <p>This will import the default Luganda and Runyankole YouTube resources into the library.</p>
+                        </div>
+                        <div className="modal-actions">
+                          <button className="btn-secondary" onClick={() => setShowSeedModal(false)}>
+                            Cancel
+                          </button>
+                          <button className="btn-primary" onClick={handleConfirmSeed} disabled={loading}>
+                            Seed Now
+                          </button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 

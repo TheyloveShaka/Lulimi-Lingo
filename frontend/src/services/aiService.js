@@ -30,6 +30,10 @@ const AI_CONFIG = {
   useMockResponses: false
 };
 
+const resolveLanguageLabel = (language = 'luganda') => (
+  String(language).trim().toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
+);
+
 /**
  * Make an API call to the Node backend
  */
@@ -204,6 +208,7 @@ export const generateOverview = async ({ topic, completedLessons, keyObjectives 
  * Chat with the AI tutor
  */
 export const chatWithTutor = async ({ message, completedTopics, conversationHistory = [], language, proficiencyLevel }) => {
+  const languageLabel = resolveLanguageLabel(language)
   const payload = {
     message: message,
     completed_topics: completedTopics || [],
@@ -221,7 +226,7 @@ export const chatWithTutor = async ({ message, completedTopics, conversationHist
 
   return {
     success: result.success !== false,
-    response: result.response || result.content || "I'm here to help you learn Luganda!",
+    response: result.response || result.content || `I'm here to help you learn ${languageLabel}!`,
     encouragement: result.encouragement || (Math.random() > 0.7 ? getEncouragement() : null),
     provider: result.provider || 'openai',
     error: result.error

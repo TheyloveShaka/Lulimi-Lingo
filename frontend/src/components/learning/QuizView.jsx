@@ -34,7 +34,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState([]);
-  const [quizState, setQuizState] = useState('taking'); // 'taking', 'reviewing', 'results'
+  const [quizState, setQuizState] = useState('taking'); // 'taking', 'submitting', 'reviewing'
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [quizDuration, setQuizDuration] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -53,9 +53,14 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
     if (raw.includes('translate') || raw.includes('translation')) return 'translate';
     if (raw.includes('reorder') || raw.includes('arrange')) return 'reorder';
+    if (raw.includes('true-false') || raw.includes('truefalse') || raw === 'tf') return 'true-false';
+    if (raw.includes('match')) return 'matching';
 
     if (prompt.includes('translate')) return 'translate';
     if (prompt.includes('fill') || prompt.includes('blank')) return 'fill-blank';
+    if (Array.isArray(options) && options.length === 2 && options.every((opt) => ['true', 'false'].includes(String(opt).toLowerCase()))) {
+      return 'true-false';
+    }
     if (Array.isArray(options) && options.length > 0) return 'multiple-choice';
     return 'translate';
   };
@@ -72,6 +77,50 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       ? options.map((opt) => String(opt))
       : [];
 
+    const pairsSource =
+      question?.pairs ||
+      question?.matchingPairs ||
+      question?.matching_pairs ||
+      question?.matches ||
+      [];
+
+    const normalizedPairs = Array.isArray(pairsSource)
+      ? pairsSource
+          .map((pair) => {
+            if (Array.isArray(pair)) {
+              return { left: String(pair[0]), right: String(pair[1]) };
+            }
+            return {
+              left: String(pair?.left ?? pair?.prompt ?? pair?.term ?? ''),
+              right: String(pair?.right ?? pair?.answer ?? pair?.match ?? '')
+            };
+          })
+          .filter((pair) => pair.left && pair.right)
+      : [];
+
+    const tokensSource =
+      question?.tokens ||
+      question?.items ||
+      question?.wordBank ||
+      question?.word_bank ||
+      question?.shuffle ||
+      [];
+
+    const normalizedTokens = Array.isArray(tokensSource)
+      ? tokensSource.map((token) => String(token))
+      : [];
+
+    const orderSource =
+      question?.correctOrder ||
+      question?.correct_order ||
+      question?.order ||
+      question?.sequence ||
+      [];
+
+    const normalizedOrder = Array.isArray(orderSource)
+      ? orderSource.map((token) => String(token))
+      : [];
+
     const correctAnswer =
       question?.correctAnswer ??
       question?.correct_answer ??
@@ -79,11 +128,27 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       question?.correct ??
       '';
 
+    let normalizedType = normalizeQuestionType(
+      question?.type || question?.questionType || question?.question_type,
+      question?.question,
+      normalizedOptions
+    );
+
+    if (normalizedPairs.length > 0) {
+      normalizedType = 'matching';
+    }
+
+    if (normalizedOrder.length > 0 && normalizedTokens.length > 0) {
+      normalizedType = 'reorder';
+    }
+
     return {
       id: question?.id || index + 1,
-      type: normalizeQuestionType(question?.type || question?.questionType || question?.question_type, question?.question, normalizedOptions),
+      type: normalizedType,
       question: String(question?.question || question?.prompt || `Question ${index + 1}`),
-      options: normalizedOptions,
+      options: normalizedType === 'true-false' && normalizedOptions.length === 0
+        ? ['True', 'False']
+        : normalizedOptions,
       correctAnswer: String(correctAnswer),
       acceptableAnswers: Array.isArray(question?.acceptableAnswers)
         ? question.acceptableAnswers
@@ -91,7 +156,10 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
           ? question.acceptable_answers
           : undefined,
       points: Number(question?.points || 1),
-      explanation: question?.explanation || ''
+      explanation: question?.explanation || '',
+      pairs: normalizedPairs,
+      tokens: normalizedTokens,
+      correctOrder: normalizedOrder
     };
   };
 
@@ -187,30 +255,35 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       },
       {
         id: 2,
-        type: 'multiple-choice',
-        question: 'How do you respond to "Oli otya?"',
-        options: ['Wasuze otya', 'Gyendi', 'Webale', 'Nze'],
-        correctAnswer: 'Gyendi',
-        points: 2,
-        explanation: '"Gyendi" means "I\'m fine" and is the common response to "How are you?"'
+        type: 'true-false',
+        question: 'True or False: "Webale" means "thank you" in Luganda.',
+        options: ['True', 'False'],
+        correctAnswer: 'True',
+        points: 1,
+        explanation: '"Webale" is the standard way to say thank you.'
       },
       {
         id: 3,
-        type: 'translate',
-        question: 'Translate to English: "Webale nnyo"',
-        correctAnswer: 'Thank you very much',
-        acceptableAnswers: ['Thank you very much', 'Thank you so much', 'Thanks a lot'],
+        type: 'matching',
+        question: 'Match the Luganda phrase to its meaning.',
+        pairs: [
+          { left: 'Gyendi', right: "I'm fine" },
+          { left: 'Webale', right: 'Thank you' },
+          { left: 'Weraba', right: 'Goodbye' }
+        ],
+        correctAnswer: 'All pairs matched',
         points: 3,
-        explanation: '"Webale" means "thank you" and "nnyo" intensifies it to mean "very much".'
+        explanation: 'These are common Luganda greetings and responses.'
       },
       {
         id: 4,
-        type: 'multiple-choice',
-        question: 'When would you use "Osiibye otya?"',
-        options: ['Morning only', 'Afternoon and evening', 'Anytime', 'Only with elders'],
-        correctAnswer: 'Afternoon and evening',
+        type: 'reorder',
+        question: 'Arrange the words to form a polite greeting.',
+        tokens: ['otya?', 'Wasuze'],
+        correctOrder: ['Wasuze', 'otya?'],
+        correctAnswer: 'Wasuze otya?',
         points: 2,
-        explanation: '"Osiibye otya?" is used later in the day, asking "How has your day been?"'
+        explanation: '"Wasuze otya?" means "How did you sleep?" and is used as a morning greeting.'
       },
       {
         id: 5,
@@ -220,6 +293,15 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
         correctAnswer: 'ko',
         points: 2,
         explanation: '"Gyebale ko" is a polite expression thanking someone for their work or effort.'
+      },
+      {
+        id: 6,
+        type: 'translate',
+        question: 'Translate to English: "Webale nnyo"',
+        correctAnswer: 'Thank you very much',
+        acceptableAnswers: ['Thank you very much', 'Thank you so much', 'Thanks a lot'],
+        points: 3,
+        explanation: '"Webale" means "thank you" and "nnyo" intensifies it to mean "very much".'
       }
     ];
     return questions.slice(0, count);
@@ -232,6 +314,37 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     });
   };
 
+  const handleMatchingChange = (leftItem, rightItem) => {
+    const existing = userAnswers[currentQuestion] || {};
+    setUserAnswers({
+      ...userAnswers,
+      [currentQuestion]: {
+        ...existing,
+        [leftItem]: rightItem
+      }
+    });
+  };
+
+  const handleReorderMove = (index, direction) => {
+    if (!question) return;
+    const current = Array.isArray(userAnswers[currentQuestion])
+      ? [...userAnswers[currentQuestion]]
+      : [...question.tokens];
+
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= current.length) return;
+
+    const updated = [...current];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    setUserAnswers({
+      ...userAnswers,
+      [currentQuestion]: updated
+    });
+  };
+
   const toggleFlag = () => {
     if (flaggedQuestions.includes(currentQuestion)) {
       setFlaggedQuestions(flaggedQuestions.filter(q => q !== currentQuestion));
@@ -241,7 +354,9 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   };
 
   const handleSubmitQuiz = async () => {
-    setQuizState('reviewing');
+    if (quizState !== 'taking') return;
+
+    setQuizState('submitting');
     
     // Calculate score
     const results = calculateResults();
@@ -294,6 +409,41 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     } catch (err) {
       console.error('Failed to get feedback:', err);
     }
+
+    setTimeout(() => {
+      setQuizState('reviewing');
+    }, 900);
+  };
+
+  const formatAnswerForReview = (question, answer) => {
+    if (question.type === 'matching') {
+      const selections = answer || {};
+      const pairs = question.pairs || [];
+      return pairs
+        .map((pair) => `${pair.left} → ${selections[pair.left] || '—'}`)
+        .join(', ');
+    }
+
+    if (question.type === 'reorder') {
+      const ordered = Array.isArray(answer) ? answer : [];
+      return ordered.length > 0 ? ordered.join(' ') : '';
+    }
+
+    return typeof answer === 'string' ? answer : '';
+  };
+
+  const formatCorrectAnswer = (question) => {
+    if (question.type === 'matching') {
+      return (question.pairs || [])
+        .map((pair) => `${pair.left} → ${pair.right}`)
+        .join(', ');
+    }
+
+    if (question.type === 'reorder') {
+      return (question.correctOrder || []).join(' ');
+    }
+
+    return question.correctAnswer || '';
   };
 
   const calculateResults = () => {
@@ -307,23 +457,33 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       maxScore += points;
 
       let isCorrect = false;
-      if (q.type === 'translate') {
+      if (q.type === 'translate' || q.type === 'fill-blank') {
         const acceptable = q.acceptableAnswers || [q.correctAnswer];
         isCorrect = acceptable.some(a => 
           a.toLowerCase().trim() === userAnswer?.toLowerCase().trim()
         );
+      } else if (q.type === 'matching') {
+        const selections = userAnswer || {};
+        const expectedPairs = q.pairs || [];
+        isCorrect = expectedPairs.length > 0 && expectedPairs.every((pair) => selections[pair.left] === pair.right);
+      } else if (q.type === 'reorder') {
+        const expected = q.correctOrder || [];
+        const provided = Array.isArray(userAnswer) ? userAnswer : [];
+        isCorrect = expected.length > 0 && expected.every((token, idx) => token === provided[idx]);
       } else {
         isCorrect = userAnswer === q.correctAnswer;
       }
 
       if (isCorrect) score += points;
 
-      const explanation = q.explanation || (q.correctAnswer ? `Correct answer: ${q.correctAnswer}.` : 'Review this concept and try again.');
+      const formattedUserAnswer = formatAnswerForReview(q, userAnswer);
+      const formattedCorrect = formatCorrectAnswer(q);
+      const explanation = q.explanation || (formattedCorrect ? `Correct answer: ${formattedCorrect}.` : 'Review this concept and try again.');
 
       details.push({
         question: q.question,
-        userAnswer,
-        correctAnswer: q.correctAnswer,
+        userAnswer: formattedUserAnswer,
+        correctAnswer: formattedCorrect,
         isCorrect,
         points: isCorrect ? points : 0,
         maxPoints: points,
@@ -376,7 +536,39 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   }
 
   const question = quiz?.questions[currentQuestion];
-  const answeredCount = Object.keys(userAnswers).length;
+  const answeredCount = quiz?.questions.reduce((count, q, index) => {
+    const answer = userAnswers[index];
+    if (q.type === 'matching') {
+      const expected = q.pairs || [];
+      const selections = answer || {};
+      return expected.length > 0 && expected.every((pair) => selections[pair.left]) ? count + 1 : count;
+    }
+    if (q.type === 'reorder') {
+      return Array.isArray(answer) && answer.length > 0 ? count + 1 : count;
+    }
+    return answer !== undefined && answer !== '' ? count + 1 : count;
+  }, 0);
+
+  if (quizState === 'submitting') {
+    return (
+      <div className="quiz-view submitting-view">
+        <motion.div
+          className="grading-card"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="grading-orb"
+            animate={{ scale: [1, 1.08, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <h2>Grading your quiz...</h2>
+          <p>Checking answers and preparing feedback.</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Results View
   if (quizState === 'reviewing') {
@@ -549,7 +741,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
           {/* Answer Options */}
           <div className="quiz-options">
-            {(question.type === 'multiple-choice' || question.type === 'fill-blank') && (
+            {(question.type === 'multiple-choice' || question.type === 'fill-blank' || question.type === 'true-false') && (
               <div className="options-list">
                 {question.options?.map((option, index) => (
                   <motion.button
@@ -566,7 +758,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
               </div>
             )}
 
-            {(question.type === 'translate' || question.type === 'reorder') && (
+            {(question.type === 'translate') && (
               <div className="translate-answer">
                 <input
                   type="text"
@@ -574,6 +766,49 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
                   value={userAnswers[currentQuestion] || ''}
                   onChange={(e) => handleAnswer(e.target.value)}
                 />
+              </div>
+            )}
+
+            {question.type === 'matching' && (
+              <div className="matching-grid">
+                <div className="matching-header">
+                  <span>Match each item</span>
+                  <span>Choose the pair</span>
+                </div>
+                {(question.pairs || []).map((pair, index) => (
+                  <div key={`${pair.left}-${index}`} className="matching-row">
+                    <span className="matching-left">{pair.left}</span>
+                    <select
+                      className="matching-select"
+                      value={(userAnswers[currentQuestion] || {})[pair.left] || ''}
+                      onChange={(e) => handleMatchingChange(pair.left, e.target.value)}
+                    >
+                      <option value="" disabled>Choose...</option>
+                      {(question.pairs || []).map((optionPair) => (
+                        <option key={`${pair.left}-${optionPair.right}`} value={optionPair.right}>
+                          {optionPair.right}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {question.type === 'reorder' && (
+              <div className="reorder-list">
+                {(Array.isArray(userAnswers[currentQuestion]) && userAnswers[currentQuestion].length > 0
+                  ? userAnswers[currentQuestion]
+                  : question.tokens
+                ).map((token, index) => (
+                  <div key={`${token}-${index}`} className="reorder-item">
+                    <span>{token}</span>
+                    <div className="reorder-controls">
+                      <button onClick={() => handleReorderMove(index, -1)} aria-label="Move up">▲</button>
+                      <button onClick={() => handleReorderMove(index, 1)} aria-label="Move down">▼</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

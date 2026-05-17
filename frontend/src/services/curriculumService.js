@@ -7,6 +7,15 @@
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://lulimi-lingo-production.up.railway.app/api'
 
+const getCurrentLanguage = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null')
+    return user?.language || 'luganda'
+  } catch {
+    return 'luganda'
+  }
+}
+
 /**
  * Get full curriculum overview (S1-S4)
  */
@@ -87,7 +96,8 @@ export async function generateCurriculumLesson(classLevel, term, milestoneId, to
         classLevel,
         term,
         milestoneId,
-        topic
+        topic,
+        language: getCurrentLanguage()
       })
     })
     if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -111,7 +121,8 @@ export async function generateCurriculumQuiz(classLevel, term, milestoneId, topi
         term,
         milestoneId,
         topic,
-        questionCount
+        questionCount,
+        language: getCurrentLanguage()
       })
     })
     if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -135,7 +146,8 @@ export async function generateCurriculumPractice(classLevel, term, milestoneId, 
         term,
         milestoneId,
         topic,
-        scenarioCount
+        scenarioCount,
+        language: getCurrentLanguage()
       })
     })
     if (!response.ok) throw new Error(`API error: ${response.status}`)
@@ -157,7 +169,8 @@ export async function generateCurriculumResource(classLevel, topic, resourceType
       body: JSON.stringify({
         classLevel,
         topic,
-        resourceType
+        resourceType,
+        language: getCurrentLanguage()
       })
     })
     if (!response.ok) throw new Error(`API error: ${response.status}`)

@@ -30,12 +30,26 @@ class QuizGeneratorService {
 Assessment criteria: ${criteriaText}
 Learner level: ${proficiencyLevel}
 
-For each question provide in JSON format:
+For each question provide in JSON format. Use a mix of types:
+- multiple-choice
+- true-false
+- fill-blank
+- translate
+- matching
+- reorder
+
+Type-specific fields:
+- multiple-choice, true-false: "options" array
+- matching: "pairs" array of { "left": "...", "right": "..." }
+- reorder: "tokens" (shuffled array) and "correctOrder" (correct array)
+
+Format:
 {
   "questions": [
     {
       "id": 1,
       "question": "Question text",
+      "type": "multiple-choice",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": "The correct option exactly as written",
       "explanation": "Why this is correct",
@@ -96,6 +110,7 @@ Return ONLY valid JSON.`;
         questions: [
           {
             id: 1,
+            type: "multiple-choice",
             question: `Choose the correct ${languageName} translation for: "Hello"`,
             options: ["Option A", "Option B", "Option C", "Option D"],
             correctAnswer: "Option A",
@@ -106,9 +121,11 @@ Return ONLY valid JSON.`;
         timestamp: new Date().toISOString()
       };
     }
+
     const allQuestions = [
       {
         id: 1,
+        type: "multiple-choice",
         question: "What is the appropriate greeting for the morning in Luganda?",
         options: ["Osiibye otya?", "Wasuze otya?", "Oli otya?", "Weraba"],
         correctAnswer: "Wasuze otya?",
@@ -117,39 +134,54 @@ Return ONLY valid JSON.`;
       },
       {
         id: 2,
-        question: "Translate 'Thank you' into Luganda:",
-        options: ["Gyendi", "Webale", "Nsanyuse", "Saawa"],
-        correctAnswer: "Webale",
-        explanation: "Webale is the standard way to say thank you in Luganda",
+        type: "true-false",
+        question: "True or False: 'Webale' means 'thank you' in Luganda.",
+        options: ["True", "False"],
+        correctAnswer: "True",
+        explanation: "Webale is the standard way to say thank you in Luganda.",
         difficulty: "easy"
       },
       {
         id: 3,
-        question: "When would you use 'Osiibye otya?'",
-        options: ["In the morning", "In the afternoon/evening", "At midnight", "When leaving"],
-        correctAnswer: "In the afternoon/evening",
-        explanation: "Osiibye otya? is used for afternoon and evening greetings",
+        type: "matching",
+        question: "Match the Luganda phrase to its meaning.",
+        pairs: [
+          { left: "Gyendi", right: "I'm fine" },
+          { left: "Webale", right: "Thank you" },
+          { left: "Weraba", right: "Goodbye" }
+        ],
+        correctAnswer: "All pairs matched",
+        explanation: "These are common Luganda greetings and responses.",
         difficulty: "medium"
       },
       {
         id: 4,
-        question: "What does 'Gyendi' mean?",
-        options: ["Hello", "Goodbye", "I'm fine", "Thank you"],
-        correctAnswer: "I'm fine",
-        explanation: "Gyendi is the response to 'Oli otya?' meaning 'I'm fine'",
+        type: "reorder",
+        question: "Arrange the words to form a polite greeting.",
+        tokens: ["otya?", "Wasuze"],
+        correctOrder: ["Wasuze", "otya?"],
+        correctAnswer: "Wasuze otya?",
+        explanation: "Wasuze otya? means 'How did you sleep?' and is used in the morning.",
         difficulty: "medium"
       },
       {
         id: 5,
+        type: "fill-blank",
         question: "Complete: 'Gyebale ___' (Well done/Thank you for your work)",
         options: ["nnyo", "ko", "otya", "bulungi"],
         correctAnswer: "ko",
-        explanation: "Gyebale ko is a phrase expressing gratitude for someone's work",
+        explanation: "Gyebale ko is a phrase expressing gratitude for someone's work.",
+        difficulty: "hard"
+      },
+      {
+        id: 6,
+        type: "translate",
+        question: "Translate 'Thank you very much' into Luganda.",
+        correctAnswer: "Webale nnyo",
+        explanation: "'Webale' means thank you and 'nnyo' means very much.",
         difficulty: "hard"
       }
     ];
-
-    // Return only the requested number of questions
     return {
       topic,
       numQuestions: Math.min(num, allQuestions.length),

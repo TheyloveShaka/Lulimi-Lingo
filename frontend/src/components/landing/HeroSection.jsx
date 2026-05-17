@@ -84,6 +84,19 @@ const HeroSection = ({ onGetStarted }) => {
             </div>
           </div>
 
+          <div className="hero-classes">
+            <div className="classes-label">
+              <Target size={18} />
+              <span>Classes Covered</span>
+            </div>
+            <div className="class-pills">
+              {['S1', 'S2', 'S3', 'S4'].map((level) => (
+                <span key={level} className="class-pill">{level}</span>
+              ))}
+              <span className="class-pill all">O-Level</span>
+            </div>
+          </div>
+
           <div className="hero-cta">
             <motion.button
               className="btn btn-primary"

@@ -17,6 +17,7 @@ const buildCurriculumRequestKey = (contentType, payload = {}) => {
     term: normalizeText(payload.term),
     milestoneId: normalizeText(payload.milestoneId),
     topic: normalizeText(payload.topic),
+    language: normalizeText(payload.language),
     questionCount: Number(payload.questionCount || 15),
     scenarioCount: Number(payload.scenarioCount || 4),
     resourceType: normalizeText(payload.resourceType || 'vocabulary_list')
@@ -108,7 +109,7 @@ export const getMilestoneDetailsHandler = (req, res) => {
 // Generate lesson
 export const generateLessonContent = async (req, res) => {
   try {
-    const { classLevel, term, milestoneId, topic } = req.body
+    const { classLevel, term, milestoneId, topic, language = 'luganda' } = req.body
 
     if (!classLevel || !term || !milestoneId || !topic) {
       return res.status(400).json({
@@ -117,7 +118,7 @@ export const generateLessonContent = async (req, res) => {
       })
     }
 
-    const requestMeta = { classLevel, term, milestoneId, topic }
+    const requestMeta = { classLevel, term, milestoneId, topic, language }
     const requestKey = buildCurriculumRequestKey('curriculum_lesson', requestMeta)
     const cached = await loadFromCache('curriculum_lesson', requestKey)
 
@@ -136,7 +137,7 @@ export const generateLessonContent = async (req, res) => {
       })
     }
 
-    const result = await generateContent('lesson', classLevel, term, milestoneId, topic, req.body.options || {})
+    const result = await generateContent('lesson', classLevel, term, milestoneId, topic, { ...(req.body.options || {}), language })
 
     if (!result.success) {
       return res.status(500).json(result)
@@ -159,7 +160,7 @@ export const generateLessonContent = async (req, res) => {
 // Generate quiz
 export const generateQuizContent = async (req, res) => {
   try {
-    const { classLevel, term, milestoneId, topic } = req.body
+    const { classLevel, term, milestoneId, topic, language = 'luganda' } = req.body
     const options = {
       questionCount: req.body.questionCount || 15,
       ...req.body.options
@@ -172,7 +173,7 @@ export const generateQuizContent = async (req, res) => {
       })
     }
 
-    const requestMeta = { classLevel, term, milestoneId, topic, questionCount: options.questionCount }
+    const requestMeta = { classLevel, term, milestoneId, topic, language, questionCount: options.questionCount }
     const requestKey = buildCurriculumRequestKey('curriculum_quiz', requestMeta)
     const cached = await loadFromCache('curriculum_quiz', requestKey)
 
@@ -191,7 +192,7 @@ export const generateQuizContent = async (req, res) => {
       })
     }
 
-    const result = await generateContent('quiz', classLevel, term, milestoneId, topic, options)
+    const result = await generateContent('quiz', classLevel, term, milestoneId, topic, { ...options, language })
 
     if (!result.success) {
       return res.status(500).json(result)
@@ -214,7 +215,7 @@ export const generateQuizContent = async (req, res) => {
 // Generate practice
 export const generatePracticeContent = async (req, res) => {
   try {
-    const { classLevel, term, milestoneId, topic } = req.body
+    const { classLevel, term, milestoneId, topic, language = 'luganda' } = req.body
     const options = {
       scenarioCount: req.body.scenarioCount || 4,
       ...req.body.options
@@ -227,7 +228,7 @@ export const generatePracticeContent = async (req, res) => {
       })
     }
 
-    const requestMeta = { classLevel, term, milestoneId, topic, scenarioCount: options.scenarioCount }
+    const requestMeta = { classLevel, term, milestoneId, topic, language, scenarioCount: options.scenarioCount }
     const requestKey = buildCurriculumRequestKey('curriculum_practice', requestMeta)
     const cached = await loadFromCache('curriculum_practice', requestKey)
 
@@ -246,7 +247,7 @@ export const generatePracticeContent = async (req, res) => {
       })
     }
 
-    const result = await generateContent('practice', classLevel, term, milestoneId, topic, options)
+    const result = await generateContent('practice', classLevel, term, milestoneId, topic, { ...options, language })
 
     if (!result.success) {
       return res.status(500).json(result)
@@ -269,7 +270,7 @@ export const generatePracticeContent = async (req, res) => {
 // Generate resource
 export const generateResourceContent = async (req, res) => {
   try {
-    const { classLevel, topic } = req.body
+    const { classLevel, topic, language = 'luganda' } = req.body
     const options = {
       resourceType: req.body.resourceType || 'vocabulary_list',
       ...req.body.options
@@ -282,7 +283,7 @@ export const generateResourceContent = async (req, res) => {
       })
     }
 
-    const requestMeta = { classLevel, topic, resourceType: options.resourceType }
+    const requestMeta = { classLevel, topic, language, resourceType: options.resourceType }
     const requestKey = buildCurriculumRequestKey('curriculum_resource', requestMeta)
     const cached = await loadFromCache('curriculum_resource', requestKey)
 
@@ -299,7 +300,7 @@ export const generateResourceContent = async (req, res) => {
       })
     }
 
-    const result = await generateContent('resource', classLevel, null, null, topic, options)
+    const result = await generateContent('resource', classLevel, null, null, topic, { ...options, language })
 
     if (!result.success) {
       return res.status(500).json(result)

@@ -30,6 +30,10 @@ function resolveDataFile(fileName) {
 
 const normalizeClassLevel = (classLevel = '') => String(classLevel).trim().toUpperCase()
 
+const resolveLanguageName = (language = 'luganda') => (
+  String(language).trim().toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
+)
+
 const normalizeTermCandidates = (term = '') => {
   const raw = String(term || '').trim()
   if (!raw) return []
@@ -110,7 +114,7 @@ function getMilestone(classLevel, term, milestoneId) {
 }
 
 // Build AI prompt for lesson generation
-function buildLessonPrompt(classLevel, term, milestone, topic) {
+function buildLessonPrompt(classLevel, term, milestone, topic, languageName = 'Luganda') {
   const templates = loadPromptTemplates()
   if (!templates) return null
   
@@ -120,7 +124,7 @@ function buildLessonPrompt(classLevel, term, milestone, topic) {
   const scenarios = milestone.scenario_examples.join('\n - ')
   
   const prompt = `
-Create an engaging and culturally appropriate Luganda lesson.
+Create an engaging and culturally appropriate ${languageName} lesson.
 
 CLASS LEVEL: ${classLevel}
 TERM: ${term}
@@ -136,14 +140,14 @@ ${scenarios}
 
 LESSON STRUCTURE (provide in JSON format):
 1. "opening_scenario" - Present a real-life Ugandan context (2-3 sentences)
-2. "vocabulary" - Array of 10-15 key words with Luganda word, pronunciation, English translation, and example usage
+2. "vocabulary" - Array of 10-15 key words with ${languageName} word, pronunciation, English translation, and example usage
 3. "grammar_rules" - Explanation of grammar rules with examples
 4. "guided_practice" - Array of 3 worked examples showing correct usage
 5. "scenario_practice" - Array of 4 scenario-based practice exercises requiring student application
 6. "cultural_notes" - Array of 2-3 important cultural insights
 7. "common_mistakes" - Array of 2-3 frequent student errors with corrections
 
-Return ONLY valid JSON with these fields. Use both Luganda and English.
+Return ONLY valid JSON with these fields. Use both ${languageName} and English.
 Make all scenarios authentic to Ugandan context (markets, homes, schools, community gatherings).
 `
   
@@ -151,12 +155,12 @@ Make all scenarios authentic to Ugandan context (markets, homes, schools, commun
 }
 
 // Build AI prompt for quiz generation
-function buildQuizPrompt(classLevel, term, milestone, topic, questionCount = 15) {
+function buildQuizPrompt(classLevel, term, milestone, topic, questionCount = 15, languageName = 'Luganda') {
   const templates = loadPromptTemplates()
   if (!templates) return null
   
   const prompt = `
-Create a comprehensive quiz for Luganda language learners.
+Create a comprehensive quiz for ${languageName} language learners.
 
 CLASS LEVEL: ${classLevel}
 TERM: ${term}
@@ -189,7 +193,7 @@ Return a JSON object with this structure:
     {
       "id": "q_comp",
       "type": "fill_in_blank",
-      "question": "Complete sentence: The word for 'hello' in Luganda is ___",
+      "question": "Complete sentence: The word for 'hello' in ${languageName} is ___",
       "answer": "Wasuze",
       "explanation": "This is a common greeting"
     }
@@ -199,8 +203,8 @@ Return a JSON object with this structure:
       "id": "q_scenario",
       "type": "scenario_based",
       "context": "You are at a market in Kampala buying vegetables. The vendor asks for the price.",
-      "question": "What would you say? Provide response in Luganda with English translation.",
-      "expected_response": "Lugandan response and English translation",
+      "question": "What would you say? Provide response in ${languageName} with English translation.",
+      "expected_response": "${languageName} response and English translation",
       "explanation": "This demonstrates negotiation skills in authentic context"
     }
   ],
@@ -222,9 +226,9 @@ Return ONLY valid JSON. Make all scenarios authentic and culturally appropriate.
 }
 
 // Build AI prompt for practice generation
-function buildPracticePrompt(classLevel, milestone, topic, scenarioCount = 4) {
+function buildPracticePrompt(classLevel, milestone, topic, scenarioCount = 4, languageName = 'Luganda') {
   const prompt = `
-Create ${scenarioCount} progressive, scenario-based practice exercises for Luganda learners.
+Create ${scenarioCount} progressive, scenario-based practice exercises for ${languageName} learners.
 
 CLASS LEVEL: ${classLevel}
 MILESTONE: ${milestone.milestone_name}
@@ -259,14 +263,14 @@ Return JSON with this structure:
         "instructions": "Create a full response to this situation",
         "situation": "You see your grandmother and want to tell her about your school day"
       },
-      "model_answer": "Expected response in Luganda with English translation",
+      "model_answer": "Expected response in ${languageName} with English translation",
       "feedback": "Explanation of correct usage, pronunciation guide, cultural notes"
     }
   ]
 }
 
 Progressively increase difficulty: Scenario 1 most scaffolded, final scenario least scaffolded.
-Include pronunciation guides (phonetic Luganda), cultural appropriateness tips, common errors.
+Include pronunciation guides (phonetic ${languageName}), cultural appropriateness tips, common errors.
 Return ONLY valid JSON.
 `
   
@@ -274,9 +278,9 @@ Return ONLY valid JSON.
 }
 
 // Build AI prompt for resource generation
-function buildResourcePrompt(classLevel, topic, resourceType = 'vocabulary_list') {
+function buildResourcePrompt(classLevel, topic, resourceType = 'vocabulary_list', languageName = 'Luganda') {
   const prompt = `
-Create a comprehensive ${resourceType} resource for Luganda learners.
+Create a comprehensive ${resourceType} resource for ${languageName} learners.
 
 CLASS LEVEL: ${classLevel}
 TOPIC: ${topic}
@@ -292,7 +296,7 @@ Return JSON with this structure:
       "luganda_word": "Word",
       "pronunciation": "Phonetic pronunciation",
       "english_translation": "English meaning",
-      "example_sentence_luganda": "Sentence in Luganda",
+      "example_sentence_luganda": "Sentence in ${languageName}",
       "example_sentence_english": "English translation of sentence",
       "usage_context": "When/how this word is used"
     }
@@ -333,6 +337,7 @@ export async function generateContent(contentType, classLevel, term, milestoneId
   try {
     const requiresMilestone = ['lesson', 'quiz', 'practice'].includes(contentType)
     const milestone = requiresMilestone ? getMilestone(classLevel, term, milestoneId) : null
+    const languageName = resolveLanguageName(options.language)
 
     if (requiresMilestone && !milestone) {
       throw new Error(`Milestone not found: ${milestoneId}`)
@@ -343,19 +348,19 @@ export async function generateContent(contentType, classLevel, term, milestoneId
 
     switch (contentType) {
       case 'lesson':
-        prompt = buildLessonPrompt(classLevel, term, milestone, topic)
+        prompt = buildLessonPrompt(classLevel, term, milestone, topic, languageName)
         generatorFn = 'lesson'
         break
       case 'quiz':
-        prompt = buildQuizPrompt(classLevel, term, milestone, topic, options.questionCount || 15)
+        prompt = buildQuizPrompt(classLevel, term, milestone, topic, options.questionCount || 15, languageName)
         generatorFn = 'quiz'
         break
       case 'practice':
-        prompt = buildPracticePrompt(classLevel, milestone, topic, options.scenarioCount || 4)
+        prompt = buildPracticePrompt(classLevel, milestone, topic, options.scenarioCount || 4, languageName)
         generatorFn = 'practice'
         break
       case 'resource':
-        prompt = buildResourcePrompt(classLevel, topic, options.resourceType || 'vocabulary_list')
+        prompt = buildResourcePrompt(classLevel, topic, options.resourceType || 'vocabulary_list', languageName)
         generatorFn = 'resource'
         break
       default:
@@ -374,7 +379,7 @@ export async function generateContent(contentType, classLevel, term, milestoneId
     if (preferOpenAi && process.env.OPENAI_API_KEY) {
       try {
         aiResponse = await callOpenAIChat([
-          { role: 'system', content: 'You are an expert Luganda language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.' },
+          { role: 'system', content: `You are an expert ${languageName} language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.` },
           { role: 'user', content: prompt }
         ], 1000)
         if (aiResponse) provider = 'openai'
@@ -399,7 +404,7 @@ export async function generateContent(contentType, classLevel, term, milestoneId
     if (!aiResponse && !preferOpenAi && process.env.OPENAI_API_KEY) {
       try {
         aiResponse = await callOpenAIChat([
-          { role: 'system', content: 'You are an expert Luganda language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.' },
+          { role: 'system', content: `You are an expert ${languageName} language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.` },
           { role: 'user', content: prompt }
         ], 1100)
         if (aiResponse) provider = 'openai'

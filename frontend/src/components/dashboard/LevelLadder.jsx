@@ -13,6 +13,14 @@ const LevelLadder = ({ onWeekClick }) => {
   const nodeRefs = useRef([])
   const [paths, setPaths] = useState([])
 
+  const getBadgeText = (title) => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
+    const maxLength = viewportWidth < 380 ? 10 : viewportWidth < 480 ? 14 : viewportWidth < 768 ? 18 : 22
+
+    if (!title || title.length <= maxLength) return title
+    return `${title.slice(0, maxLength).trimEnd()}...`
+  }
+
   const currentClass = curriculumData[selectedClass]
   const currentTerm = currentClass.terms[selectedTerm]
   
@@ -149,7 +157,7 @@ const LevelLadder = ({ onWeekClick }) => {
 
           {/* Topic Title Badge */}
           <div className="topic-badge">
-            <span className="topic-title">{item.topicTitle.substring(0, 20)}{item.topicTitle.length > 20 ? '...' : ''}</span>
+            <span className="topic-title">{getBadgeText(item.topicTitle)}</span>
           </div>
         </motion.button>
 
