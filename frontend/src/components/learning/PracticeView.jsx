@@ -50,10 +50,26 @@ const findMatchingMilestone = (termData, topicText) => {
 };
 
 const mapCurriculumScenarioToQuestion = (scenario, index) => {
-  const promptText = scenario?.independent?.situation || scenario?.context || scenario?.guided?.instructions || `Scenario ${index + 1}`;
-  const modelAnswer = scenario?.model_answer || scenario?.independent?.model_answer || scenario?.guided?.model_or_example || scenario?.feedback || '';
+  if (!scenario) {
+    console.warn('📚 Scenario is null/undefined at index', index);
+    return null;
+  }
+  
+  const promptText = scenario?.independent?.situation 
+    || scenario?.context 
+    || scenario?.guided?.instructions 
+    || scenario?.situation
+    || scenario?.prompt
+    || `Scenario ${index + 1}`;
+    
+  const modelAnswer = scenario?.model_answer 
+    || scenario?.independent?.model_answer 
+    || scenario?.guided?.model_or_example 
+    || scenario?.feedback 
+    || scenario?.answer
+    || '';
 
-  return {
+  const question = {
     id: scenario?.scenario_id || index + 1,
     type: 'translate',
     question: String(promptText),
@@ -63,25 +79,70 @@ const mapCurriculumScenarioToQuestion = (scenario, index) => {
     hint: scenario?.guided?.instructions || scenario?.feedback || 'Use the lesson vocabulary and structure.',
     explanation: scenario?.feedback || String(modelAnswer)
   };
+  
+  if (!question.question || !question.correctAnswer) {
+    console.warn('📚 Invalid scenario mapping at index', index, ':', { question: question.question, answer: question.correctAnswer });
+    return null;
+  }
+  
+  return question;
 };
 
 const extractCurriculumQuestions = (content) => {
-  if (!content) return [];
+  if (!content) {
+    console.warn('📚 No content passed to extractCurriculumQuestions');
+    return [];
+  }
+  
   const resolvedContent = typeof content === 'string'
     ? (() => {
         try {
           return JSON.parse(content);
         } catch {
+          console.warn('📚 Failed to parse stringified content');
           return null;
         }
       })()
     : content;
 
-  if (!resolvedContent) return [];
-  if (Array.isArray(resolvedContent.questions)) return resolvedContent.questions;
-  if (Array.isArray(resolvedContent.scenarios)) return resolvedContent.scenarios.map(mapCurriculumScenarioToQuestion);
-  if (Array.isArray(resolvedContent.practice?.questions)) return resolvedContent.practice.questions;
-  if (Array.isArray(resolvedContent.data?.questions)) return resolvedContent.data.questions;
+  if (!resolvedContent) {
+    console.warn('📚 Could not resolve content');
+    return [];
+  }
+  
+  console.log('📚 Content structure:', { 
+    hasQuestions: Array.isArray(resolvedContent.questions),
+    hasScenarios: Array.isArray(resolvedContent.scenarios),
+    hasPracticeQuestions: Array.isArray(resolvedContent.practice?.questions),
+    hasDataQuestions: Array.isArray(resolvedContent.data?.questions),
+    keys: Object.keys(resolvedContent)
+  });
+
+  if (Array.isArray(resolvedContent.questions)) {
+    console.log('📚 Found questions directly:', resolvedContent.questions.length);
+    return resolvedContent.questions;
+  }
+  
+  if (Array.isArray(resolvedContent.scenarios)) {
+    console.log('📚 Found scenarios, mapping to questions:', resolvedContent.scenarios.length);
+    const mapped = resolvedContent.scenarios
+      .map(mapCurriculumScenarioToQuestion)
+      .filter(q => q !== null);
+    console.log('📚 Mapped scenarios to questions:', mapped.length);
+    return mapped;
+  }
+  
+  if (Array.isArray(resolvedContent.practice?.questions)) {
+    console.log('📚 Found practice.questions:', resolvedContent.practice.questions.length);
+    return resolvedContent.practice.questions;
+  }
+  
+  if (Array.isArray(resolvedContent.data?.questions)) {
+    console.log('📚 Found data.questions:', resolvedContent.data.questions.length);
+    return resolvedContent.data.questions;
+  }
+  
+  console.warn('📚 No questions found in any expected location. Content:', resolvedContent);
   return [];
 };
 
@@ -190,15 +251,24 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         || termCurriculum?.data?.milestones?.[0];
 
       if (termCurriculum.success && matchingMilestone?.id) {
-        const curriculumResult = await generateCurriculumPractice(classLevel, term, matchingMilestone.id, topicTitle, 4);
-        const curriculumQuestions = extractCurriculumQuestions(curriculumResult?.content)
-          .map((q, idx) => normalizeQuestion(q, idx));
+        try {
+          const curriculumResult = await generateCurriculumPractice(classLevel, term, matchingMilestone.id, topicTitle, 4);
+          console.log('📚 Curriculum practice result:', { success: curriculumResult.success, contentKeys: Object.keys(curriculumResult.content || {}) });
+          
+          const curriculumQuestions = extractCurriculumQuestions(curriculumResult?.content)
+            .map((q, idx) => normalizeQuestion(q, idx));
+          
+          console.log('📚 Extracted curriculum questions:', curriculumQuestions.length);
 
-        if (curriculumResult.success && curriculumQuestions.length > 0) {
-          setQuestions(curriculumQuestions);
-          setIsCached(Boolean(curriculumResult.cached));
-          setProvider(curriculumResult.provider || 'curriculum');
-          return;
+          if (curriculumResult.success && curriculumQuestions.length > 0) {
+            setQuestions(curriculumQuestions);
+            setIsCached(Boolean(curriculumResult.cached));
+            setProvider(curriculumResult.provider || 'curriculum');
+            setLoading(false);
+            return;
+          }
+        } catch (currErr) {
+          console.warn('Curriculum practice failed, falling back to AI:', currErr.message);
         }
       }
 
@@ -210,6 +280,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         topicObjectives: context.weekData?.objectives || []
       });
 
+      console.log('🤖 AI practice result:', { success: result.success, questions: result.questions?.length || 0 });
+
       if (result.success && result.questions && result.questions.length > 0) {
         const parsedQuestions = result.questions.map((q, idx) => normalizeQuestion(q, idx))
         setQuestions(parsedQuestions);
@@ -219,6 +291,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         setError(result.error || 'AI did not return valid practice questions');
       }
     } catch (err) {
+      console.error('Practice load error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
