@@ -316,6 +316,12 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
 
   const question = questions[currentQuestion];
   const isCorrect = showResult ? checkAnswer() : null;
+  const currentAnswer = userAnswers[currentQuestion];
+  const formattedCurrentAnswer = typeof currentAnswer === 'string'
+    ? currentAnswer.trim()
+    : Array.isArray(currentAnswer)
+      ? currentAnswer.join(' ')
+      : currentAnswer || '';
 
   return (
     <div className="practice-view">
@@ -495,6 +501,27 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
             </motion.div>
           )}
 
+          {showResult && (
+            <motion.div
+              className={`answer-review-card ${isCorrect ? 'correct' : 'incorrect'}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="answer-review-row">
+                <span className="answer-review-label">Your answer</span>
+                <span className={`answer-review-value ${isCorrect ? 'correct' : 'incorrect'}`}>
+                  {formattedCurrentAnswer || 'No answer'}
+                </span>
+              </div>
+              {!isCorrect && (
+                <div className="answer-review-row">
+                  <span className="answer-review-label">Correct answer</span>
+                  <span className="answer-review-value correct">{question.correctAnswer}</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Action Buttons */}
           <div className="question-actions">
             {!showResult ? (
@@ -507,11 +534,11 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               </button>
             ) : currentQuestion < questions.length - 1 ? (
               <button className="next-btn" onClick={handleNextQuestion}>
-                Next Question <ChevronRight size={16} />
+                Next Practice Question <ChevronRight size={16} />
               </button>
             ) : (
               <button className="finish-btn" onClick={() => setShowSummary(true)}>
-                See Results <Award size={16} />
+                Finish Practice <Award size={16} />
               </button>
             )}
           </div>

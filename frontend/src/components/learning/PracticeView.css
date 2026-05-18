@@ -454,6 +454,52 @@
   color: #4b5563;
 }
 
+.answer-review-card {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.answer-review-card.correct {
+  background: #ecfdf5;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.answer-review-card.incorrect {
+  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.answer-review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.answer-review-label {
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.answer-review-value {
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.answer-review-value.correct {
+  color: #059669;
+}
+
+.answer-review-value.incorrect {
+  color: #dc2626;
+}
+
 /* ============ Action Buttons ============ */
 .question-actions {
   display: flex;
