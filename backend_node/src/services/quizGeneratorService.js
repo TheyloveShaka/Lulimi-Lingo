@@ -81,7 +81,7 @@ Return ONLY valid JSON.`;
     }
   }
 
-  _parseQuiz(content, topic, numQuestions, provider = 'unknown', languageName = 'Luganda') {
+  async _parseQuiz(content, topic, numQuestions, provider = 'unknown', languageName = 'Luganda') {
     const tryParse = (text) => {
       try {
         const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);

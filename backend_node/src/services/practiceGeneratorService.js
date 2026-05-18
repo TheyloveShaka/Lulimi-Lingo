@@ -79,7 +79,7 @@ Return ONLY valid JSON.`;
     }
   }
 
-  _parsePractice(content, topic, provider = 'unknown', languageName = 'Luganda') {
+  async _parsePractice(content, topic, provider = 'unknown', languageName = 'Luganda') {
     const tryParse = (text) => {
       try {
         const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);
