@@ -1,127 +1,133 @@
-import React, { useState, useEffect } from 'react'
-import { BookOpen, Clock, CheckCircle2, Lock } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { BookOpen, Clock, CheckCircle2, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { curriculumData } from '../data/curriculumData'
 import './ClassesPage.css'
 
 const ClassesPage = ({ user }) => {
-  const [classes, setClasses] = useState([])
-  const [selectedClass, setSelectedClass] = useState(null)
+  const classOrder = ['S1', 'S2', 'S3', 'S4']
+  const termOrder = ['Term1', 'Term2', 'Term3']
+  const [selectedClass, setSelectedClass] = useState('S1')
+  const [selectedTerm, setSelectedTerm] = useState('Term1')
 
-  useEffect(() => {
-    // Mock data
-    const mockClasses = [
-      {
-        id: 1,
-        week: 1,
-        title: 'Luganda Basics & Greetings',
-        lessons: [
-          { id: 'L1', title: 'Introduction to Luganda', completed: true, duration: '15 min' },
-          { id: 'L2', title: 'Common Greetings', completed: true, duration: '12 min' },
-          { id: 'L3', title: 'Polite Expressions', completed: false, duration: '18 min' },
-          { id: 'L4', title: 'Numbers 1-10', completed: false, duration: '20 min' }
-        ],
-        progress: 50
-      },
-      {
-        id: 2,
-        week: 2,
-        title: 'Family & Daily Life',
-        lessons: [
-          { id: 'L5', title: 'Family Members', completed: true, duration: '15 min' },
-          { id: 'L6', title: 'Daily Activities', completed: true, duration: '17 min' },
-          { id: 'L7', title: 'Food & Drinks', completed: false, duration: '19 min' },
-          { id: 'L8', title: 'Time & Routines', completed: false, duration: '21 min' }
-        ],
-        progress: 50
-      },
-      {
-        id: 3,
-        week: 3,
-        title: 'Grammar Fundamentals',
-        lessons: [
-          { id: 'L9', title: 'Articles & Nouns', disabled: true, duration: '20 min' },
-          { id: 'L10', title: 'Verbs & Tenses', disabled: true, duration: '22 min' },
-          { id: 'L11', title: 'Adjectives', disabled: true, duration: '18 min' },
-          { id: 'L12', title: 'Pronouns', disabled: true, duration: '16 min' }
-        ],
-        progress: 0
-      }
-    ]
-    setClasses(mockClasses)
-    setSelectedClass(mockClasses[0])
-  }, [])
+  const orderedClasses = useMemo(
+    () => classOrder.filter((classKey) => curriculumData[classKey]),
+    []
+  )
+
+  const classData = curriculumData[selectedClass]
+  const termData = classData?.terms?.[selectedTerm]
+  const weeks = termData?.weeks || []
+
+  const handleSelectClass = (classKey) => {
+    setSelectedClass(classKey)
+    setSelectedTerm('Term1')
+  }
 
   return (
     <div className="classes-page">
       <div className="classes-header">
         <h1>My Classes</h1>
-        <p>Track your lessons and continue learning</p>
+        <p>Explore the full path from S1 to S4, arranged by term for easier navigation.</p>
       </div>
 
       <div className="classes-container">
         {/* Classes List */}
         <div className="classes-list">
-          {classes.map((cls, idx) => (
-            <motion.div
-              key={cls.id}
-              className={`class-card ${selectedClass?.id === cls.id ? 'active' : ''}`}
-              onClick={() => setSelectedClass(cls)}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="class-header-info">
-                <h3>Week {cls.week}</h3>
-                <p>{cls.title}</p>
-              </div>
-              <div className="class-progress-mini">
-                <div className="progress-bar-mini">
-                  <div className="progress-fill" style={{ width: `${cls.progress}%` }}></div>
+          {orderedClasses.map((classKey, idx) => {
+            const currentClass = curriculumData[classKey]
+            const totalTerms = Object.keys(currentClass.terms || {}).length
+            const totalWeeks = Object.values(currentClass.terms || {}).reduce(
+              (sum, term) => sum + (term.weeks?.length || 0),
+              0
+            )
+
+            return (
+              <motion.div
+                key={classKey}
+                className={`class-card ${selectedClass === classKey ? 'active' : ''}`}
+                onClick={() => handleSelectClass(classKey)}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="class-header-info">
+                  <h3>{classKey}</h3>
+                  <p>{currentClass.name}</p>
                 </div>
-                <span className="progress-text">{cls.progress}%</span>
-              </div>
-            </motion.div>
-          ))}
+                <div className="class-progress-mini">
+                  <div className="class-meta-row">
+                    <span>{totalWeeks} weeks</span>
+                    <span>{totalTerms} terms</span>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
 
-        {/* Lessons Details */}
-        {selectedClass && (
+        {/* Class Details */}
+        {classData && (
           <motion.div
             className="lessons-detail"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h2>{selectedClass.title}</h2>
-            <div className="lessons-grid">
-              {selectedClass.lessons.map((lesson, idx) => (
+            <div className="class-detail-header">
+              <div>
+                <h2>{classData.name}</h2>
+                <p>{classData.description}</p>
+              </div>
+              <div className="term-tabs">
+                {termOrder.map((termKey) => (
+                  <button
+                    key={termKey}
+                    className={`term-tab ${selectedTerm === termKey ? 'active' : ''}`}
+                    onClick={() => setSelectedTerm(termKey)}
+                  >
+                    {classData.terms[termKey]?.name || termKey.replace('Term', 'Term ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="term-overview">
+              <h3>{classData.terms[selectedTerm]?.name}</h3>
+              <p>{classData.terms[selectedTerm]?.weeks?.length || 0} weeks available in this term</p>
+            </div>
+
+            <div className="lessons-grid term-weeks-grid">
+              {weeks.map((week, idx) => (
                 <motion.div
-                  key={lesson.id}
-                  className={`lesson-card ${lesson.completed ? 'completed' : ''} ${lesson.disabled ? 'disabled' : ''}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  key={week.id}
+                  className="lesson-card term-week-card"
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.05 }}
-                  whileHover={!lesson.disabled ? { scale: 1.05 } : {}}
+                  whileHover={{ scale: 1.03 }}
                 >
                   <div className="lesson-status">
-                    {lesson.completed ? (
+                    {week.progress >= 100 ? (
                       <CheckCircle2 size={24} className="completed-icon" />
-                    ) : lesson.disabled ? (
-                      <Lock size={24} className="disabled-icon" />
                     ) : (
                       <BookOpen size={24} className="pending-icon" />
                     )}
                   </div>
-                  <h4>{lesson.title}</h4>
+                  <h4>Week {week.number}</h4>
+                  <p className="week-title">{week.title}</p>
                   <div className="lesson-meta">
                     <span className="lesson-duration">
                       <Clock size={14} />
-                      {lesson.duration}
+                      {week.estimatedHours} hrs
                     </span>
                   </div>
-                  {!lesson.disabled && !lesson.completed && (
-                    <button className="btn-start">Start Lesson</button>
-                  )}
+                  <div className="week-topics">
+                    {(week.topics || []).slice(0, 3).map((topic) => (
+                      <span key={topic} className="week-topic-chip">{topic}</span>
+                    ))}
+                  </div>
+                  <button className="btn-start">Open Week <ChevronRight size={16} /></button>
                 </motion.div>
               ))}
             </div>

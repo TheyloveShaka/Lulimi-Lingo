@@ -10,6 +10,7 @@ import {
   getResource,
   getStudentProgress,
   getTeacherStudents,
+  attachStudentByEmail,
   seedResources
 } from '../controllers/resourceController.js'
 import {
@@ -75,6 +76,7 @@ router.post('/resources/seed', authMiddleware, seedResources)
 
 // Teacher dashboard endpoints
 router.get('/teacher/students', authMiddleware, getTeacherStudents)
+router.post('/teacher/students/attach', authMiddleware, attachStudentByEmail)
 router.get('/teacher/student/:studentId/progress', authMiddleware, getStudentProgress)
 
 export default router

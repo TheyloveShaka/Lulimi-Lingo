@@ -84,7 +84,7 @@ export const LearningProvider = ({ children }) => {
   }, []);
 
   // Save progress to localStorage
-  const saveProgress = () => {
+  const saveProgress = (overrides = {}) => {
     const progress = {
       completedTopics,
       completedLessons,
@@ -95,7 +95,8 @@ export const LearningProvider = ({ children }) => {
       currentTerm,
       currentWeek,
       currentStreak,
-      lastActivityDate
+      lastActivityDate,
+      ...overrides
     };
     localStorage.setItem('lulimiLingoProgress', JSON.stringify(progress));
   };
@@ -149,10 +150,21 @@ export const LearningProvider = ({ children }) => {
     }
   }
 
-  // Auto-save progress when streak or activity changes
+  // Auto-save progress whenever tracked learning state changes
   useEffect(() => {
     saveProgress();
-  }, [currentStreak, lastActivityDate]);
+  }, [
+    completedTopics,
+    completedLessons,
+    quizScores,
+    commonMistakes,
+    proficiencyLevel,
+    currentClass,
+    currentTerm,
+    currentWeek,
+    currentStreak,
+    lastActivityDate
+  ]);
 
   // Get current week data from syllabus (array format)
   const getCurrentWeekData = () => {
@@ -190,7 +202,7 @@ export const LearningProvider = ({ children }) => {
       const newCompleted = [...completedTopics, topic];
       setCompletedTopics(newCompleted);
       updateActivityStreak();
-      saveProgress();
+      saveProgress({ completedTopics: newCompleted });
     }
   };
 
@@ -200,7 +212,7 @@ export const LearningProvider = ({ children }) => {
       const newCompleted = [...completedLessons, lessonId];
       setCompletedLessons(newCompleted);
       updateActivityStreak();
-      saveProgress();
+      saveProgress({ completedLessons: newCompleted });
     }
   };
 
@@ -214,19 +226,22 @@ export const LearningProvider = ({ children }) => {
     
     // Update proficiency based on scores
     updateProficiency(newScores);
-    saveProgress();
+    saveProgress({ quizScores: newScores });
   };
 
   // Track mistakes for personalized learning
   const recordMistake = (mistake) => {
     const existing = commonMistakes.find(m => m.type === mistake.type);
+    let updatedMistakes;
     if (existing) {
       existing.count += 1;
-      setCommonMistakes([...commonMistakes]);
+      updatedMistakes = [...commonMistakes];
+      setCommonMistakes(updatedMistakes);
     } else {
-      setCommonMistakes([...commonMistakes, { ...mistake, count: 1 }]);
+      updatedMistakes = [...commonMistakes, { ...mistake, count: 1 }];
+      setCommonMistakes(updatedMistakes);
     }
-    saveProgress();
+    saveProgress({ commonMistakes: updatedMistakes });
   };
 
   // Update proficiency level based on performance

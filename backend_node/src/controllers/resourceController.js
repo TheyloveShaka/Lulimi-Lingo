@@ -192,7 +192,9 @@ export const getStudentProgress = async (req, res) => {
     }
 
     const teacher = await User.findById(teacherId)
-    if (teacher.role === 'teacher' && !teacher.assignedStudents.includes(studentId)) {
+    const hasAccess = Array.isArray(teacher.assignedStudents)
+      && teacher.assignedStudents.some((assignedId) => String(assignedId) === String(studentId))
+    if (teacher.role === 'teacher' && !hasAccess) {
       return res.status(403).json({ success: false, error: 'Not authorized to view this student' })
     }
 
@@ -231,6 +233,48 @@ export const getTeacherStudents = async (req, res) => {
     res.json({
       success: true,
       data: teacher.assignedStudents
+    })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+}
+
+// Attach a student to a teacher by student email
+export const attachStudentByEmail = async (req, res) => {
+  try {
+    const teacherId = req.user?.userId
+    const email = String(req.body?.email || '').trim().toLowerCase()
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Student email is required' })
+    }
+
+    const teacher = await User.findById(teacherId)
+    if (!teacher || (teacher.role !== 'teacher' && teacher.role !== 'admin')) {
+      return res.status(403).json({ success: false, error: 'Not authorized to attach students' })
+    }
+
+    const student = await User.findOne({ email })
+    if (!student) {
+      return res.status(404).json({ success: false, error: 'No student found with that email' })
+    }
+
+    if (student.role !== 'student') {
+      return res.status(400).json({ success: false, error: 'Only student accounts can be attached' })
+    }
+
+    const teacherDoc = await User.findById(teacherId)
+    if (!teacherDoc.assignedStudents.some((id) => String(id) === String(student._id))) {
+      teacherDoc.assignedStudents.push(student._id)
+      await teacherDoc.save()
+    }
+
+    const refreshedTeacher = await User.findById(teacherId).populate('assignedStudents')
+
+    return res.json({
+      success: true,
+      message: 'Student attached successfully',
+      data: refreshedTeacher.assignedStudents
     })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })

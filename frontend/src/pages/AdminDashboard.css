@@ -330,9 +330,66 @@
   gap: 2rem;
 }
 
+.attach-student-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.08) 0%,
+    rgba(118, 75, 162, 0.08) 100%
+  );
+  border: 1px solid rgba(102, 126, 234, 0.12);
+}
+
+.attach-student-panel h3 {
+  margin: 0 0 0.25rem;
+  color: #1e3c72;
+}
+
+.attach-student-panel p {
+  margin: 0;
+  color: #666;
+}
+
+.attach-student-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  min-width: min(100%, 420px);
+}
+
+.attach-student-form input {
+  flex: 1;
+  min-width: 220px;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #d7dbe8;
+  font-size: 0.95rem;
+}
+
+.attach-student-form input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
 @media (max-width: 1024px) {
   .students-container {
     grid-template-columns: 1fr;
+  }
+
+  .attach-student-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .attach-student-form {
+    min-width: 100%;
   }
 }
 

@@ -15,6 +15,8 @@ const AdminDashboard = ({ user }) => {
   const [showSeedModal, setShowSeedModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [studentEmail, setStudentEmail] = useState('')
+  const [attachingStudent, setAttachingStudent] = useState(false)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -209,6 +211,41 @@ const AdminDashboard = ({ user }) => {
     if (!studentProgress) return
 
     window.print()
+  }
+
+  const handleAttachStudent = async () => {
+    const email = studentEmail.trim().toLowerCase()
+    if (!email) {
+      alert('Enter a student email')
+      return
+    }
+
+    try {
+      setAttachingStudent(true)
+      const token = localStorage.getItem('authToken')
+      const response = await fetch('/api/teacher/students/attach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ email })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to attach student')
+      }
+
+      setStudentEmail('')
+      await fetchStudents()
+      alert('Student attached successfully')
+    } catch (error) {
+      console.error('Attach student failed:', error)
+      alert(error.message)
+    } finally {
+      setAttachingStudent(false)
+    }
   }
 
   const filteredResources = resources.filter(r =>
@@ -425,6 +462,31 @@ const AdminDashboard = ({ user }) => {
               >
                 <div className="section-header">
                   <h2>Student Progress & Results</h2>
+                </div>
+
+                <div className="attach-student-panel">
+                  <div>
+                    <h3>Attach Student by Email</h3>
+                    <p>Link a learner to your account so their progress, quiz history, and analytics show here.</p>
+                  </div>
+                  <div className="attach-student-form">
+                    <input
+                      type="email"
+                      placeholder="student@example.com"
+                      value={studentEmail}
+                      onChange={(e) => setStudentEmail(e.target.value)}
+                    />
+                    <motion.button
+                      className="btn-primary"
+                      type="button"
+                      onClick={handleAttachStudent}
+                      disabled={attachingStudent}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {attachingStudent ? 'Attaching...' : 'Attach Student'}
+                    </motion.button>
+                  </div>
                 </div>
 
                 <div className="students-container">

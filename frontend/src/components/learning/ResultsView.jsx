@@ -4,11 +4,11 @@ import { Award, Sparkles, CheckCircle, AlertCircle, BookOpen, ArrowRight } from 
 import './ResultsView.css'
 
 const getGrade = (percentage) => {
-  if (percentage >= 90) return { label: 'A', tone: 'excellent', message: 'Excellent mastery' }
-  if (percentage >= 80) return { label: 'B', tone: 'strong', message: 'Strong performance' }
-  if (percentage >= 70) return { label: 'C', tone: 'steady', message: 'Solid progress' }
-  if (percentage >= 60) return { label: 'D', tone: 'growing', message: 'Keep building momentum' }
-  return { label: 'F', tone: 'focus', message: 'Needs more practice' }
+  if (percentage >= 90) return { tone: 'excellent', message: 'Excellent mastery' }
+  if (percentage >= 80) return { tone: 'strong', message: 'Strong performance' }
+  if (percentage >= 70) return { tone: 'steady', message: 'Solid progress' }
+  if (percentage >= 60) return { tone: 'growing', message: 'Keep building momentum' }
+  return { tone: 'focus', message: 'Needs more practice' }
 }
 
 const formatFeedbackText = (feedback) => {
@@ -71,7 +71,7 @@ const ResultsView = ({ topic, resultsData, onDone }) => {
 
         <div className="results-score-ring" aria-label={`Score ${results.percentage}%`}>
           <span className="score-value">{results.percentage}%</span>
-          <span className="score-label">{grade.label}</span>
+          <span className="score-label">Score</span>
         </div>
       </div>
 
