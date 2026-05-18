@@ -24,7 +24,8 @@ const AdminDashboard = ({ user }) => {
     type: 'document',
     classLevel: 'S1',
     subject: 'Luganda',
-    externalUrl: ''
+    externalUrl: '',
+    file: null
   })
 
   const defaultSubject = user?.language === 'runyankole' ? 'Runyankole' : 'Luganda'
@@ -109,26 +110,54 @@ const AdminDashboard = ({ user }) => {
 
   const handleUploadResource = async () => {
     try {
-      if (!formData.title || !formData.externalUrl) {
-        alert('Please fill in all required fields')
+      if (!formData.title || (!formData.externalUrl && !formData.file)) {
+        alert('Please fill in all required fields (title + URL or file)')
         return
       }
 
       const subject = formData.subject || defaultSubject
 
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/resources', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          subject,
-          fileName: formData.title
+      let response
+
+      if (formData.file) {
+        // Convert to base64 and send as JSON payload
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result.split(',')[1])
+          reader.onerror = reject
+          reader.readAsDataURL(file)
         })
-      })
+
+        const base64 = await toBase64(formData.file)
+        response = await fetch('/api/resources', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...formData,
+            subject,
+            fileName: formData.file.name,
+            fileSize: formData.file.size,
+            fileBase64: base64
+          })
+        })
+      } else {
+        response = await fetch('/api/resources', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...formData,
+            subject,
+            fileName: formData.title
+          })
+        })
+      }
 
       if (response.ok) {
         alert('Resource uploaded successfully!')
@@ -728,6 +757,14 @@ const AdminDashboard = ({ user }) => {
                     placeholder="https://example.com/resource"
                     value={formData.externalUrl}
                     onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Or Upload File</label>
+                  <input
+                    type="file"
+                    onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] || null })}
                   />
                 </div>
 

@@ -145,7 +145,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
 
   useEffect(() => {
     loadPractice();
-  }, [topic]);
+  }, [topic?.id, topic?.title]);
 
   useEffect(() => {
     if (!loading) return;
@@ -404,8 +404,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
             <h2>Practice Time</h2>
             <span className="practice-subtitle">✍🏾 Practice Mode</span>
             <div className="practice-meta-tags">
-              <span className="practice-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
-              {isCached && <span className="practice-meta-tag cached">Reused from library</span>}
+              <span className="practice-meta-tag">{provider === 'openai' ? 'GPT-4o' : (provider === 'curriculum' ? 'Curriculum' : 'Gemini fallback')}</span>
+              {isCached && provider === 'curriculum' && <span className="practice-meta-tag cached">Reused from library</span>}
             </div>
           </div>
         </div>

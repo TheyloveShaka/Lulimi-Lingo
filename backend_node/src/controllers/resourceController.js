@@ -95,13 +95,31 @@ export const getTeacherResources = async (req, res) => {
 // Upload a new resource (for teachers/admins)
 export const uploadResource = async (req, res) => {
   try {
-    const { title, description, type, classLevel, subject, externalUrl, fileName, fileSize } = req.body
+    const { title, description, type, classLevel, subject, externalUrl, fileName, fileSize, fileBase64 } = req.body
     const uploadedBy = req.user?.userId
 
     // Verify user is teacher or admin
     const user = await User.findById(uploadedBy)
     if (user.role !== 'teacher' && user.role !== 'admin') {
       return res.status(403).json({ success: false, error: 'Only teachers and admins can upload resources' })
+    }
+
+    // If a base64 file was provided, write it to disk and set fileUrl
+    let fileUrl = undefined
+    if (fileBase64 && fileName) {
+      try {
+        const uploadsDir = resolveDataFile('uploads')
+        // Ensure uploadsDir exists
+        const fs = require('fs')
+        const path = require('path')
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true })
+        const safeName = `${Date.now()}_${fileName.replace(/[^a-z0-9.-]/gi, '_')}`
+        const filePath = path.join(uploadsDir, safeName)
+        fs.writeFileSync(filePath, Buffer.from(fileBase64, 'base64'))
+        fileUrl = `/data/uploads/${safeName}`
+      } catch (writeErr) {
+        console.error('Failed to write uploaded file:', writeErr.message)
+      }
     }
 
     const newResource = new Resource({
@@ -111,6 +129,7 @@ export const uploadResource = async (req, res) => {
       classLevel,
       subject,
       externalUrl,
+      fileUrl,
       fileName,
       fileSize,
       uploadedBy
@@ -264,6 +283,7 @@ export const attachStudentByEmail = async (req, res) => {
     }
 
     const teacherDoc = await User.findById(teacherId)
+    teacherDoc.assignedStudents = Array.isArray(teacherDoc.assignedStudents) ? teacherDoc.assignedStudents : []
     if (!teacherDoc.assignedStudents.some((id) => String(id) === String(student._id))) {
       teacherDoc.assignedStudents.push(student._id)
       await teacherDoc.save()

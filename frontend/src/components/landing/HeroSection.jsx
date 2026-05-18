@@ -93,7 +93,6 @@ const HeroSection = ({ onGetStarted }) => {
               {['S1', 'S2', 'S3', 'S4'].map((level) => (
                 <span key={level} className="class-pill">{level}</span>
               ))}
-              <span className="class-pill all">O-Level</span>
             </div>
           </div>
 
@@ -104,7 +103,7 @@ const HeroSection = ({ onGetStarted }) => {
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.6)" }}
               whileTap={{ scale: 0.95 }}
             >
-              Get Started Free
+              Get Started
             </motion.button>
             <motion.button
               className="btn btn-secondary"
