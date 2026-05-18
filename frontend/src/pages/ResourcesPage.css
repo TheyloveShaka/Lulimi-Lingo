@@ -55,6 +55,37 @@
   gap: 1rem;
 }
 
+.resource-group {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.resource-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.2rem;
+}
+
+.resource-group-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.resource-group-header span {
+  min-width: 2rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .resource-item {
   background: #fff;
   padding: 1.5rem;
@@ -68,6 +99,10 @@
 
 .resource-item.video-item {
   align-items: stretch;
+}
+
+.resource-item.document-item {
+  align-items: center;
 }
 
 .resource-item:hover {
@@ -109,6 +144,44 @@
   gap: 0.3rem;
 }
 
+.resource-description {
+  margin: 0.9rem 0 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.resource-preview {
+  margin-top: 1rem;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.resource-thumbnail {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #1e3c72 0%, #667eea 100%);
+}
+
+.resource-thumbnail.placeholder {
+  display: grid;
+  place-items: center;
+  gap: 0.4rem;
+  color: white;
+  text-align: center;
+  font-weight: 600;
+}
+
+.resource-preview iframe {
+  width: 100%;
+  height: 220px;
+  border: none;
+  display: block;
+}
+
 .btn-download {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
@@ -125,25 +198,14 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.resource-video {
-  margin-top: 1rem;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  background: #f8fafc;
-}
-
-.resource-video iframe {
-  width: 100%;
-  height: 220px;
-  border: none;
-  display: block;
-}
-
 .no-resources {
   text-align: center;
   padding: 3rem;
   color: #999;
+}
+
+.no-resources.compact {
+  padding: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -154,5 +216,10 @@
   .resource-item {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .resource-preview iframe,
+  .resource-thumbnail {
+    height: 180px;
   }
 }

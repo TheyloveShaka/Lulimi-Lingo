@@ -363,12 +363,20 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     const context = getSyllabusContext();
     setSubmittedResults(results);
     setQuizState('reviewing');
-
     recordQuizScore(
       topic?.id || topic,
       results.score,
       results.maxScore
     );
+
+    // Notify parent immediately so the modal can switch to a Results tab.
+    try {
+      if (typeof onComplete === 'function') {
+        onComplete(results, null);
+      }
+    } catch (err) {
+      console.error('onComplete callback failed:', err);
+    }
 
     (async () => {
       try {
@@ -401,6 +409,14 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
         if (feedbackResult.success) {
           setFeedback(feedbackResult);
+          // Inform parent that feedback is now available
+          try {
+            if (typeof onComplete === 'function') {
+              onComplete(results, feedbackResult);
+            }
+          } catch (err) {
+            console.error('onComplete callback failed (feedback):', err);
+          }
         }
       } catch (err) {
         console.error('Failed to persist quiz attempt or get feedback:', err);

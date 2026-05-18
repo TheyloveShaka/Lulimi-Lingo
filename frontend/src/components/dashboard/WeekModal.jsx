@@ -5,18 +5,21 @@ import { useLearning } from '../../context/LearningContext'
 import LessonView from '../learning/LessonView'
 import PracticeView from '../learning/PracticeView'
 import QuizView from '../learning/QuizView'
+import ResultsView from '../learning/ResultsView'
 import './WeekModal.css'
 
 const WeekModal = ({ week, onClose }) => {
   const [activeTab, setActiveTab] = useState('lecture')
   const [isLearningMode, setIsLearningMode] = useState(false)
   const [showTopics, setShowTopics] = useState(false)
+  const [resultsData, setResultsData] = useState(null)
   const { completedLessons, quizScores, setCurrentWeek, setCurrentTopic } = useLearning()
 
   const tabs = [
     { id: 'lecture', label: 'Lecture', icon: <BookOpen size={18} /> },
-    { id: 'quiz', label: 'Quiz', icon: <Brain size={18} /> },
     { id: 'practice', label: 'Practice', icon: <Dumbbell size={18} /> },
+    { id: 'quiz', label: 'Quiz', icon: <Brain size={18} /> },
+    { id: 'results', label: 'Results', icon: <Play size={18} /> },
   ]
 
   // Check completion status
@@ -59,9 +62,9 @@ const WeekModal = ({ week, onClose }) => {
   }
 
   // Handle quiz completion
-  const handleQuizComplete = (score, total) => {
-    // Close the learning modal when the quiz signals completion (e.g., user pressed "Done").
-    exitLearningMode()
+  const handleQuizComplete = () => {
+    // When QuizView calls onComplete(results, feedback) we switch to the results tab.
+    setActiveTab('results')
   }
 
   // Handle practice completion
@@ -181,7 +184,10 @@ const WeekModal = ({ week, onClose }) => {
                       topics: week.topics,
                       weekId: week.id
                     }}
-                    onComplete={handleQuizComplete}
+                    onComplete={(results, feedback) => {
+                      setResultsData({ results, feedback })
+                      handleQuizComplete()
+                    }}
                     numberOfQuestions={5}
                   />
                 ) : (
@@ -201,6 +207,19 @@ const WeekModal = ({ week, onClose }) => {
                   />
                 ) : (
                   <PracticePreview onStart={() => startLearning('practice')} />
+                )
+              )}
+              {activeTab === 'results' && (
+                isLearningMode ? (
+                  <ResultsView
+                    topic={week.title}
+                    resultsData={resultsData}
+                    onDone={exitLearningMode}
+                  />
+                ) : (
+                  <div className="tab-content">
+                    <p>Start the quiz to see results.</p>
+                  </div>
                 )
               )}
             </AnimatePresence>
