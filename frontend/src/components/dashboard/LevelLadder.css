@@ -255,9 +255,12 @@
 .topic-title {
   font-size: 0.75rem;
   font-weight: 700;
-  white-space: normal;
+  display: inline-block;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
-  word-break: break-word;
 }
 
 /* Tooltip */
