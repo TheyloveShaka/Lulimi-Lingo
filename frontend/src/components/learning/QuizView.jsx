@@ -38,6 +38,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [quizDuration, setQuizDuration] = useState(0);
   const [feedback, setFeedback] = useState(null);
+  const [submittedResults, setSubmittedResults] = useState(null);
 
   const loadingMessages = [
     'Challenge improves mastery.',
@@ -208,6 +209,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     setFlaggedQuestions([]);
     setCurrentQuestion(0);
     setQuizState('taking');
+    setSubmittedResults(null);
+    setFeedback(null);
 
     const context = getSyllabusContext();
 
@@ -356,63 +359,53 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const handleSubmitQuiz = async () => {
     if (quizState !== 'taking') return;
 
-    setQuizState('submitting');
-    
-    // Calculate score
     const results = calculateResults();
     const context = getSyllabusContext();
-    
-    // Record score
+    setSubmittedResults(results);
+    setQuizState('reviewing');
+
     recordQuizScore(
       topic?.id || topic,
       results.score,
       results.maxScore
     );
 
-    // Persist attempt
-    try {
-      const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
-      const timeSpent = quizDuration && timeRemaining !== null
-        ? Math.max(0, quizDuration - timeRemaining)
-        : null;
+    (async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
+        const timeSpent = quizDuration && timeRemaining !== null
+          ? Math.max(0, quizDuration - timeRemaining)
+          : null;
 
-      if (currentUser?._id) {
-        await upsertProgress(currentUser._id, {
-          weekId: context.week,
-          language: context.language,
-          proficiencyLevel: context.proficiencyLevel,
-          quizAttempt: {
-            quizId: topic?.id || topic?.title || topic || 'quiz',
-            score: results.score,
-            maxScore: results.maxScore,
-            percentage: results.percentage,
-            timeSpent
-          }
+        if (currentUser?._id) {
+          await upsertProgress(currentUser._id, {
+            weekId: context.week,
+            language: context.language,
+            proficiencyLevel: context.proficiencyLevel,
+            quizAttempt: {
+              quizId: topic?.id || topic?.title || topic || 'quiz',
+              score: results.score,
+              maxScore: results.maxScore,
+              percentage: results.percentage,
+              timeSpent
+            }
+          });
+        }
+
+        const feedbackResult = await generateFeedback({
+          learnerAnswers: userAnswers,
+          correctAnswers: quiz.questions.map(q => ({ question: q.question, answer: q.correctAnswer })),
+          topicObjectives: topic?.objectives || [],
+          language: context.language
         });
+
+        if (feedbackResult.success) {
+          setFeedback(feedbackResult);
+        }
+      } catch (err) {
+        console.error('Failed to persist quiz attempt or get feedback:', err);
       }
-    } catch (err) {
-      console.error('Failed to persist quiz attempt:', err);
-    }
-
-    // Get AI feedback
-    try {
-      const feedbackResult = await generateFeedback({
-        learnerAnswers: userAnswers,
-        correctAnswers: quiz.questions.map(q => ({ question: q.question, answer: q.correctAnswer })),
-        topicObjectives: topic?.objectives || [],
-        language: context.language
-      });
-
-      if (feedbackResult.success) {
-        setFeedback(feedbackResult);
-      }
-    } catch (err) {
-      console.error('Failed to get feedback:', err);
-    }
-
-    setTimeout(() => {
-      setQuizState('reviewing');
-    }, 900);
+    })();
   };
 
   const formatAnswerForReview = (question, answer) => {
@@ -446,6 +439,33 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     return question.correctAnswer || '';
   };
 
+  const isAnswerCorrect = (question, answer) => {
+    if (answer === null || answer === undefined || answer === '') {
+      return false;
+    }
+
+    if (question.type === 'translate' || question.type === 'fill-blank') {
+      const acceptable = question.acceptableAnswers || [question.correctAnswer];
+      return acceptable.some(a => 
+        String(a).toLowerCase().trim() === String(answer).toLowerCase().trim()
+      );
+    }
+
+    if (question.type === 'matching') {
+      const selections = answer || {};
+      const expectedPairs = question.pairs || [];
+      return expectedPairs.length > 0 && expectedPairs.every((pair) => selections[pair.left] === pair.right);
+    }
+
+    if (question.type === 'reorder') {
+      const expected = question.correctOrder || [];
+      const provided = Array.isArray(answer) ? answer : [];
+      return expected.length > 0 && expected.every((token, idx) => token === provided[idx]);
+    }
+
+    return String(answer).trim() === String(question.correctAnswer).trim();
+  };
+
   const calculateResults = () => {
     let score = 0;
     let maxScore = 0;
@@ -456,23 +476,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       const points = q.points || 1;
       maxScore += points;
 
-      let isCorrect = false;
-      if (q.type === 'translate' || q.type === 'fill-blank') {
-        const acceptable = q.acceptableAnswers || [q.correctAnswer];
-        isCorrect = acceptable.some(a => 
-          a.toLowerCase().trim() === userAnswer?.toLowerCase().trim()
-        );
-      } else if (q.type === 'matching') {
-        const selections = userAnswer || {};
-        const expectedPairs = q.pairs || [];
-        isCorrect = expectedPairs.length > 0 && expectedPairs.every((pair) => selections[pair.left] === pair.right);
-      } else if (q.type === 'reorder') {
-        const expected = q.correctOrder || [];
-        const provided = Array.isArray(userAnswer) ? userAnswer : [];
-        isCorrect = expected.length > 0 && expected.every((token, idx) => token === provided[idx]);
-      } else {
-        isCorrect = userAnswer === q.correctAnswer;
-      }
+      const isCorrect = isAnswerCorrect(q, userAnswer);
 
       if (isCorrect) score += points;
 
@@ -572,7 +576,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
   // Results View
   if (quizState === 'reviewing') {
-    const results = calculateResults();
+    const results = submittedResults || calculateResults();
     const gradeInfo = getGrade(results.percentage);
 
     return (
@@ -741,7 +745,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
           {/* Answer Options */}
           <div className="quiz-options">
-            {(question.type === 'multiple-choice' || question.type === 'fill-blank' || question.type === 'true-false') && (
+            {(question.type === 'multiple-choice' || question.type === 'true-false' || (question.type === 'fill-blank' && question.options?.length > 0)) && (
               <div className="options-list">
                 {question.options?.map((option, index) => (
                   <motion.button
@@ -755,6 +759,18 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
                     <span className="option-content">{option}</span>
                   </motion.button>
                 ))}
+              </div>
+            )}
+
+            {question.type === 'fill-blank' && (!question.options || question.options.length === 0) && (
+              <div className="translate-answer">
+                <input
+                  type="text"
+                  placeholder="Type the missing word..."
+                  value={userAnswers[currentQuestion] || ''}
+                  onChange={(e) => handleAnswer(e.target.value)}
+                  disabled={quizState !== 'taking'}
+                />
               </div>
             )}
 

@@ -204,7 +204,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     
     if (!userAnswer) return null;
 
-    if (question.type === 'translate') {
+    if (question.type === 'translate' || question.type === 'fill-blank') {
       const acceptable = question.acceptableAnswers || [question.correctAnswer];
       return acceptable.some(a => 
         a.toLowerCase().trim() === userAnswer.toLowerCase().trim()
@@ -240,7 +240,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     let correct = 0;
     questions.forEach((q, index) => {
       const answer = userAnswers[index];
-      if (q.type === 'translate') {
+      if (q.type === 'translate' || q.type === 'fill-blank') {
         const acceptable = q.acceptableAnswers || [q.correctAnswer];
         if (acceptable.some(a => a.toLowerCase().trim() === answer?.toLowerCase().trim())) {
           correct++;
@@ -369,7 +369,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
 
           {/* Answer Input */}
           <div className="answer-section">
-            {(question.type === 'multiple-choice' || question.type === 'fill-blank') && (
+            {(question.type === 'multiple-choice' || (question.type === 'fill-blank' && question.options?.length > 0)) && (
               <div className="options-grid">
                 {question.options?.map((option, index) => (
                   <motion.button
@@ -390,6 +390,32 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                     )}
                   </motion.button>
                 ))}
+              </div>
+            )}
+
+            {question.type === 'fill-blank' && (!question.options || question.options.length === 0) && (
+              <div className="translate-input">
+                <input
+                  type="text"
+                  placeholder="Type the missing word..."
+                  value={userAnswers[currentQuestion] || ''}
+                  onChange={(e) => handleAnswer(e.target.value)}
+                  disabled={showResult}
+                  className={showResult ? (isCorrect ? 'correct' : 'incorrect') : ''}
+                />
+                {showResult && (
+                  <div className="translate-result">
+                    {isCorrect ? (
+                      <span className="correct-msg">
+                        <CheckCircle size={16} /> Correct!
+                      </span>
+                    ) : (
+                      <span className="incorrect-msg">
+                        <XCircle size={16} /> Correct answer: {question.correctAnswer}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

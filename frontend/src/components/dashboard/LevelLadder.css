@@ -14,6 +14,8 @@
   display: flex;
   gap: var(--spacing-xl);
   flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
 .class-selector,
@@ -379,6 +381,26 @@
 @media (max-width: 768px) {
   .ladder-controls {
     flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+  }
+
+  .class-selector,
+  .term-selector {
+    min-width: 0;
+  }
+
+  .class-buttons,
+  .term-buttons {
+    width: 100%;
+  }
+
+  .class-btn,
+  .term-btn {
+    flex: 1 1 calc(50% - var(--spacing-sm));
+    min-width: 0;
+    text-align: center;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 
   .connecting-svg {
@@ -407,5 +429,30 @@
   .progress-ring {
     width: 90px;
     height: 90px;
+  }
+
+  .topic-badge {
+    bottom: -30px;
+    max-width: 150px;
+  }
+
+  .topic-title {
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 480px) {
+  .class-btn,
+  .term-btn {
+    flex-basis: 100%;
+  }
+
+  .ladder-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .ladder-header p {
+    font-size: 0.9rem;
   }
 }

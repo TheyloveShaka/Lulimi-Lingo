@@ -127,8 +127,13 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
             )}
           </AnimatePresence>
 
-          <button className="toggle-btn" onClick={onToggle}>
-            {expanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          <button
+            className="toggle-btn"
+            onClick={onToggle}
+            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {expanded ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
           </button>
         </div>
 
@@ -144,8 +149,8 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="nav-icon">{item.icon}</span>
-                <AnimatePresence>
-                  {expanded && (
+                <AnimatePresence initial={false}>
+                  {(expanded || isMobile) && (
                     <motion.span
                       className="nav-label"
                       initial={{ opacity: 0, width: 0 }}
@@ -172,8 +177,8 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="nav-icon">{item.icon}</span>
-                <AnimatePresence>
-                  {expanded && (
+                <AnimatePresence initial={false}>
+                  {(expanded || isMobile) && (
                     <motion.span
                       className="nav-label"
                       initial={{ opacity: 0, width: 0 }}
