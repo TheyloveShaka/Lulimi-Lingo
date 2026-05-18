@@ -80,24 +80,41 @@ Return ONLY valid JSON.`;
   }
 
   _parsePractice(content, topic, provider = 'unknown', languageName = 'Luganda') {
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
+    const tryParse = (text) => {
+      try {
+        const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);
+        if (!jsonMatch) return null;
         const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.questions && Array.isArray(parsed.questions)) {
-          return {
-            topic,
-            totalQuestions: parsed.questions.length,
-            questions: parsed.questions,
-            provider,
-            timestamp: new Date().toISOString()
-          };
-        }
+        if (parsed.questions && Array.isArray(parsed.questions)) return parsed;
+      } catch (err) {
+        return null;
       }
-    } catch (error) {
-      console.error('Failed to parse practice JSON:', error);
+      return null;
     }
-    return this._mockPractice(topic, languageName);
+
+    let parsed = tryParse(content)
+    if (parsed) {
+      return { topic, totalQuestions: parsed.questions.length, questions: parsed.questions, provider, timestamp: new Date().toISOString() }
+    }
+
+    // Attempt one repair retry via OpenAI to return valid JSON
+    try {
+      const repairPrompt = `The previous AI response could not be parsed as valid JSON. Return ONLY valid JSON matching the schema: { "questions": [ { "id": number, "type": "fill-blank|multiple-choice|translate|reorder|matching", "question": "text", "options": ["..."], "correctAnswer": "...", "hint": "...", "explanation": "..." } ] } . Here is the raw response:\n\n${String(content)}\n\nReturn only the corrected JSON.`
+      const repairResp = await callOpenAIChat([
+        { role: 'system', content: `You are an expert ${languageName} tutor. Return only valid JSON, no markdown.` },
+        { role: 'user', content: repairPrompt }
+      ], 600)
+
+      parsed = tryParse(repairResp)
+      if (parsed) {
+        return { topic, totalQuestions: parsed.questions.length, questions: parsed.questions, provider: 'openai-repair', timestamp: new Date().toISOString() }
+      }
+    } catch (err) {
+      console.error('Practice repair attempt failed:', err.message)
+    }
+
+    // If still invalid, fail loudly so frontend can surface an error instead of using stale hardcoded content
+    throw new Error('AI did not return valid practice questions')
   }
 
   _mockPractice(topic, languageName = 'Luganda') {

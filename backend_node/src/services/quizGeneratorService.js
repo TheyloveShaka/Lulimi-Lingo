@@ -82,24 +82,40 @@ Return ONLY valid JSON.`;
   }
 
   _parseQuiz(content, topic, numQuestions, provider = 'unknown', languageName = 'Luganda') {
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
+    const tryParse = (text) => {
+      try {
+        const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);
+        if (!jsonMatch) return null;
         const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.questions && Array.isArray(parsed.questions)) {
-          return {
-            topic,
-            numQuestions: parsed.questions.length,
-            questions: parsed.questions,
-            provider,
-            timestamp: new Date().toISOString()
-          };
-        }
+        if (parsed.questions && Array.isArray(parsed.questions)) return parsed;
+      } catch (err) {
+        return null;
       }
-    } catch (error) {
-      console.error('Failed to parse quiz JSON:', error);
+      return null;
     }
-    return this._mockQuiz(topic, numQuestions, languageName);
+
+    let parsed = tryParse(content)
+    if (parsed) {
+      return { topic, numQuestions: parsed.questions.length, questions: parsed.questions, provider, timestamp: new Date().toISOString() }
+    }
+
+    // Attempt one repair retry via OpenAI
+    try {
+      const repairPrompt = `The previous AI response could not be parsed as valid JSON. Return ONLY valid JSON matching the quiz schema: { "questions": [ { "id": number, "question": "text", "type": "multiple-choice|true-false|fill-blank|translate|matching|reorder", "options": [...], "correctAnswer": "...", "explanation": "..." } ] }. Here is the raw response:\n\n${String(content)}\n\nReturn only the corrected JSON.`
+      const repairResp = await callOpenAIChat([
+        { role: 'system', content: `You are an expert ${languageName} assessment designer. Return only valid JSON, no markdown.` },
+        { role: 'user', content: repairPrompt }
+      ], 900)
+
+      parsed = tryParse(repairResp)
+      if (parsed) {
+        return { topic, numQuestions: parsed.questions.length, questions: parsed.questions, provider: 'openai-repair', timestamp: new Date().toISOString() }
+      }
+    } catch (err) {
+      console.error('Quiz repair attempt failed:', err.message)
+    }
+
+    throw new Error('AI did not return valid quiz questions')
   }
 
   _mockQuiz(topic, num = 5, languageName = 'Luganda') {

@@ -417,26 +417,35 @@ export async function generateContent(contentType, classLevel, term, milestoneId
       throw new Error('No AI provider available')
     }
 
-    // Parse JSON response
-    let content = null
-    try {
-      // Try to extract JSON from response
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        content = JSON.parse(jsonMatch[0])
-      } else {
-        content = JSON.parse(aiResponse)
+    // Parse JSON response with a repair retry
+    const tryParse = (text) => {
+      try {
+        const jsonMatch = String(text || '').match(/\{[\s\S]*\}/)
+        if (!jsonMatch) return null
+        return JSON.parse(jsonMatch[0])
+      } catch (err) {
+        return null
       }
-    } catch (parseErr) {
-      console.error('Failed to parse AI response as JSON:', parseErr.message)
-      // Return raw response if parsing fails
-      content = {
-        type: contentType,
-        milestone: milestone.milestone_name,
-        topic: topic,
-        class_level: classLevel,
-        raw_response: aiResponse
+    }
+
+    let content = tryParse(aiResponse)
+    if (!content) {
+      // Ask the model to repair/return valid JSON once
+      try {
+        const repairPrompt = `The previous AI response could not be parsed as JSON. Return ONLY valid JSON appropriate for ${contentType} generation. Here is the raw response:\n\n${String(aiResponse)}\n\nReturn only the corrected JSON.`
+        const repairResp = await callOpenAIChat([
+          { role: 'system', content: `You are an expert ${languageName} language teacher and curriculum designer. Return ONLY valid JSON with no markdown or extra text.` },
+          { role: 'user', content: repairPrompt }
+        ], 1200)
+
+        content = tryParse(repairResp)
+      } catch (repairErr) {
+        console.error('Content repair attempt failed:', repairErr.message)
       }
+    }
+
+    if (!content) {
+      throw new Error('AI did not return valid curriculum content JSON')
     }
 
     return {
