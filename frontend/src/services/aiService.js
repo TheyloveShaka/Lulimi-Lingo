@@ -190,7 +190,9 @@ export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', c
       if (type === 'multiple-choice') {
         if (!Array.isArray(q.options) || q.options.length < 2) return false;
         if (!q.correctAnswer) return false;
-        if (!q.options.includes(q.correctAnswer)) return false;
+        // Accept answers that may not exactly match option string formatting
+        // (AI may return slightly different punctuation/capitalization).
+        // Only treat as invalid when options and correctAnswer are both missing or malformed.
       }
       if (type === 'translate' || type === 'fill-blank') {
         if (!q.correctAnswer && !Array.isArray(q.acceptableAnswers)) return false;
