@@ -143,9 +143,11 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     };
   };
 
+  const topicKey = `${topic?.id || ''}::${topic?.title || ''}`;
+
   useEffect(() => {
     loadPractice();
-  }, [topic?.id, topic?.title]);
+  }, [topicKey]);
 
   useEffect(() => {
     if (!loading) return;
@@ -195,71 +197,19 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         topicObjectives: context.weekData?.objectives || []
       });
 
-      if (result.success) {
-        const parsedQuestions = result.questions?.length > 0
-          ? result.questions.map((q, idx) => normalizeQuestion(q, idx))
-          : generateMockQuestions(topic);
+      if (result.success && result.questions && result.questions.length > 0) {
+        const parsedQuestions = result.questions.map((q, idx) => normalizeQuestion(q, idx))
         setQuestions(parsedQuestions);
         setIsCached(Boolean(result.cached));
         setProvider(result.provider || 'openai');
       } else {
-        setError(result.error || 'Failed to generate practice');
+        setError(result.error || 'AI did not return valid practice questions');
       }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateMockQuestions = (topic) => {
-    return [
-      {
-        id: 1,
-        type: 'fill-blank',
-        question: 'Complete: "_____ otya?" (How are you?)',
-        options: ['Oli', 'Gwe', 'Nze', 'Ye'],
-        correctAnswer: 'Oli',
-        hint: 'This is the informal "you" in Luganda',
-        explanation: 'Use the singular informal "you" in this greeting.'
-      },
-      {
-        id: 2,
-        type: 'translate',
-        question: 'Translate to Luganda: "Good morning"',
-        correctAnswer: 'Wasuze otya',
-        acceptableAnswers: ['Wasuze otya', 'Wasuze otya?', 'wasuze otya'],
-        hint: 'It literally means "How did you sleep?"',
-        explanation: 'This is the standard Luganda morning greeting.'
-      },
-      {
-        id: 3,
-        type: 'multiple-choice',
-        question: 'What is the correct response to "Oli otya?"',
-        options: ['Webale', 'Gyendi', 'Wasuze otya', 'Nze'],
-        correctAnswer: 'Gyendi',
-        hint: 'It means "I\'m fine"',
-        explanation: '"Gyendi" is the polite response to "How are you?"'
-      },
-      {
-        id: 4,
-        type: 'fill-blank',
-        question: 'Complete: "Gyebale _____" (Thank you for your work)',
-        options: ['ko', 'nyo', 'nnyo', 'otya'],
-        correctAnswer: 'ko',
-        hint: 'This is a common polite expression',
-        explanation: '"Gyebale ko" thanks someone for their effort.'
-      },
-      {
-        id: 5,
-        type: 'multiple-choice',
-        question: 'When would you use "Osiibye otya?"',
-        options: ['In the morning', 'In the afternoon/evening', 'At midnight', 'Never'],
-        correctAnswer: 'In the afternoon/evening',
-        hint: 'Think about what time of day this greeting refers to',
-        explanation: 'This greeting is used later in the day.'
-      }
-    ];
   };
 
   const handleAnswer = (answer) => {

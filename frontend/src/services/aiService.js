@@ -1,6 +1,6 @@
 /**
  * Lulimi Lingo - AI Service Layer
- * 
+ *
  * This service handles all AI API calls for the learning platform.
  * It supports multiple AI providers and manages the communication
  * between the frontend and AI models.
@@ -25,8 +25,8 @@ const AI_CONFIG = {
     import.meta.env.VITE_BACKEND_URL ||
     import.meta.env.VITE_NODE_BACKEND_URL ||
     'https://lulimi-lingo-production.up.railway.app',
-  
-  // Fallback to mock responses if backend is down
+
+  // Allow toggling mock responses during development
   useMockResponses: false
 };
 
@@ -79,141 +79,181 @@ const callBackend = async (endpoint, payload) => {
   }
 };
 
-/**
- * Generate a lesson for a specific topic
- */
-export const generateLesson = async ({ classLevel, term, week, topic, objectives, language, proficiencyLevel }) => {
-  const result = await callBackend('lesson', {
-    class_level: classLevel,
-    term: term,
-    week: week,
-    topic: topic,
-    objectives: objectives || [],
-    language: language,
-    proficiency_level: proficiencyLevel
-  });
-
-  const lessonPayload = result.lesson || result.data;
-
-  if (result.success && lessonPayload) {
-    return {
-      success: true,
-      lesson: typeof lessonPayload === 'string' ? parseLesson(lessonPayload) : lessonPayload,
-      raw: lessonPayload,
-      cached: Boolean(result.cached),
-      provider: result.provider || 'openai'
-    };
+// ----------------- Helpers and Parsers -----------------
+const parsePracticeQuestions = (payload) => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  try {
+    if (typeof payload === 'string') return JSON.parse(payload);
+    if (typeof payload === 'object' && payload.questions) return payload.questions;
+  } catch (e) {
+    console.warn('Failed to parse practice payload', e);
   }
-  return result;
+  return [];
 };
 
-/**
- * Generate practice questions
- */
-export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes, language, topicObjectives }) => {
-  const result = await callBackend('practice', {
-    topic: topic,
-    proficiency_level: proficiencyLevel || 'beginner',
-    common_mistakes: commonMistakes || [],
-    language: language,
-    topic_objectives: topicObjectives || []
-  });
-
-  const questionsPayload = result.questions || result.practice?.questions || result.data?.questions;
-
-  if (result.success && questionsPayload) {
-    return {
-      success: true,
-      questions: Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload),
-      raw: questionsPayload,
-      cached: Boolean(result.cached),
-      provider: result.provider || 'openai'
-    };
+const parseQuiz = (payload) => {
+  if (!payload) return null;
+  try {
+    if (typeof payload === 'object') return payload;
+    return JSON.parse(payload);
+  } catch (e) {
+    console.warn('Failed to parse quiz payload', e);
+    return null;
   }
-  return result;
 };
 
-/**
- * Generate a quiz
- */
-export const generateQuiz = async ({ topic, numberOfQuestions, assessmentCriteria, language, proficiencyLevel }) => {
-  const result = await callBackend('quiz', {
-    topic: topic,
-    number_of_questions: numberOfQuestions || 5,
-    assessment_criteria: assessmentCriteria || [],
-    language: language,
-    proficiency_level: proficiencyLevel
+const parseLesson = (content) => {
+  if (!content) return null;
+  if (typeof content === 'object') return content;
+
+  const sections = {
+    introduction: '',
+    explanation: '',
+    examples: [],
+    culturalNote: ''
+  };
+
+  const lines = content.split('\n');
+  let current = 'introduction';
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+    if (lower.includes('introduction') || lower.includes('topic:')) current = 'introduction';
+    else if (lower.includes('explanation') || lower.includes('concept')) current = 'explanation';
+    else if (lower.includes('example')) current = 'examples';
+    else if (lower.includes('cultural') || lower.includes('note')) current = 'culturalNote';
+
+    if (current === 'examples' && line.trim().startsWith('-')) sections.examples.push(line.trim());
+    else if (current !== 'examples') sections[current] += line + '\n';
   });
 
-  const quizPayload = result.quiz || result.data;
-
-  if (result.success && quizPayload) {
-    return {
-      success: true,
-      quiz: typeof quizPayload === 'object' ? quizPayload : parseQuiz(quizPayload),
-      raw: quizPayload,
-      cached: Boolean(result.cached),
-      provider: result.provider || 'openai'
-    };
-  }
-  return result;
+  return sections;
 };
 
-/**
- * Generate feedback for learner answers
- */
-export const generateFeedback = async ({ learnerAnswers, correctAnswers, topicObjectives, language }) => {
-  const result = await callBackend('feedback', {
-    learner_answers: learnerAnswers || {},
-    correct_answers: correctAnswers || {},
-    topic_objectives: topicObjectives || [],
-    language: language
-  });
-
-  if (result.success && result.feedback) {
-    return {
-      success: true,
-      feedback: typeof result.feedback === 'string' ? parseFeedback(result.feedback) : result.feedback,
-      encouragement: getEncouragement(),
-      raw: result.feedback
-    };
-  }
-  return result;
-};
-
-/**
- * Generate topic overview for revision
- */
-export const generateOverview = async ({ topic, completedLessons, keyObjectives }) => {
-  // Use lesson endpoint for overview generation
-  const result = await callBackend('lesson', {
-    topic: `Overview: ${topic}`,
-    context: {
-      completedLessons,
-      keyObjectives,
-      isOverview: true
+// ----------------- Generators with validation & retries -----------------
+const withRetries = async (worker, validate, attempts = 3, delayMs = 600) => {
+  for (let i = 0; i < attempts; i++) {
+    const res = await worker();
+    try {
+      if (res && res.success !== false && validate(res)) return res;
+    } catch (e) {
+      console.warn('Validation threw error', e);
     }
-  });
-
-  if (result.success) {
-    return {
-      success: true,
-      overview: result.lesson,
-      raw: result.lesson
-    };
+    if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
   }
-  return result;
+  return null;
 };
 
-/**
- * Chat with the AI tutor
- */
-export const chatWithTutor = async ({ message, completedTopics, conversationHistory = [], language, proficiencyLevel }) => {
-  const languageLabel = resolveLanguageLabel(language)
+export const generateLesson = async ({ classLevel, term, week, topic, objectives = [], language, proficiencyLevel }) => {
   const payload = {
-    message: message,
+    class_level: classLevel,
+    term,
+    week,
+    topic,
+    objectives,
+    language,
+    proficiency_level: proficiencyLevel
+  };
+
+  const worker = () => callBackend('lesson', payload);
+  const validate = (res) => {
+    const lessonPayload = res.lesson || res.data;
+    const parsed = lessonPayload && typeof lessonPayload === 'object' ? lessonPayload : (lessonPayload ? parseLesson(lessonPayload) : null);
+    return !!parsed && typeof parsed === 'object' && (parsed.introduction || parsed.explanation || parsed.examples?.length);
+  };
+
+  const final = await withRetries(worker, validate, 3, 800);
+  if (final) {
+    const lessonPayload = final.lesson || final.data;
+    const parsed = typeof lessonPayload === 'string' ? parseLesson(lessonPayload) : lessonPayload;
+    return { success: true, lesson: parsed, raw: lessonPayload, cached: Boolean(final.cached), provider: final.provider || 'openai' };
+  }
+  return { success: false, error: 'AI did not return a valid lesson' };
+};
+
+export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', commonMistakes = [], language, topicObjectives = [] }) => {
+  const payload = {
+    topic,
+    proficiency_level: proficiencyLevel,
+    common_mistakes: commonMistakes,
+    language,
+    topic_objectives: topicObjectives
+  };
+
+  const validate = (res) => {
+    const questionsPayload = res.questions || res.practice?.questions || res.data?.questions;
+    const qs = Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload);
+    if (!Array.isArray(qs) || qs.length === 0) return false;
+    for (const q of qs) {
+      if (!q || !q.question) return false;
+      const type = (q.type || '').toLowerCase();
+      if (type === 'multiple-choice') {
+        if (!Array.isArray(q.options) || q.options.length < 2) return false;
+        if (!q.correctAnswer) return false;
+        if (!q.options.includes(q.correctAnswer)) return false;
+      }
+      if (type === 'translate' || type === 'fill-blank') {
+        if (!q.correctAnswer && !Array.isArray(q.acceptableAnswers)) return false;
+      }
+      if (type === 'reorder') {
+        if (!Array.isArray(q.tokens) || !Array.isArray(q.correctOrder)) return false;
+      }
+    }
+    return true;
+  };
+
+  const worker = () => callBackend('practice', payload);
+  const final = await withRetries(worker, validate, 3, 600);
+  if (final) {
+    const questionsPayload = final.questions || final.practice?.questions || final.data?.questions;
+    const qs = Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload);
+    return { success: true, questions: qs, raw: questionsPayload, cached: Boolean(final.cached), provider: final.provider || 'openai' };
+  }
+
+  return { success: false, error: 'AI did not return valid practice questions' };
+};
+
+export const generateQuiz = async ({ topic, numberOfQuestions = 5, assessmentCriteria = [], language, proficiencyLevel }) => {
+  const payload = { topic, number_of_questions: numberOfQuestions, assessment_criteria: assessmentCriteria, language, proficiency_level: proficiencyLevel };
+
+  const validate = (res) => {
+    const quizPayload = res.quiz || res.data;
+    const parsed = quizPayload && typeof quizPayload === 'object' ? quizPayload : (quizPayload ? parseQuiz(quizPayload) : null);
+    if (!parsed || !Array.isArray(parsed.questions) || parsed.questions.length === 0) return false;
+    for (const q of parsed.questions) {
+      if (!q.question) return false;
+      const type = (q.type || '').toLowerCase();
+      if (type === 'multiple-choice' && (!Array.isArray(q.options) || q.options.length < 2 || !q.correctAnswer)) return false;
+    }
+    return true;
+  };
+
+  const worker = () => callBackend('quiz', payload);
+  const final = await withRetries(worker, validate, 3, 700);
+  if (final) {
+    const quizPayload = final.quiz || final.data;
+    const parsed = quizPayload && typeof quizPayload === 'object' ? quizPayload : (quizPayload ? parseQuiz(quizPayload) : null);
+    return { success: true, quiz: parsed, raw: quizPayload, cached: Boolean(final.cached), provider: final.provider || 'openai' };
+  }
+
+  return { success: false, error: 'AI did not return a valid quiz' };
+};
+
+export const generateFeedback = async ({ learnerAnswers = {}, correctAnswers = {}, topicObjectives = [], language }) => {
+  const payload = { learner_answers: learnerAnswers, correct_answers: correctAnswers, topic_objectives: topicObjectives, language };
+  const worker = () => callBackend('feedback', payload);
+  const validate = (res) => !!res && (res.feedback || res.recommendations);
+  const final = await withRetries(worker, validate, 2, 500);
+  if (final) return { success: true, feedback: final.feedback || final.recommendations, raw: final, provider: final.provider || 'openai' };
+  return { success: false, error: 'AI did not return feedback' };
+};
+
+export const chatWithTutor = async ({ message, completedTopics = [], conversationHistory = [], language, proficiencyLevel }) => {
+  const languageLabel = resolveLanguageLabel(language);
+  const payload = {
+    message,
     completed_topics: completedTopics || [],
-    conversation_history: conversationHistory.slice(-5), // Last 5 messages
+    conversation_history: conversationHistory.slice(-5),
     language,
     proficiency_level: proficiencyLevel
   };
@@ -221,9 +261,7 @@ export const chatWithTutor = async ({ message, completedTopics, conversationHist
   console.log('🎤 Chat payload:', payload);
   const result = await callBackend('chat', payload);
 
-  if (!result.success) {
-    console.warn('Chat request failed:', result.error);
-  }
+  if (!result.success) console.warn('Chat request failed:', result.error);
 
   return {
     success: result.success !== false,
@@ -234,305 +272,20 @@ export const chatWithTutor = async ({ message, completedTopics, conversationHist
   };
 };
 
-/**
- * Translate text using OpenAI (best translation quality)
- */
 export const translateText = async (text, sourceLang = 'en', targetLang = 'lg') => {
-  const result = await callBackend('translate', {
-    text: text,
-    source_lang: sourceLang,
-    target_lang: targetLang
-  });
-
-  if (result.success && result.translation) {
-    return {
-      success: true,
-      translation: result.translation,
-      sourceLang: sourceLang,
-      targetLang: targetLang,
-      model: result.model || 'openai'
-    };
-  }
-  return {
-    success: false,
-    translation: '',
-    error: result.error || 'Translation failed'
-  };
+  const result = await callBackend('translate', { text, source_lang: sourceLang, target_lang: targetLang });
+  if (result.success && result.translation) return { success: true, translation: result.translation, sourceLang, targetLang, model: result.model || 'openai' };
+  return { success: false, translation: '', error: result.error || 'Translation failed' };
 };
 
-/**
- * Validate Luganda text
- */
 export const validateLuganda = async (text) => {
   try {
-    const result = await callBackend('feedback', {
-      user_answer: text,
-      correct_answer: '',
-      context: {
-        validateOnly: true
-      }
-    });
-
-    return {
-      success: true,
-      isValid: result.success,
-      message: result.feedback || 'Text validated'
-    };
+    const result = await callBackend('feedback', { user_answer: text, correct_answer: '', context: { validateOnly: true } });
+    return { success: true, isValid: result.success, message: result.feedback || 'Text validated' };
   } catch (error) {
     console.error('Luganda validation error:', error);
     return { success: false, isValid: true, message: 'Validation unavailable' };
   }
 };
 
-// ============ PARSING HELPERS ============
-
-/**
- * Parse lesson content from AI response
- */
-const parseLesson = (content) => {
-  // Basic parsing - can be enhanced with more structured output
-  const sections = {
-    introduction: '',
-    explanation: '',
-    examples: [],
-    culturalNote: ''
-  };
-
-  // Simple section extraction
-  const lines = content.split('\n');
-  let currentSection = 'introduction';
-
-  lines.forEach(line => {
-    const lowerLine = line.toLowerCase();
-    if (lowerLine.includes('introduction') || lowerLine.includes('topic:')) {
-      currentSection = 'introduction';
-    } else if (lowerLine.includes('explanation') || lowerLine.includes('concept')) {
-      currentSection = 'explanation';
-    } else if (lowerLine.includes('example')) {
-      currentSection = 'examples';
-    } else if (lowerLine.includes('cultural') || lowerLine.includes('note')) {
-      currentSection = 'culturalNote';
-    }
-
-    if (currentSection === 'examples' && line.includes('-')) {
-      sections.examples.push(line.trim());
-    } else if (currentSection !== 'examples') {
-      sections[currentSection] += line + '\n';
-    }
-  });
-
-  return sections;
-};
-
-/**
- * Parse practice questions from AI response
- */
-const parsePracticeQuestions = (content) => {
-  const questions = [];
-  const lines = content.split('\n');
-  let currentQuestion = null;
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (/^\d+[\.\)]/.test(trimmed)) {
-      if (currentQuestion) questions.push(currentQuestion);
-      currentQuestion = {
-        question: trimmed.replace(/^\d+[\.\)]\s*/, ''),
-        type: detectQuestionType(trimmed),
-        options: [],
-        answer: null
-      };
-    } else if (currentQuestion && /^[a-d][\.\)]/i.test(trimmed)) {
-      currentQuestion.options.push(trimmed.replace(/^[a-d][\.\)]\s*/i, ''));
-    }
-  });
-
-  if (currentQuestion) questions.push(currentQuestion);
-  return questions;
-};
-
-/**
- * Detect question type from text
- */
-const detectQuestionType = (text) => {
-  const lower = text.toLowerCase();
-  if (lower.includes('fill in') || lower.includes('blank') || lower.includes('___')) {
-    return 'fill-blank';
-  } else if (lower.includes('translate')) {
-    return 'translate';
-  } else if (lower.includes('reorder') || lower.includes('arrange')) {
-    return 'reorder';
-  } else if (lower.includes('choose') || lower.includes('select')) {
-    return 'multiple-choice';
-  }
-  return 'open';
-};
-
-/**
- * Parse quiz from AI response
- */
-const parseQuiz = (content) => {
-  return {
-    questions: parsePracticeQuestions(content),
-    totalPoints: 0,
-    timeLimit: null
-  };
-};
-
-/**
- * Parse feedback from AI response
- */
-const parseFeedback = (content) => {
-  return {
-    summary: content,
-    score: null,
-    strengths: [],
-    weaknesses: [],
-    recommendations: []
-  };
-};
-
-/**
- * Parse overview from AI response
- */
-const parseOverview = (content) => {
-  return {
-    summary: content,
-    keyPoints: [],
-    examples: [],
-    commonMistakes: []
-  };
-};
-
-// ============ MOCK RESPONSES FOR DEVELOPMENT ============
-
-/**
- * Generate mock responses when no API is configured
- */
-const generateMockResponse = (prompt, mode) => {
-  const mockResponses = {
-    LESSON: `📘 **Introduction to Greetings in Luganda**
-
-Greetings are fundamental in Luganda culture. They show respect and build relationships. In this lesson, you'll learn the basic greetings used daily.
-
-**Concept Explanation:**
-In Luganda, greetings change based on the time of day and the age of the person you're greeting. It's important to use the correct form to show proper respect.
-
-**Examples:**
-- "Oli otya?" - How are you? (informal, to peers)
-- "Gyebale ko" - Well done / Thank you for your work
-- "Wasuze otya?" - Good morning (literally: How did you sleep?)
-- "Osiibye otya?" - Good afternoon/evening (literally: How was your day?)
-- "Webale" - Thank you
-
-**Cultural Note:**
-In Luganda culture, it's considered rude to jump straight into conversation without proper greetings. Always take time to greet and ask about someone's wellbeing first.`,
-
-    PRACTICE: `✍🏾 **Practice Questions: Greetings**
-
-1. Fill in the blank: "_____ otya?" (How are you?)
-   a) Oli
-   b) Gwe
-   c) Nze
-
-2. Translate to Luganda: "Good morning"
-   
-3. Choose the correct response to "Oli otya?":
-   a) Webale
-   b) Gyendi (I'm fine)
-   c) Wasuze otya
-
-4. Reorder these words to form a greeting: "otya / Wasuze"
-
-5. Fill in the blank: "_____ ko" (Thank you for your work)
-   a) Webale
-   b) Gyebale
-   c) Oli`,
-
-    QUIZ: `🧪 **Quiz: Basic Luganda Greetings**
-
-1. What is the appropriate greeting for the morning in Luganda?
-   a) Osiibye otya?
-   b) Wasuze otya?
-   c) Oli otya?
-
-2. Translate "Thank you" into Luganda.
-
-3. When would you use "Osiibye otya?"?
-   a) In the morning
-   b) In the afternoon/evening
-   c) At midnight
-
-4. Complete this greeting: "Gyebale ___"
-
-5. Why are greetings important in Luganda culture?`,
-
-    FEEDBACK: `📊 **Your Performance Feedback**
-
-**Overall:** Good effort! You're making progress with Luganda greetings.
-
-**Strengths:**
-- You correctly identified morning and evening greetings
-- Good understanding of "Webale" (Thank you)
-
-**Areas for Improvement:**
-- Remember: "Wasuze otya?" is for morning, "Osiibye otya?" is for afternoon/evening
-- Practice the response "Gyendi" (I'm fine)
-
-**Explanation of Mistakes:**
-Question 3: The correct answer was "Wasuze otya?" because this greeting specifically asks about how someone slept, making it appropriate for morning.
-
-Keep practicing! You're doing great! 💪`,
-
-    OVERVIEW: `📚 **Revision: Luganda Greetings**
-
-**Summary:**
-You've learned the essential greetings in Luganda, including time-based greetings and polite expressions.
-
-**Key Rules:**
-1. Always greet before starting a conversation
-2. Use "Wasuze otya?" in the morning
-3. Use "Osiibye otya?" in the afternoon/evening
-4. Show respect with "Gyebale ko"
-
-**Example Sentences:**
-- Wasuze otya? - Good morning
-- Gyendi - I'm fine
-- Webale nnyo - Thank you very much
-
-**Common Mistakes to Avoid:**
-- Mixing up morning and evening greetings
-- Forgetting to respond to greetings
-
-**Practice Suggestions:**
-- Greet family members in Luganda daily
-- Practice with a partner`,
-
-    TUTOR_CHAT: `Great question! 
-
-Based on what you've learned so far, I can help explain this.
-
-"Oli otya?" is an informal greeting meaning "How are you?" You can use it with friends and people your age.
-
-The common response is "Gyendi" which means "I'm fine" or "I'm well."
-
-Remember, in Luganda culture, it's polite to always ask about someone's wellbeing when you greet them!
-
-Would you like to practice more greetings? 😊`
-  };
-
-  return {
-    success: true,
-    content: mockResponses[mode] || mockResponses.TUTOR_CHAT
-  };
-};
-
-export default {
-  generateLesson,
-  generatePractice,
-  generateQuiz,
-  generateFeedback,
-  generateOverview,
-  chatWithTutor,
-  validateLuganda
-};
+ 
