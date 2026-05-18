@@ -249,14 +249,14 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  max-width: 180px;
+  max-width: 260px;
 }
 
 .topic-title {
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-block;
-  max-width: 140px;
+  max-width: 220px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -436,7 +436,7 @@
 
   .topic-badge {
     bottom: -30px;
-    max-width: 150px;
+    max-width: 220px;
   }
 
   .topic-title {

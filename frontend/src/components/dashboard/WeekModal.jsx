@@ -60,10 +60,8 @@ const WeekModal = ({ week, onClose }) => {
 
   // Handle quiz completion
   const handleQuizComplete = (score, total) => {
-    // Keep learning mode open so QuizView can render the results screen in-place.
-    // The QuizView persists attempts and sets its own `reviewing` state; closing
-    // the modal here would unmount it before users can see results.
-    // exitLearningMode()
+    // Close the learning modal when the quiz signals completion (e.g., user pressed "Done").
+    exitLearningMode()
   }
 
   // Handle practice completion
