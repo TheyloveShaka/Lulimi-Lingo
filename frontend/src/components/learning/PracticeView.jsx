@@ -18,9 +18,59 @@ import {
   Award
 } from 'lucide-react';
 import { generatePractice } from '../../services/aiService';
+import { generateCurriculumPractice, getTermCurriculum } from '../../services/curriculumService';
 import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
 import './PracticeView.css';
+
+const normalizeText = (value) => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[’']/g, '')
+  .replace(/[^a-z0-9]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const findMatchingMilestone = (termData, topicText) => {
+  const target = normalizeText(topicText);
+  if (!target || !Array.isArray(termData?.milestones)) return null;
+
+  return termData.milestones.find((milestone) => {
+    const milestoneValues = [
+      milestone?.milestone_name,
+      milestone?.topic,
+      milestone?.title,
+      ...(Array.isArray(milestone?.topics) ? milestone.topics : [])
+    ]
+      .filter(Boolean)
+      .map(normalizeText);
+
+    return milestoneValues.some((candidate) => candidate === target || candidate.includes(target) || target.includes(candidate));
+  }) || null;
+};
+
+const mapCurriculumScenarioToQuestion = (scenario, index) => {
+  const promptText = scenario?.independent?.situation || scenario?.context || scenario?.guided?.instructions || `Scenario ${index + 1}`;
+  const modelAnswer = scenario?.model_answer || scenario?.independent?.model_answer || scenario?.guided?.model_or_example || scenario?.feedback || '';
+
+  return {
+    id: scenario?.scenario_id || index + 1,
+    type: 'translate',
+    question: String(promptText),
+    options: [],
+    correctAnswer: String(modelAnswer),
+    acceptableAnswers: modelAnswer ? [String(modelAnswer)] : undefined,
+    hint: scenario?.guided?.instructions || scenario?.feedback || 'Use the lesson vocabulary and structure.',
+    explanation: scenario?.feedback || String(modelAnswer)
+  };
+};
+
+const extractCurriculumQuestions = (content) => {
+  if (!content) return [];
+  if (Array.isArray(content.questions)) return content.questions;
+  if (Array.isArray(content.scenarios)) return content.scenarios.map(mapCurriculumScenarioToQuestion);
+  return [];
+};
 
 const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   const { getSyllabusContext, recordMistake } = useLearning();
@@ -114,18 +164,39 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     setShowSummary(false);
 
     const context = getSyllabusContext();
+    const classLevel = context.classLevel || context.class || topic?.classLevel || topic?.class || 'S1';
+    const term = context.term || context.weekData?.term || topic?.term || 1;
+    const topicTitle = topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Practice';
 
     try {
+      const termCurriculum = await getTermCurriculum(classLevel, term);
+      const matchingMilestone = findMatchingMilestone(termCurriculum?.data, topicTitle)
+        || findMatchingMilestone(termCurriculum?.data, context.weekData?.topic)
+        || termCurriculum?.data?.milestones?.[0];
+
+      if (termCurriculum.success && matchingMilestone?.id) {
+        const curriculumResult = await generateCurriculumPractice(classLevel, term, matchingMilestone.id, topicTitle, 4);
+        const curriculumQuestions = extractCurriculumQuestions(curriculumResult?.content)
+          .map((q, idx) => normalizeQuestion(q, idx));
+
+        if (curriculumResult.success && curriculumQuestions.length > 0) {
+          setQuestions(curriculumQuestions);
+          setIsCached(Boolean(curriculumResult.cached));
+          setProvider(curriculumResult.provider || 'curriculum');
+          return;
+        }
+      }
+
       const result = await generatePractice({
-        topic: topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Practice',
+        topic: topicTitle,
         proficiencyLevel: context.proficiencyLevel,
         commonMistakes: context.commonMistakes,
-        language: context.language
+        language: context.language,
+        topicObjectives: context.weekData?.objectives || []
       });
 
       if (result.success) {
-        // Parse questions or use mock data
-        const parsedQuestions = result.questions?.length > 0 
+        const parsedQuestions = result.questions?.length > 0
           ? result.questions.map((q, idx) => normalizeQuestion(q, idx))
           : generateMockQuestions(topic);
         setQuestions(parsedQuestions);

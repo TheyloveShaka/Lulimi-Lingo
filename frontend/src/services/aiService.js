@@ -110,12 +110,13 @@ export const generateLesson = async ({ classLevel, term, week, topic, objectives
 /**
  * Generate practice questions
  */
-export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes, language }) => {
+export const generatePractice = async ({ topic, proficiencyLevel, commonMistakes, language, topicObjectives }) => {
   const result = await callBackend('practice', {
     topic: topic,
     proficiency_level: proficiencyLevel || 'beginner',
     common_mistakes: commonMistakes || [],
-    language: language
+    language: language,
+    topic_objectives: topicObjectives || []
   });
 
   const questionsPayload = result.questions || result.practice?.questions || result.data?.questions;
