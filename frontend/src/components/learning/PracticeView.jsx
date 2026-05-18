@@ -277,7 +277,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         proficiencyLevel: context.proficiencyLevel,
         commonMistakes: context.commonMistakes,
         language: context.language,
-        topicObjectives: context.weekData?.objectives || []
+        topicObjectives: context.weekData?.objectives || [],
+        skipCache: true // Always get fresh practice content
       });
 
       console.log('🤖 AI practice result:', { success: result.success, questions: result.questions?.length || 0 });

@@ -113,7 +113,8 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
         topic: topic?.title || topic?.topics?.[0] || context.weekData?.topic || 'Language Lesson',
         objectives: topic?.objectives || context.weekData?.objectives || [],
         language: context.language,
-        proficiencyLevel: context.proficiencyLevel
+        proficiencyLevel: context.proficiencyLevel,
+        skipCache: true // Always get fresh lesson content
       });
 
       if (result.success) {

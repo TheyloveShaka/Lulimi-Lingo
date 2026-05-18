@@ -144,7 +144,7 @@ const withRetries = async (worker, validate, attempts = 3, delayMs = 600) => {
   return null;
 };
 
-export const generateLesson = async ({ classLevel, term, week, topic, objectives = [], language, proficiencyLevel }) => {
+export const generateLesson = async ({ classLevel, term, week, topic, objectives = [], language, proficiencyLevel, skipCache = false }) => {
   const payload = {
     class_level: classLevel,
     term,
@@ -152,7 +152,9 @@ export const generateLesson = async ({ classLevel, term, week, topic, objectives
     topic,
     objectives,
     language,
-    proficiency_level: proficiencyLevel
+    proficiency_level: proficiencyLevel,
+    skip_cache: skipCache,
+    _nonce: Date.now() // Prevent cache collisions across views
   };
 
   const worker = () => callBackend('lesson', payload);
@@ -171,13 +173,15 @@ export const generateLesson = async ({ classLevel, term, week, topic, objectives
   return { success: false, error: 'AI did not return a valid lesson' };
 };
 
-export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', commonMistakes = [], language, topicObjectives = [] }) => {
+export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', commonMistakes = [], language, topicObjectives = [], skipCache = false }) => {
   const payload = {
     topic,
     proficiency_level: proficiencyLevel,
     common_mistakes: commonMistakes,
     language,
-    topic_objectives: topicObjectives
+    topic_objectives: topicObjectives,
+    skip_cache: skipCache,
+    _nonce: Date.now() // Prevent cache collisions across views
   };
 
   const validate = (res) => {
@@ -215,8 +219,16 @@ export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', c
   return { success: false, error: 'AI did not return valid practice questions' };
 };
 
-export const generateQuiz = async ({ topic, numberOfQuestions = 5, assessmentCriteria = [], language, proficiencyLevel }) => {
-  const payload = { topic, number_of_questions: numberOfQuestions, assessment_criteria: assessmentCriteria, language, proficiency_level: proficiencyLevel };
+export const generateQuiz = async ({ topic, numberOfQuestions = 5, assessmentCriteria = [], language, proficiencyLevel, skipCache = false }) => {
+  const payload = { 
+    topic, 
+    number_of_questions: numberOfQuestions, 
+    assessment_criteria: assessmentCriteria, 
+    language, 
+    proficiency_level: proficiencyLevel,
+    skip_cache: skipCache,
+    _nonce: Date.now() // Prevent cache collisions across views
+  };
 
   const validate = (res) => {
     const quizPayload = res.quiz || res.data;

@@ -22,7 +22,9 @@ const buildRequestKey = (contentType, payload = {}) => {
     proficiencyLevel: normalizeText(payload.proficiencyLevel),
     objectives: Array.isArray(payload.objectives) ? payload.objectives.map(normalizeText).sort() : [],
     criteria: Array.isArray(payload.criteria) ? payload.criteria.map(normalizeText).sort() : [],
-    commonMistakes: Array.isArray(payload.commonMistakes) ? payload.commonMistakes.map(normalizeText).sort() : []
+    commonMistakes: Array.isArray(payload.commonMistakes) ? payload.commonMistakes.map(normalizeText).sort() : [],
+    // Nonce ensures cache busting when frontend requests fresh content
+    nonce: payload._nonce ? String(payload._nonce) : ''
   }
 
   return crypto.createHash('sha256').update(JSON.stringify(keyPayload)).digest('hex')

@@ -229,7 +229,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
         numberOfQuestions,
         assessmentCriteria: context.weekData?.assessmentTypes || [],
         language: context.language,
-        proficiencyLevel: context.proficiencyLevel
+        proficiencyLevel: context.proficiencyLevel,
+        skipCache: true // Always get fresh quiz content
       });
 
       if (result.success) {
