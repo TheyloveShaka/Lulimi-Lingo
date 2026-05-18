@@ -172,6 +172,15 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     };
   };
 
+  const formatFeedbackParagraphs = (text) => {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    return source
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  };
+
   // Timer
   useEffect(() => {
     if (quizState !== 'taking' || !timeRemaining) return;
@@ -672,8 +681,12 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
         {feedback && (
           <div className="ai-feedback">
             <h3>📊 Teacher's Feedback</h3>
-            <div className="feedback-content">
-              {feedback.feedback?.summary || feedback.raw}
+            <div className="feedback-content feedback-content-polished">
+              {formatFeedbackParagraphs(feedback.feedback?.summary || feedback.raw).map((paragraph, index) => (
+                <div key={index} className="feedback-paragraph">
+                  {paragraph}
+                </div>
+              ))}
             </div>
             {feedback.encouragement && (
               <p className="encouragement">{feedback.encouragement}</p>
@@ -705,7 +718,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
             <span className="quiz-subtitle">🧪 Quiz Mode</span>
             <div className="quiz-meta-tags">
               <span className="quiz-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
-              {isCached && <span className="quiz-meta-tag cached">Reused from library</span>}
+              {isCached && <span className="quiz-meta-tag cached">Library-backed</span>}
             </div>
           </div>
         </div>

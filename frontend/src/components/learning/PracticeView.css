@@ -147,8 +147,12 @@
 }
 
 .practice-meta-tag.cached {
-  background: rgba(16, 185, 129, 0.28);
-  border-color: rgba(16, 185, 129, 0.48);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0.12rem 0.5rem;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
 }
 
 .practice-progress {

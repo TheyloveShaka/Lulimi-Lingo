@@ -204,6 +204,7 @@ export const generatePractice = async (req, res) => {
       topic,
       proficiencyLevel = req.body.proficiency_level || 'beginner',
       commonMistakes = req.body.common_mistakes || [],
+      topicObjectives = req.body.topic_objectives || [],
       language = req.body.language || 'luganda'
     } = req.body
 
@@ -214,7 +215,7 @@ export const generatePractice = async (req, res) => {
       })
     }
 
-    const requestMeta = { topic, proficiencyLevel, commonMistakes, language }
+    const requestMeta = { topic, proficiencyLevel, commonMistakes, objectives: topicObjectives, language }
     const requestKey = buildRequestKey('practice', requestMeta)
     const cached = await loadFromCache('practice', requestKey)
 
@@ -234,6 +235,7 @@ export const generatePractice = async (req, res) => {
       topic,
       proficiencyLevel,
       commonMistakes,
+      topicObjectives,
       language
     })
 

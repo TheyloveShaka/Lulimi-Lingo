@@ -78,6 +78,15 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
     };
   };
 
+  const formatParagraphs = (text) => {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    return source
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  };
+
   useEffect(() => {
     loadLesson();
   }, [topic]);
@@ -192,7 +201,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
             <span className="lesson-subtitle">📘 Lesson Mode</span>
             <div className="lesson-meta-tags">
               <span className="lesson-meta-tag">{provider === 'openai' ? 'GPT-4o' : 'Gemini fallback'}</span>
-              {isCached && <span className="lesson-meta-tag cached">Reused from library</span>}
+              {isCached && <span className="lesson-meta-tag cached">Library-backed</span>}
             </div>
           </div>
         </div>
@@ -242,8 +251,12 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
           {currentSection === 0 && (
             <div className="section-content introduction">
               <h3>🎯 Introduction</h3>
-              <div className="content-text">
-                {lesson?.introduction || lesson?.raw?.split('\n\n')[0] || 'Welcome to this lesson!'}
+              <div className="content-stack">
+                {formatParagraphs(lesson?.introduction || lesson?.raw?.split('\n\n')[0] || 'Welcome to this lesson!').map((paragraph, index) => (
+                  <div key={index} className="content-card content-card-soft">
+                    {paragraph}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -251,8 +264,12 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
           {currentSection === 1 && (
             <div className="section-content explanation">
               <h3>💡 Concept Explanation</h3>
-              <div className="content-text">
-                {lesson?.explanation || lesson?.raw?.split('\n\n')[1] || 'Understanding the concept...'}
+              <div className="content-stack">
+                {formatParagraphs(lesson?.explanation || lesson?.raw?.split('\n\n')[1] || 'Understanding the concept...').map((paragraph, index) => (
+                  <div key={index} className="content-card">
+                    {paragraph}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -284,8 +301,12 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
                     );
                   })
                 ) : (
-                  <div className="content-text">
-                    {lesson?.raw?.split('**Examples**')[1]?.split('**')[0] || 'Examples will appear here...'}
+                  <div className="content-stack">
+                    {formatParagraphs(lesson?.raw?.split('**Examples**')[1]?.split('**')[0] || 'Examples will appear here...').map((paragraph, index) => (
+                      <div key={index} className="content-card content-card-muted">
+                        {paragraph}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -297,8 +318,12 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
               <h3>🌍 Cultural Note</h3>
               <div className="cultural-card">
                 <div className="cultural-icon">🇺🇬</div>
-                <div className="content-text">
-                  {lesson?.culturalNote || lesson?.raw?.split('Cultural Note')[1] || 'Cultural context helps you understand how the language is used in real life.'}
+                <div className="content-stack cultural-stack">
+                  {formatParagraphs(lesson?.culturalNote || lesson?.raw?.split('Cultural Note')[1] || 'Cultural context helps you understand how the language is used in real life.').map((paragraph, index) => (
+                    <div key={index} className="content-card content-card-warm">
+                      {paragraph}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

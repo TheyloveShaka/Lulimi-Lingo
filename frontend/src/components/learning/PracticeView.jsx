@@ -355,7 +355,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
             <span className="practice-subtitle">✍🏾 Practice Mode</span>
             <div className="practice-meta-tags">
               <span className="practice-meta-tag">{provider === 'openai' ? 'GPT-4o' : (provider === 'curriculum' ? 'Curriculum' : 'Gemini fallback')}</span>
-              {isCached && provider === 'curriculum' && <span className="practice-meta-tag cached">Reused from library</span>}
+              {isCached && <span className="practice-meta-tag cached">Library-backed</span>}
             </div>
           </div>
         </div>

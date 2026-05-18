@@ -23,17 +23,22 @@ class PracticeGeneratorService {
     topic, 
     proficiencyLevel = 'beginner', 
     commonMistakes = [],
+    topicObjectives = [],
     language = 'luganda'
   }) {
     const languageName = language?.toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
     const mistakesText = commonMistakes.length
       ? `Address these mistakes: ${commonMistakes.join(', ')}`
       : '';
+    const objectivesText = Array.isArray(topicObjectives) && topicObjectives.length
+      ? `\nTopic objectives: ${topicObjectives.join(', ')}`
+      : '';
 
     const prompt = `Generate 5 varied practice questions for ${languageName} topic: "${topic}"
 
 Proficiency level: ${proficiencyLevel}
 ${mistakesText}
+${objectivesText}
 
 Include these question types:
 1. Fill in the blank

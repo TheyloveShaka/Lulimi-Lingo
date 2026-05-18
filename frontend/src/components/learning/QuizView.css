@@ -214,8 +214,27 @@
 }
 
 .quiz-meta-tag.cached {
-  background: rgba(16, 185, 129, 0.28);
-  border-color: rgba(16, 185, 129, 0.48);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0.12rem 0.5rem;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.feedback-content-polished {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.feedback-paragraph {
+  padding: 1rem 1.1rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 
 .quiz-timer {
