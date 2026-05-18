@@ -67,8 +67,21 @@ const mapCurriculumScenarioToQuestion = (scenario, index) => {
 
 const extractCurriculumQuestions = (content) => {
   if (!content) return [];
-  if (Array.isArray(content.questions)) return content.questions;
-  if (Array.isArray(content.scenarios)) return content.scenarios.map(mapCurriculumScenarioToQuestion);
+  const resolvedContent = typeof content === 'string'
+    ? (() => {
+        try {
+          return JSON.parse(content);
+        } catch {
+          return null;
+        }
+      })()
+    : content;
+
+  if (!resolvedContent) return [];
+  if (Array.isArray(resolvedContent.questions)) return resolvedContent.questions;
+  if (Array.isArray(resolvedContent.scenarios)) return resolvedContent.scenarios.map(mapCurriculumScenarioToQuestion);
+  if (Array.isArray(resolvedContent.practice?.questions)) return resolvedContent.practice.questions;
+  if (Array.isArray(resolvedContent.data?.questions)) return resolvedContent.data.questions;
   return [];
 };
 
