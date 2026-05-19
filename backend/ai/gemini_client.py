@@ -133,12 +133,15 @@ class GeminiClient:
         """Generate structured lesson content from syllabus metadata.
         
         Args:
-            syllabus_meta: Dictionary with title, objectives, level, term, week, topics
+            syllabus_meta: Dictionary with title, objectives, level, term, week, topics, language
             
         Returns:
             Structured lesson with introduction, explanation, examples, exercises, etc.
         """
-        prompt = f"""Generate a comprehensive Luganda language lesson with the following details:
+        language = syllabus_meta.get('language', 'luganda').lower()
+        language_name = 'Runyankole' if language == 'runyankole' else 'Luganda'
+        
+        prompt = f"""Generate a comprehensive {language_name} language lesson with the following details:
 
 Title: {syllabus_meta.get('title', 'Untitled')}
 Class Level: {syllabus_meta.get('level', 'Beginner')}
@@ -151,15 +154,16 @@ Please provide a structured lesson with the following sections:
 
 1. **Introduction** (2-3 sentences introducing the topic in an engaging way)
 2. **Main Content** (detailed explanation of the concepts, vocabulary, and grammar)
-3. **Examples** (5-7 practical examples with Luganda text, English translation, and usage context)
-4. **Cultural Context** (relevant cultural notes about Luganda language and Ugandan culture)
+3. **Examples** (5-7 practical examples with {language_name} text, English translation, and usage context)
+4. **Cultural Context** (relevant cultural notes about {language_name} language and Ugandan culture)
 5. **Practice Exercises** (3-5 exercises for students to practice)
 6. **Key Takeaways** (3-5 main points students should remember)
 
-Format: Provide clear, beginner-friendly explanations. Use proper Luganda spelling and grammar.
+Format: Provide clear, beginner-friendly explanations. Use proper {language_name} spelling and grammar.
 Make the content engaging and culturally appropriate."""
 
         result = self.generate(prompt, max_tokens=2048, temperature=0.3)
+        
         
         # Try to parse the response into structured format
         if "raw" in result:

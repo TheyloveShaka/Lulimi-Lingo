@@ -20,7 +20,8 @@ class LessonGenerator:
         term: str,
         week: str,
         topic: str,
-        objectives: List[str]
+        objectives: List[str],
+        language: str = 'luganda'
     ) -> Dict[str, Any]:
         """
         Generate a complete lesson.
@@ -31,12 +32,15 @@ class LessonGenerator:
             week: e.g., "Week 1"
             topic: The lesson topic
             objectives: Learning objectives
+            language: The target language (luganda, runyankole, etc.)
             
         Returns:
             Structured lesson content
         """
         
-        prompt = f"""Generate a Luganda lesson for:
+        language_name = 'Runyankole' if language.lower() == 'runyankole' else 'Luganda'
+        
+        prompt = f"""Generate a {language_name} lesson for:
 Class: {class_level}
 Term: {term}
 Week: {week}
@@ -46,7 +50,7 @@ Objectives: {', '.join(objectives) if objectives else 'General introduction to t
 Provide the lesson in this structure:
 1. Introduction (2-3 sentences introducing the topic)
 2. Explanation (main concept explanation)
-3. Examples (5 examples with Luganda, English translation, and usage)
+3. Examples (5 examples with text in {language_name}, English translation, and usage)
 4. Cultural Note (relevant cultural context)
 5. Key Points (3-5 key takeaways)
 
@@ -56,14 +60,14 @@ Format your response as JSON."""
             if self.tutor.model:
                 response = await self.tutor.chat(prompt, [], [])
                 # Parse response into structured format
-                return self._parse_lesson(response["response"], topic)
+                return self._parse_lesson(response["response"], topic, language_name)
             else:
-                return self._mock_lesson(topic)
+                return self._mock_lesson(topic, language_name)
         except Exception as e:
             logger.error(f"Lesson generation error: {e}")
-            return self._mock_lesson(topic)
+            return self._mock_lesson(topic, language_name)
     
-    def _parse_lesson(self, content: str, topic: str) -> Dict[str, Any]:
+    def _parse_lesson(self, content: str, topic: str, language_name: str = 'Luganda') -> Dict[str, Any]:
         """Parse AI response into structured lesson."""
         # Simple parsing - could be enhanced with more robust parsing
         sections = {
@@ -101,31 +105,42 @@ Format your response as JSON."""
         for key in ['introduction', 'explanation', 'culturalNote']:
             sections[key] = sections[key].strip()
         
-        return sections if sections['introduction'] else self._mock_lesson(topic)
+        return sections if sections['introduction'] else self._mock_lesson(topic, language_name)
     
-    def _mock_lesson(self, topic: str) -> Dict[str, Any]:
+    def _mock_lesson(self, topic: str, language_name: str = 'Luganda') -> Dict[str, Any]:
         """Generate mock lesson for development."""
+        
+        # Language-specific examples
+        luganda_examples = [
+            {"text": "Oli otya?", "english": "How are you?", "usage": "Informal, to peers"},
+            {"text": "Wasuze otya?", "english": "Good morning", "usage": "Morning greeting, asks 'how did you sleep?'"},
+            {"text": "Osiibye otya?", "english": "Good afternoon/evening", "usage": "Used after noon"},
+            {"text": "Gyendi", "english": "I'm fine", "usage": "Response to greetings"},
+            {"text": "Webale", "english": "Thank you", "usage": "Expressing gratitude"}
+        ]
+        
+        runyankole_examples = [
+            {"text": f"{language_name} example phrase 1", "english": "English translation", "usage": "Common greeting"},
+            {"text": f"{language_name} example phrase 2", "english": "English translation", "usage": "Simple response"},
+            {"text": f"{language_name} example phrase 3", "english": "English translation", "usage": "Polite expression"},
+            {"text": f"{language_name} example phrase 4", "english": "English translation", "usage": "Thank you"},
+            {"text": f"{language_name} example phrase 5", "english": "English translation", "usage": "I'm fine"}
+        ]
+        
+        examples = luganda_examples if language_name == 'Luganda' else runyankole_examples
+        
         return {
-            "introduction": f"Welcome to today's lesson on {topic}! In Luganda culture, this topic is very important for daily communication and building relationships.",
-            "explanation": """Luganda greetings change based on the time of day and the age of the person you're greeting. It's important to use the correct form to show proper respect.
+            "introduction": f"Welcome to today's lesson on {topic}! In {language_name} culture, this topic is very important for daily communication and building relationships.",
+            "explanation": f"""{language_name} greetings change based on the time of day and the age of the person you're greeting. It's important to use the correct form to show proper respect.
 
-There are three main types of greetings:
-1. Morning greetings (Wasuze otya?)
-2. Afternoon/evening greetings (Osiibye otya?)
-3. General greetings (Oli otya?)""",
-            "examples": [
-                {"luganda": "Oli otya?", "english": "How are you?", "usage": "Informal, to peers"},
-                {"luganda": "Wasuze otya?", "english": "Good morning", "usage": "Morning greeting, asks 'how did you sleep?'"},
-                {"luganda": "Osiibye otya?", "english": "Good afternoon/evening", "usage": "Used after noon"},
-                {"luganda": "Gyendi", "english": "I'm fine", "usage": "Response to greetings"},
-                {"luganda": "Webale", "english": "Thank you", "usage": "Expressing gratitude"}
-            ],
-            "culturalNote": "In Luganda culture, it's considered rude to jump straight into conversation without proper greetings. Always take time to greet and ask about someone's wellbeing first. Younger people are expected to initiate greetings with elders, and females traditionally kneel when greeting elders.",
+There are several main types of greetings with different contexts and uses for formal and informal settings.""",
+            "examples": examples,
+            "culturalNote": f"In {language_name} culture, it's considered rude to jump straight into conversation without proper greetings. Always take time to greet and ask about someone's wellbeing first. Younger people are expected to initiate greetings with elders, and proper respect forms are essential.",
             "keyPoints": [
                 "Always greet before starting a conversation",
-                "Use appropriate greetings based on time of day",
+                f"Use appropriate greetings in {language_name}",
                 "Show respect to elders in your greetings",
-                "Respond to 'Oli otya?' with 'Gyendi' (I'm fine)",
-                "Use 'Webale' to say thank you"
+                "Respond appropriately when greeted",
+                "Cultural respect is essential in communication"
             ]
         }

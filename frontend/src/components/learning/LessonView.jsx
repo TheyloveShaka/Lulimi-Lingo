@@ -33,10 +33,13 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
   const [currentSection, setCurrentSection] = useState(0);
   const [sectionsCompleted, setSectionsCompleted] = useState([]);
 
+  const { language: selectedLanguage = 'luganda' } = useLearning();
+  const languageLabel = selectedLanguage?.toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda';
+  
   const loadingMessages = [
     'Knowledge grows with every question.',
     'Small steps become language fluency.',
-    'Your next Luganda breakthrough is loading.'
+    `Your next ${languageLabel} breakthrough is loading.`
   ];
 
   const sections = [
@@ -48,17 +51,21 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
 
   const normalizeExample = (example) => {
     if (typeof example === 'string') {
-      const [lugandaText, englishText = ''] = example.split(' - ');
+      const [targetLangText, englishText = ''] = example.split(' - ');
       return {
-        lugandaText: lugandaText || example,
+        targetLangText: targetLangText || example,
         englishText
       };
     }
 
     if (example && typeof example === 'object') {
-      const lugandaText =
+      // Handle both Luganda and Runyankole formats
+      const targetLangText =
         example.luganda ||
+        example.runyankole ||
         example.lugandaText ||
+        example.runyankoleText ||
+        example.targetLang ||
         example.example ||
         example.text ||
         String(example.raw || '');
@@ -69,11 +76,11 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
         example.meaning ||
         '';
 
-      return { lugandaText, englishText };
+      return { targetLangText, englishText };
     }
 
     return {
-      lugandaText: String(example || ''),
+      targetLangText: String(example || ''),
       englishText: ''
     };
   };
@@ -292,7 +299,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
                       >
                         <span className="example-number">{index + 1}</span>
                         <div className="example-content">
-                          <p className="luganda-text">{parsedExample.lugandaText}</p>
+                          <p className="target-lang-text">{parsedExample.targetLangText}</p>
                           <p className="english-text">{parsedExample.englishText}</p>
                         </div>
                         <button className="audio-btn" title="Listen">

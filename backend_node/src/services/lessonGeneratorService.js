@@ -41,7 +41,7 @@ Provide the lesson in this JSON structure:
   "explanation": "Main concept explanation with details",
   "examples": [
     {
-      "luganda": "word or phrase",
+      "text": "word or phrase in ${languageName}",
       "english": "English translation",
       "usage": "How to use it"
     }
@@ -102,44 +102,44 @@ Return ONLY valid JSON.`;
     const fallbackExamples = languageName === 'Luganda'
       ? [
         {
-          luganda: "Oli otya?",
+          text: "Oli otya?",
           english: "How are you?",
           usage: "Informal greeting to peers"
         },
         {
-          luganda: "Webale",
+          text: "Webale",
           english: "Thank you",
           usage: "Expressing gratitude"
         },
         {
-          luganda: "Gyendi",
+          text: "Gyendi",
           english: "I'm fine",
           usage: "Positive response to greetings"
         },
         {
-          luganda: "Simanyi",
+          text: "Simanyi",
           english: "I don't understand",
           usage: "Asking for clarification"
         },
         {
-          luganda: "Nsonyivu",
+          text: "Nsonyivu",
           english: "I'm sorry",
           usage: "Expressing apology"
         }
       ]
       : [
         {
-          luganda: `${languageName} example phrase 1`,
+          text: `${languageName} example phrase 1`,
           english: "English translation",
           usage: "Common greeting"
         },
         {
-          luganda: `${languageName} example phrase 2`,
+          text: `${languageName} example phrase 2`,
           english: "English translation",
           usage: "Simple response"
         },
         {
-          luganda: `${languageName} example phrase 3`,
+          text: `${languageName} example phrase 3`,
           english: "English translation",
           usage: "Polite expression"
         }
@@ -160,7 +160,7 @@ There are several key aspects to understanding ${topic}:
       keyPoints: [
         `Always use proper ${topic} in appropriate contexts`,
         "Consider the age and status of the person you're communicating with",
-        "Cultural norms are important in Luganda communication",
+        `Cultural norms are important in ${languageName} communication`,
         `Practice ${topic} regularly for fluency`,
         "Learn from native speakers when possible"
       ],
