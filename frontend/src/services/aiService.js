@@ -80,15 +80,36 @@ const callBackend = async (endpoint, payload) => {
 };
 
 // ----------------- Helpers and Parsers -----------------
-const parsePracticeQuestions = (payload) => {
+const parsePracticeQuestions = (payload, seen = new Set()) => {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
-  try {
-    if (typeof payload === 'string') return JSON.parse(payload);
-    if (typeof payload === 'object' && payload.questions) return payload.questions;
-  } catch (e) {
-    console.warn('Failed to parse practice payload', e);
+
+  if (typeof payload === 'string') {
+    try {
+      return parsePracticeQuestions(JSON.parse(payload), seen);
+    } catch (e) {
+      console.warn('Failed to parse practice payload string', e);
+      return [];
+    }
   }
+
+  if (typeof payload !== 'object' || seen.has(payload)) return [];
+  seen.add(payload);
+
+  const candidates = [
+    payload.questions,
+    payload.practice?.questions,
+    payload.data?.questions,
+    payload.content?.questions,
+    payload.content?.scenarios,
+    payload.scenarios
+  ];
+
+  for (const candidate of candidates) {
+    const parsed = parsePracticeQuestions(candidate, seen);
+    if (parsed.length > 0) return parsed;
+  }
+
   return [];
 };
 
@@ -189,21 +210,31 @@ export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', c
     const qs = Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload);
     if (!Array.isArray(qs) || qs.length === 0) return false;
     for (const q of qs) {
-      if (!q || !q.question) return false;
+      const questionText = q?.question || q?.prompt || q?.text;
+      if (!q || !questionText) return false;
       const type = (q.type || '').toLowerCase();
       if (type === 'multiple-choice') {
         if (!Array.isArray(q.options) || q.options.length < 2) return false;
-        if (!q.correctAnswer) return false;
+        if (!(q.correctAnswer || q.correct_answer || q.answer)) return false;
         // Accept answers that may not exactly match option string formatting
         // (AI may return slightly different punctuation/capitalization).
         // Only treat as invalid when options and correctAnswer are both missing or malformed.
       }
       if (type === 'translate' || type === 'fill-blank') {
-        if (!q.correctAnswer && !Array.isArray(q.acceptableAnswers)) return false;
+        if (!(q.correctAnswer || q.correct_answer || q.answer) && !Array.isArray(q.acceptableAnswers) && !Array.isArray(q.acceptable_answers)) return false;
       }
       if (type === 'reorder') {
-        if (!Array.isArray(q.tokens) || !Array.isArray(q.correctOrder)) return false;
+        // Accept either: old format (tokens + correctOrder arrays) or new format (correctAnswer string)
+        const hasOldFormat = Array.isArray(q.tokens) && Array.isArray(q.correctOrder);
+        const correctValue = q.correctAnswer || q.correct_answer || q.answer;
+        const hasNewFormat = correctValue && typeof correctValue === 'string';
+        if (!hasOldFormat && !hasNewFormat) return false;
       }
+         if (type === 'matching') {
+           // Matching needs options and some form of correctAnswer
+           if (!Array.isArray(q.options) || q.options.length < 2) return false;
+           if (!(q.correctAnswer || q.correct_answer || q.answer)) return false;
+         }
     }
     return true;
   };
