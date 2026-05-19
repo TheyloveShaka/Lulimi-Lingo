@@ -21,6 +21,13 @@ import {
 import { generateQuiz, generateFeedback } from '../../services/aiService';
 import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
+import {
+  normalizeQuestions,
+  isQuestionAnswered,
+  isAnswerCorrect,
+  formatAnswerForReview,
+  formatCorrectAnswer
+} from './questionUtils';
 import './QuizView.css';
 
 const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
@@ -45,132 +52,6 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     'Strong foundations come from steady revision.',
     'You are training your memory and confidence.'
   ];
-
-  const normalizeQuestionType = (type, questionText = '', options = []) => {
-    const raw = String(type || '').toLowerCase().replace(/[\s_]+/g, '-');
-    const prompt = String(questionText || '').toLowerCase();
-
-    if (raw.includes('multiple') || raw.includes('choice') || raw === 'mcq') return 'multiple-choice';
-    if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
-    if (raw.includes('translate') || raw.includes('translation')) return 'translate';
-    if (raw.includes('reorder') || raw.includes('arrange')) return 'reorder';
-    if (raw.includes('true-false') || raw.includes('truefalse') || raw === 'tf') return 'true-false';
-    if (raw.includes('match')) return 'matching';
-
-    if (prompt.includes('translate')) return 'translate';
-    if (prompt.includes('fill') || prompt.includes('blank')) return 'fill-blank';
-    if (Array.isArray(options) && options.length === 2 && options.every((opt) => ['true', 'false'].includes(String(opt).toLowerCase()))) {
-      return 'true-false';
-    }
-    if (Array.isArray(options) && options.length > 0) return 'multiple-choice';
-    return 'translate';
-  };
-
-  const normalizeQuestion = (question, index) => {
-    const options =
-      question?.options ||
-      question?.choices ||
-      question?.answerOptions ||
-      question?.answer_options ||
-      [];
-
-    const normalizedOptions = Array.isArray(options)
-      ? options.map((opt) => String(opt))
-      : [];
-
-    const pairsSource =
-      question?.pairs ||
-      question?.matchingPairs ||
-      question?.matching_pairs ||
-      question?.matches ||
-      [];
-
-    const normalizedPairs = Array.isArray(pairsSource)
-      ? pairsSource
-          .map((pair) => {
-            if (Array.isArray(pair)) {
-              return { left: String(pair[0]), right: String(pair[1]) };
-            }
-            return {
-              left: String(pair?.left ?? pair?.prompt ?? pair?.term ?? ''),
-              right: String(pair?.right ?? pair?.answer ?? pair?.match ?? '')
-            };
-          })
-          .filter((pair) => pair.left && pair.right)
-      : [];
-
-    const tokensSource =
-      question?.tokens ||
-      question?.items ||
-      question?.wordBank ||
-      question?.word_bank ||
-      question?.shuffle ||
-      [];
-
-    const normalizedTokens = Array.isArray(tokensSource)
-      ? tokensSource.map((token) => String(token))
-      : [];
-
-    const orderSource =
-      question?.correctOrder ||
-      question?.correct_order ||
-      question?.order ||
-      question?.sequence ||
-      [];
-
-    const normalizedOrder = Array.isArray(orderSource)
-      ? orderSource.map((token) => String(token))
-      : [];
-
-    const correctAnswer =
-      question?.correctAnswer ??
-      question?.correct_answer ??
-      question?.answer ??
-      question?.correct ??
-      '';
-
-    let normalizedType = normalizeQuestionType(
-      question?.type || question?.questionType || question?.question_type,
-      question?.question,
-      normalizedOptions
-    );
-
-    if (normalizedPairs.length > 0) {
-      normalizedType = 'matching';
-    }
-
-    if (normalizedOrder.length > 0 && normalizedTokens.length > 0) {
-      normalizedType = 'reorder';
-    }
-
-    return {
-      id: question?.id || index + 1,
-      type: normalizedType,
-      question: String(question?.question || question?.prompt || `Question ${index + 1}`),
-      options: normalizedType === 'true-false' && normalizedOptions.length === 0
-        ? ['True', 'False']
-        : normalizedOptions,
-      correctAnswer: String(correctAnswer),
-      acceptableAnswers: Array.isArray(question?.acceptableAnswers)
-        ? question.acceptableAnswers
-        : Array.isArray(question?.acceptable_answers)
-          ? question.acceptable_answers
-          : undefined,
-      points: Number(question?.points || 1),
-      explanation: question?.explanation || '',
-      pairs: normalizedPairs,
-      tokens: normalizedTokens,
-      correctOrder: normalizedOrder
-    };
-  };
-
-  const normalizeQuiz = (quizData) => {
-    const sourceQuestions = Array.isArray(quizData?.questions) ? quizData.questions : [];
-    return {
-      ...quizData,
-      questions: sourceQuestions.map((q, idx) => normalizeQuestion(q, idx))
-    };
-  };
 
   const formatFeedbackParagraphs = (text) => {
     const source = String(text || '').trim();
@@ -235,8 +116,8 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
       if (result.success) {
         const quizData = result.quiz?.questions?.length > 0
-          ? normalizeQuiz(result.quiz)
-          : { questions: generateMockQuizQuestions(topic, numberOfQuestions) };
+          ? { ...result.quiz, questions: normalizeQuestions(result.quiz.questions) }
+          : { questions: normalizeQuestions(generateMockQuizQuestions(topic, numberOfQuestions)) };
         
         setQuiz(quizData);
         setIsCached(Boolean(result.cached));
@@ -434,64 +315,6 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
     })();
   };
 
-  const formatAnswerForReview = (question, answer) => {
-    if (question.type === 'matching') {
-      const selections = answer || {};
-      const pairs = question.pairs || [];
-      return pairs
-        .map((pair) => `${pair.left} → ${selections[pair.left] || '—'}`)
-        .join(', ');
-    }
-
-    if (question.type === 'reorder') {
-      const ordered = Array.isArray(answer) ? answer : [];
-      return ordered.length > 0 ? ordered.join(' ') : '';
-    }
-
-    return typeof answer === 'string' ? answer : '';
-  };
-
-  const formatCorrectAnswer = (question) => {
-    if (question.type === 'matching') {
-      return (question.pairs || [])
-        .map((pair) => `${pair.left} → ${pair.right}`)
-        .join(', ');
-    }
-
-    if (question.type === 'reorder') {
-      return (question.correctOrder || []).join(' ');
-    }
-
-    return question.correctAnswer || '';
-  };
-
-  const isAnswerCorrect = (question, answer) => {
-    if (answer === null || answer === undefined || answer === '') {
-      return false;
-    }
-
-    if (question.type === 'translate' || question.type === 'fill-blank') {
-      const acceptable = question.acceptableAnswers || [question.correctAnswer];
-      return acceptable.some(a => 
-        String(a).toLowerCase().trim() === String(answer).toLowerCase().trim()
-      );
-    }
-
-    if (question.type === 'matching') {
-      const selections = answer || {};
-      const expectedPairs = question.pairs || [];
-      return expectedPairs.length > 0 && expectedPairs.every((pair) => selections[pair.left] === pair.right);
-    }
-
-    if (question.type === 'reorder') {
-      const expected = question.correctOrder || [];
-      const provided = Array.isArray(answer) ? answer : [];
-      return expected.length > 0 && expected.every((token, idx) => token === provided[idx]);
-    }
-
-    return String(answer).trim() === String(question.correctAnswer).trim();
-  };
-
   const calculateResults = () => {
     let score = 0;
     let maxScore = 0;
@@ -568,15 +391,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   const question = quiz?.questions[currentQuestion];
   const answeredCount = quiz?.questions.reduce((count, q, index) => {
     const answer = userAnswers[index];
-    if (q.type === 'matching') {
-      const expected = q.pairs || [];
-      const selections = answer || {};
-      return expected.length > 0 && expected.every((pair) => selections[pair.left]) ? count + 1 : count;
-    }
-    if (q.type === 'reorder') {
-      return Array.isArray(answer) && answer.length > 0 ? count + 1 : count;
-    }
-    return answer !== undefined && answer !== '' ? count + 1 : count;
+    return isQuestionAnswered(q, answer) ? count + 1 : count;
   }, 0);
 
   if (quizState === 'submitting') {

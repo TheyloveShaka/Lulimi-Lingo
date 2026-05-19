@@ -21,6 +21,13 @@ import { generatePractice } from '../../services/aiService';
 import { generateCurriculumPractice, getTermCurriculum } from '../../services/curriculumService';
 import { upsertProgress } from '../../services/progressService';
 import { useLearning } from '../../context/LearningContext';
+import {
+  normalizeQuestion,
+  isAnswerCorrect,
+  isQuestionAnswered,
+  formatAnswerForReview,
+  formatCorrectAnswer
+} from './questionUtils';
 import './PracticeView.css';
 
 const normalizeText = (value) => String(value || '')
@@ -167,56 +174,6 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     'Consistency today, fluency tomorrow.'
   ];
 
-  const normalizeQuestionType = (type, questionText = '', options = []) => {
-    const raw = String(type || '').toLowerCase().replace(/[\s_]+/g, '-');
-    const prompt = String(questionText || '').toLowerCase();
-
-    if (raw.includes('multiple') || raw.includes('choice') || raw === 'mcq') return 'multiple-choice';
-    if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
-    if (raw.includes('translate') || raw.includes('translation')) return 'translate';
-    if (raw.includes('reorder') || raw.includes('arrange')) return 'reorder';
-
-    if (prompt.includes('translate')) return 'translate';
-    if (prompt.includes('fill') || prompt.includes('blank')) return 'fill-blank';
-    if (Array.isArray(options) && options.length > 0) return 'multiple-choice';
-    return 'translate';
-  };
-
-  const normalizeQuestion = (question, index) => {
-    const options =
-      question?.options ||
-      question?.choices ||
-      question?.answerOptions ||
-      question?.answer_options ||
-      [];
-
-    const normalizedOptions = Array.isArray(options)
-      ? options.map((opt) => String(opt))
-      : [];
-
-    const correctAnswer =
-      question?.correctAnswer ??
-      question?.correct_answer ??
-      question?.answer ??
-      question?.correct ??
-      '';
-
-    return {
-      id: question?.id || index + 1,
-      type: normalizeQuestionType(question?.type || question?.questionType || question?.question_type, question?.question, normalizedOptions),
-      question: String(question?.question || question?.prompt || `Practice question ${index + 1}`),
-      options: normalizedOptions,
-      correctAnswer: String(correctAnswer),
-      acceptableAnswers: Array.isArray(question?.acceptableAnswers)
-        ? question.acceptableAnswers
-        : Array.isArray(question?.acceptable_answers)
-          ? question.acceptable_answers
-          : undefined,
-      hint: question?.hint || question?.clue || 'Think about common usage.',
-      explanation: question?.explanation || ''
-    };
-  };
-
   const topicKey = `${topic?.id || ''}::${topic?.title || ''}`;
 
   useEffect(() => {
@@ -284,7 +241,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
       console.log('🤖 AI practice result:', { success: result.success, questions: result.questions?.length || 0 });
 
       if (result.success && result.questions && result.questions.length > 0) {
-        const parsedQuestions = result.questions.map((q, idx) => normalizeQuestion(q, idx))
+        const parsedQuestions = result.questions.map((q, idx) => normalizeQuestion(q, idx));
         setQuestions(parsedQuestions);
         setIsCached(Boolean(result.cached));
         setProvider(result.provider || 'openai');
@@ -306,20 +263,45 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     });
   };
 
+  const handleMatchingChange = (leftItem, rightItem) => {
+    const existing = userAnswers[currentQuestion] || {};
+    setUserAnswers({
+      ...userAnswers,
+      [currentQuestion]: {
+        ...existing,
+        [leftItem]: rightItem
+      }
+    });
+  };
+
+  const handleReorderMove = (index, direction) => {
+    const question = questions[currentQuestion];
+    if (!question) return;
+
+    const current = Array.isArray(userAnswers[currentQuestion])
+      ? [...userAnswers[currentQuestion]]
+      : [...(question.tokens || [])];
+
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= current.length) return;
+
+    const updated = [...current];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    setUserAnswers({
+      ...userAnswers,
+      [currentQuestion]: updated
+    });
+  };
+
   const checkAnswer = () => {
     const question = questions[currentQuestion];
     const userAnswer = userAnswers[currentQuestion];
-    
-    if (!userAnswer) return null;
 
-    if (question.type === 'translate' || question.type === 'fill-blank') {
-      const acceptable = question.acceptableAnswers || [question.correctAnswer];
-      return acceptable.some(a => 
-        a.toLowerCase().trim() === userAnswer.toLowerCase().trim()
-      );
-    }
-    
-    return userAnswer === question.correctAnswer;
+    if (!isQuestionAnswered(question, userAnswer)) return null;
+    return isAnswerCorrect(question, userAnswer);
   };
 
   const handleSubmitAnswer = () => {
@@ -348,19 +330,14 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
     let correct = 0;
     questions.forEach((q, index) => {
       const answer = userAnswers[index];
-      if (q.type === 'translate' || q.type === 'fill-blank') {
-        const acceptable = q.acceptableAnswers || [q.correctAnswer];
-        if (acceptable.some(a => a.toLowerCase().trim() === answer?.toLowerCase().trim())) {
-          correct++;
-        }
-      } else if (answer === q.correctAnswer) {
+      if (isAnswerCorrect(q, answer)) {
         correct++;
       }
     });
     return { correct, total: questions.length, percentage: Math.round((correct / questions.length) * 100) };
   };
 
-  const allAnswered = Object.keys(userAnswers).length === questions.length;
+  const allAnswered = questions.length > 0 && questions.every((question, index) => isQuestionAnswered(question, userAnswers[index]));
   const isComplete = showSummary && allAnswered;
 
   useEffect(() => {
@@ -425,11 +402,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   const question = questions[currentQuestion];
   const isCorrect = showResult ? checkAnswer() : null;
   const currentAnswer = userAnswers[currentQuestion];
-  const formattedCurrentAnswer = typeof currentAnswer === 'string'
-    ? currentAnswer.trim()
-    : Array.isArray(currentAnswer)
-      ? currentAnswer.join(' ')
-      : currentAnswer || '';
+  const formattedCurrentAnswer = formatAnswerForReview(question, currentAnswer);
 
   return (
     <div className="practice-view">
@@ -476,6 +449,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
             {question.type === 'translate' && '🔄 Translation'}
             {question.type === 'multiple-choice' && '✅ Multiple Choice'}
             {question.type === 'reorder' && '🔀 Reorder'}
+            {question.type === 'matching' && '🧩 Matching'}
           </div>
 
           {/* Question Text */}
@@ -525,7 +499,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                       </span>
                     ) : (
                       <span className="incorrect-msg">
-                        <XCircle size={16} /> Correct answer: {question.correctAnswer}
+                        <XCircle size={16} /> Correct answer: {formatCorrectAnswer(question)}
                       </span>
                     )}
                   </div>
@@ -533,7 +507,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               </div>
             )}
 
-            {(question.type === 'translate' || question.type === 'reorder') && (
+            {(question.type === 'translate' || (question.type === 'reorder' && (!question.tokens || question.tokens.length === 0))) && (
               <div className="translate-input">
                 <input
                   type="text"
@@ -551,11 +525,55 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                       </span>
                     ) : (
                       <span className="incorrect-msg">
-                        <XCircle size={16} /> Correct answer: {question.correctAnswer}
+                        <XCircle size={16} /> Correct answer: {formatCorrectAnswer(question)}
                       </span>
                     )}
                   </div>
                 )}
+              </div>
+            )}
+
+            {question.type === 'matching' && (
+              <div className="matching-grid">
+                <div className="matching-header">
+                  <span>Match each item</span>
+                  <span>Choose the pair</span>
+                </div>
+                {(question.pairs || []).map((pair, index) => (
+                  <div key={`${pair.left}-${index}`} className="matching-row">
+                    <span className="matching-left">{pair.left}</span>
+                    <select
+                      className="matching-select"
+                      value={(userAnswers[currentQuestion] || {})[pair.left] || ''}
+                      onChange={(e) => handleMatchingChange(pair.left, e.target.value)}
+                      disabled={showResult}
+                    >
+                      <option value="" disabled>Choose...</option>
+                      {(question.pairs || []).map((optionPair) => (
+                        <option key={`${pair.left}-${optionPair.right}`} value={optionPair.right}>
+                          {optionPair.right}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {question.type === 'reorder' && Array.isArray(question.tokens) && question.tokens.length > 0 && (
+              <div className="reorder-list">
+                {(Array.isArray(userAnswers[currentQuestion]) && userAnswers[currentQuestion].length > 0
+                  ? userAnswers[currentQuestion]
+                  : question.tokens
+                ).map((token, index) => (
+                  <div key={`${token}-${index}`} className="reorder-item">
+                    <span>{token}</span>
+                    <div className="reorder-controls">
+                      <button onClick={() => handleReorderMove(index, -1)} aria-label="Move up" disabled={showResult}>▲</button>
+                      <button onClick={() => handleReorderMove(index, 1)} aria-label="Move down" disabled={showResult}>▼</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -600,7 +618,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               ) : (
                 <>
                   <XCircle size={24} />
-                  <span>Not quite. The correct answer is: <strong>{question.correctAnswer}</strong></span>
+                  <span>Not quite. The correct answer is: <strong>{formatCorrectAnswer(question)}</strong></span>
                 </>
               )}
               {!isCorrect && question.explanation && (
@@ -624,7 +642,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               {!isCorrect && (
                 <div className="answer-review-row">
                   <span className="answer-review-label">Correct answer</span>
-                  <span className="answer-review-value correct">{question.correctAnswer}</span>
+                  <span className="answer-review-value correct">{formatCorrectAnswer(question)}</span>
                 </div>
               )}
             </motion.div>
@@ -636,7 +654,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
               <button 
                 className="submit-btn"
                 onClick={handleSubmitAnswer}
-                disabled={!userAnswers[currentQuestion]}
+                disabled={!isQuestionAnswered(question, userAnswers[currentQuestion])}
               >
                 Check Answer
               </button>
