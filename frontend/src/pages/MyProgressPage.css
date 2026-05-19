@@ -572,34 +572,3 @@
     height: 6px;
   }
 }
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .progress-page {
-    padding: 1rem;
-  }
-
-  .progress-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card {
-    flex-direction: column;
-  }
-
-  .charts-section {
-    grid-template-columns: 1fr;
-  }
-
-  .goals-grid {
-    grid-template-columns: 1fr;
-  }
-}
