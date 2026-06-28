@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useLearning } from '../context/LearningContext'
 import { getLearnerStats } from '../services/progressService'
 import Sidebar from '../components/dashboard/Sidebar'
@@ -139,7 +140,18 @@ const Dashboard = ({ user }) => {
       />
       
       <main className={`dashboard-main ${!sidebarExpanded ? 'sidebar-collapsed' : ''}`}>
-        {renderPageContent()}
+        {/* Cross-fade + slide whenever the learner switches dashboard pages. */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.28, ease: 'easeOut' }}
+          >
+            {renderPageContent()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <ChatbotDock isOpen={chatbotOpen} onToggle={() => setChatbotOpen(!chatbotOpen)} />

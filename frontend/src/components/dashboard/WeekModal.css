@@ -538,6 +538,42 @@
   margin-bottom: var(--spacing-xl);
 }
 
+/* This week's real topics, shown so each level preview is distinct. */
+.preview-topics {
+  width: 100%;
+  max-width: 500px;
+  text-align: left;
+  background: var(--gray-50, #f8fafc);
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--spacing-lg, 1rem) var(--spacing-xl, 1.25rem);
+  margin-bottom: var(--spacing-xl, 1.5rem);
+}
+
+.preview-topics-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary-600, #4453c7);
+  margin-bottom: 0.6rem;
+}
+
+.preview-topics ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.preview-topics li {
+  color: var(--gray-700, #334155);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .start-learning-btn {
   display: flex;
   align-items: center;

@@ -13,7 +13,7 @@ const WeekModal = ({ week, onClose }) => {
   const [isLearningMode, setIsLearningMode] = useState(false)
   const [showTopics, setShowTopics] = useState(false)
   const [resultsData, setResultsData] = useState(null)
-  const { completedLessons, quizScores, setCurrentWeek, setCurrentTopic } = useLearning()
+  const { completedLessons, quizScores, setCurrentWeek, setCurrentTopic, getWeekProgress } = useLearning()
 
   const tabs = [
     { id: 'lecture', label: 'Lecture', icon: <BookOpen size={18} /> },
@@ -22,11 +22,14 @@ const WeekModal = ({ week, onClose }) => {
     { id: 'results', label: 'Results', icon: <Play size={18} /> },
   ]
 
-  // Check completion status
+  // Check completion status. These ids are the single contract between the modal,
+  // the learning views (which write them), and the ladder (which reads them).
   const lessonId = `week-${week.id}-lesson`
   const quizId = `week-${week.id}-quiz`
+  const practiceId = `week-${week.id}-practice`
   const isLessonComplete = completedLessons.includes(lessonId)
   const isQuizComplete = quizScores[quizId] !== undefined
+  const weekProgress = getWeekProgress(week.id)
 
   // Start learning mode
   const startLearning = (mode) => {
@@ -125,13 +128,13 @@ const WeekModal = ({ week, onClose }) => {
             <div className="week-progress">
               <div className="progress-info">
                 <span>Week Progress</span>
-                <span className="progress-percentage">{week.progress}%</span>
+                <span className="progress-percentage">{weekProgress}%</span>
               </div>
               <div className="progress-bar-modal">
                 <motion.div
                   className="progress-fill-modal"
                   initial={{ width: 0 }}
-                  animate={{ width: `${week.progress}%` }}
+                  animate={{ width: `${weekProgress}%` }}
                   transition={{ duration: 0.8, ease: 'easeOut' }}
                 />
               </div>
@@ -162,8 +165,9 @@ const WeekModal = ({ week, onClose }) => {
             <AnimatePresence mode="wait">
               {activeTab === 'lecture' && (
                 isLearningMode ? (
-                  <LessonView 
+                  <LessonView
                     topic={{
+                      id: lessonId,
                       title: week.title,
                       topics: week.topics,
                       weekId: week.id,
@@ -173,13 +177,14 @@ const WeekModal = ({ week, onClose }) => {
                     onStartPractice={() => startLearning('practice')}
                   />
                 ) : (
-                  <LecturePreview onStart={() => startLearning('lecture')} isComplete={isLessonComplete} />
+                  <LecturePreview onStart={() => startLearning('lecture')} isComplete={isLessonComplete} week={week} />
                 )
               )}
               {activeTab === 'quiz' && (
                 isLearningMode ? (
-                  <QuizView 
+                  <QuizView
                     topic={{
+                      id: quizId,
                       title: week.title,
                       topics: week.topics,
                       weekId: week.id
@@ -191,13 +196,14 @@ const WeekModal = ({ week, onClose }) => {
                     numberOfQuestions={5}
                   />
                 ) : (
-                  <QuizPreview onStart={() => startLearning('quiz')} isComplete={isQuizComplete} score={quizScores[quizId]} />
+                  <QuizPreview onStart={() => startLearning('quiz')} isComplete={isQuizComplete} score={quizScores[quizId]} week={week} />
                 )
               )}
               {activeTab === 'practice' && (
                 isLearningMode ? (
-                  <PracticeView 
+                  <PracticeView
                     topic={{
+                      id: practiceId,
                       title: week.title,
                       topics: week.topics,
                       weekId: week.id
@@ -206,7 +212,7 @@ const WeekModal = ({ week, onClose }) => {
                     onStartQuiz={() => startLearning('quiz')}
                   />
                 ) : (
-                  <PracticePreview onStart={() => startLearning('practice')} />
+                  <PracticePreview onStart={() => startLearning('practice')} week={week} />
                 )
               )}
               {activeTab === 'results' && (
@@ -233,8 +239,22 @@ const WeekModal = ({ week, onClose }) => {
   )
 }
 
+// Renders this week's actual topics so each level's preview is distinct.
+const TopicChecklist = ({ week }) => (
+  Array.isArray(week?.topics) && week.topics.length > 0 ? (
+    <div className="preview-topics">
+      <span className="preview-topics-label">What you'll cover</span>
+      <ul>
+        {week.topics.map((topic, i) => (
+          <li key={i}>{topic}</li>
+        ))}
+      </ul>
+    </div>
+  ) : null
+)
+
 // Lecture Preview (before starting)
-const LecturePreview = ({ onStart, isComplete }) => (
+const LecturePreview = ({ onStart, isComplete, week }) => (
   <motion.div
     key="lecture-preview"
     className="tab-content"
@@ -247,15 +267,10 @@ const LecturePreview = ({ onStart, isComplete }) => (
       <div className="preview-icon">
         <BookOpen size={64} />
       </div>
-      <h3>Lecture Content</h3>
+      <h3>{week?.title || 'Lecture Content'}</h3>
       <p>AI-generated lessons tailored to your learning style</p>
-      <div className="preview-features">
-        <div className="feature-item">✨ Interactive language explanations</div>
-        <div className="feature-item">✨ Cultural context and usage notes</div>
-        <div className="feature-item">✨ Vocabulary with examples</div>
-        <div className="feature-item">✨ Progress tracking</div>
-      </div>
-      <motion.button 
+      <TopicChecklist week={week} />
+      <motion.button
         className="start-learning-btn"
         onClick={onStart}
         whileHover={{ scale: 1.05 }}
@@ -268,7 +283,7 @@ const LecturePreview = ({ onStart, isComplete }) => (
 )
 
 // Quiz Preview (before starting)
-const QuizPreview = ({ onStart, isComplete, score }) => (
+const QuizPreview = ({ onStart, isComplete, score, week }) => (
   <motion.div
     key="quiz-preview"
     className="tab-content"
@@ -281,22 +296,17 @@ const QuizPreview = ({ onStart, isComplete, score }) => (
       <div className="preview-icon">
         <Brain size={64} />
       </div>
-      <h3>Quiz Section</h3>
+      <h3>Quiz — {week?.title || 'Assessment'}</h3>
       {isComplete && score ? (
         <div className="previous-score">
           <p>Your last score: <strong>{score.percentage}%</strong></p>
           <p>{score.score}/{score.maxScore} correct</p>
         </div>
       ) : (
-        <p>AI-generated quizzes to test your knowledge</p>
+        <p>AI-generated questions on this week's topics</p>
       )}
-      <div className="preview-features">
-        <div className="feature-item">✨ Multiple question types</div>
-        <div className="feature-item">✨ Instant feedback</div>
-        <div className="feature-item">✨ Adaptive difficulty</div>
-        <div className="feature-item">✨ Performance tracking</div>
-      </div>
-      <motion.button 
+      <TopicChecklist week={week} />
+      <motion.button
         className="start-learning-btn"
         onClick={onStart}
         whileHover={{ scale: 1.05 }}
@@ -309,7 +319,7 @@ const QuizPreview = ({ onStart, isComplete, score }) => (
 )
 
 // Practice Preview (before starting)
-const PracticePreview = ({ onStart }) => (
+const PracticePreview = ({ onStart, week }) => (
   <motion.div
     key="practice-preview"
     className="tab-content"
@@ -322,15 +332,10 @@ const PracticePreview = ({ onStart }) => (
       <div className="preview-icon">
         <Dumbbell size={64} />
       </div>
-      <h3>Practice Activities</h3>
-      <p>Interactive exercises to reinforce your learning</p>
-      <div className="preview-features">
-        <div className="feature-item">✨ Fill in the blank exercises</div>
-        <div className="feature-item">✨ Translation practice</div>
-        <div className="feature-item">✨ Word reordering</div>
-        <div className="feature-item">✨ Multiple choice questions</div>
-      </div>
-      <motion.button 
+      <h3>Practice — {week?.title || 'Activities'}</h3>
+      <p>Interactive exercises to reinforce this week's topics</p>
+      <TopicChecklist week={week} />
+      <motion.button
         className="start-learning-btn"
         onClick={onStart}
         whileHover={{ scale: 1.05 }}

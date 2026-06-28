@@ -1,22 +1,34 @@
 import React, { useState } from 'react'
-import { Bell, Moon, Lock, LogOut } from 'lucide-react'
+import { Bell, Moon, Lock, LogOut, RotateCcw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useLearning } from '../context/LearningContext'
 import './SettingsPage.css'
 
 const SettingsPage = () => {
   const navigate = useNavigate()
+  const { resetProgress } = useLearning()
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: false,
     emailUpdates: true
   })
+  const [resetDone, setResetDone] = useState(false)
 
   const handleLogout = () => {
     // Session state lives in localStorage, so logout removes those keys first.
     localStorage.removeItem('authToken')
     localStorage.removeItem('lulimiLingoCurrentUser')
     navigate('/')
+  }
+
+  const handleResetProgress = () => {
+    if (!window.confirm('Reset all your learning progress? This clears completed lessons, quiz scores, and your streak. This cannot be undone.')) {
+      return
+    }
+    resetProgress()
+    setResetDone(true)
+    setTimeout(() => setResetDone(false), 3000)
   }
 
   return (
@@ -102,12 +114,40 @@ const SettingsPage = () => {
           </div>
         </motion.div>
 
-        {/* The session section is intentionally small because logout is the main action here. */}
+        {/* Learning data controls let the learner start fresh if they want. */}
         <motion.div
           className="settings-section danger-zone"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+        >
+          <h2>Learning Progress</h2>
+
+          <div className="setting-item">
+            <div className="setting-info">
+              <RotateCcw size={24} />
+              <div>
+                <h3>Reset Progress</h3>
+                <p>Clear completed lessons, quiz scores, and your streak to start over</p>
+              </div>
+            </div>
+            <motion.button
+              className="btn-reset-progress"
+              onClick={handleResetProgress}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {resetDone ? 'Progress reset ✓' : 'Reset'}
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* The session section is intentionally small because logout is the main action here. */}
+        <motion.div
+          className="settings-section danger-zone"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
         >
           <h2>Session</h2>
 

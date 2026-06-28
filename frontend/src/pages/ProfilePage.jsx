@@ -73,17 +73,8 @@ const ProfilePage = ({ user }) => {
 
           <div className="info-group">
             <label>Learning Language</label>
-            {isEditing ? (
-              <select
-                value={formData.language}
-                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-              >
-                <option value="luganda">Luganda</option>
-                <option value="runyankole">Runyankole</option>
-              </select>
-            ) : (
-              <p>{formData.language === 'luganda' ? 'Luganda' : 'Runyankole'}</p>
-            )}
+            {/* Language is fixed to the one chosen at signup. */}
+            <p>{formData.language === 'luganda' ? 'Luganda' : 'Runyankole'}</p>
           </div>
         </div>
 

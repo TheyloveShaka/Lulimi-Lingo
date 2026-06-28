@@ -295,6 +295,39 @@ export const LearningProvider = ({ children }) => {
     saveProgress();
   };
 
+  // ---- Real per-week progress & gating ----
+  // A week is half-done when its lesson is complete and fully done once its quiz
+  // has been attempted. These keys are written by LessonView/QuizView.
+  const isLessonDone = (weekId) => completedLessons.includes(`week-${weekId}-lesson`);
+  const isQuizDone = (weekId) => quizScores[`week-${weekId}-quiz`] !== undefined;
+
+  const getWeekProgress = (weekId) => {
+    return (isLessonDone(weekId) ? 50 : 0) + (isQuizDone(weekId) ? 50 : 0);
+  };
+
+  const isWeekComplete = (weekId) => getWeekProgress(weekId) >= 100;
+
+  // Unlock rule: the first two weeks are always open; every later week opens only
+  // once the immediately preceding week is fully complete.
+  const isWeekUnlocked = (orderedWeekIds, weekId) => {
+    const idx = orderedWeekIds.indexOf(weekId);
+    if (idx <= 1) return true;
+    return isWeekComplete(orderedWeekIds[idx - 1]);
+  };
+
+  // Wipe all learning progress (used by the Settings "reset progress" action).
+  const resetProgress = () => {
+    setCompletedTopics([]);
+    setCompletedLessons([]);
+    setQuizScores({});
+    setPracticeHistory([]);
+    setCommonMistakes([]);
+    setProficiencyLevel('beginner');
+    setCurrentStreak(0);
+    setLastActivityDate(null);
+    localStorage.removeItem('lulimiLingoProgress');
+  };
+
   // Get syllabus context for AI
   const getSyllabusContext = () => {
     const weekData = getCurrentWeekData();
@@ -353,6 +386,10 @@ export const LearningProvider = ({ children }) => {
     getCompletedTopicsForAI,
     getSyllabusContext,
     saveProgress,
+    getWeekProgress,
+    isWeekComplete,
+    isWeekUnlocked,
+    resetProgress,
 
     // Raw syllabus data
     syllabusContent

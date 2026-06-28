@@ -1,12 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Lock, CheckCircle2, Play, Star } from 'lucide-react'
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
 import 'react-circular-progressbar/dist/styles.css'
+import { useLearning } from '../../context/LearningContext'
 import './LevelLadder.css'
 import curriculumData from '../../data/curriculumData'
 
 const LevelLadder = ({ onWeekClick }) => {
+  const { getWeekProgress, isWeekUnlocked, isWeekComplete } = useLearning()
   const [selectedClass, setSelectedClass] = useState('S1')
   const [selectedTerm, setSelectedTerm] = useState('Term1')
   const containerRef = useRef(null)
@@ -15,7 +17,7 @@ const LevelLadder = ({ onWeekClick }) => {
 
   const getBadgeText = (title) => {
     const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024
-    const maxLength = viewportWidth < 380 ? 10 : viewportWidth < 480 ? 14 : viewportWidth < 768 ? 18 : 22
+    const maxLength = viewportWidth < 380 ? 12 : viewportWidth < 480 ? 16 : viewportWidth < 768 ? 20 : 26
 
     if (!title || title.length <= maxLength) return title
     return `${title.slice(0, maxLength).trimEnd()}...`
@@ -23,19 +25,40 @@ const LevelLadder = ({ onWeekClick }) => {
 
   const currentClass = curriculumData[selectedClass]
   const currentTerm = currentClass.terms[selectedTerm]
-  
-  // Flatten topics from all weeks into a single ladder so progress looks like a path.
-  const topics = currentTerm.weeks.flatMap((week, weekIndex) => 
-    week.topics.map((topic, topicIndex) => ({
-      id: `${week.id}-${topicIndex}`,
-      topicTitle: topic,
-      weekTitle: week.title,
-      weekIndex,
-      progress: week.progress,
-      locked: week.locked,
-      originalWeek: week
-    }))
+
+  // Order every week in the class so unlocking is a continuous chain across terms.
+  const orderedWeekIds = useMemo(
+    () => Object.values(currentClass.terms)
+      .flatMap((term) => term.weeks)
+      .sort((a, b) => a.id - b.id)
+      .map((w) => w.id),
+    [selectedClass]
   )
+
+  // One node per week (a "level"). Progress and lock state are REAL — derived from
+  // the learner's completed lessons/quizzes, never from static placeholder values.
+  const nextWeekId = useMemo(() => {
+    for (const id of orderedWeekIds) {
+      if (isWeekUnlocked(orderedWeekIds, id) && !isWeekComplete(id)) return id
+    }
+    return null
+  }, [orderedWeekIds, isWeekUnlocked, isWeekComplete])
+
+  const topics = currentTerm.weeks.map((week) => {
+    const progress = getWeekProgress(week.id)
+    const locked = !isWeekUnlocked(orderedWeekIds, week.id)
+    return {
+      id: `week-${week.id}`,
+      topicTitle: week.title,
+      weekTitle: `Week ${week.number} • ${week.topics.length} topics`,
+      progress,
+      locked,
+      isNext: week.id === nextWeekId,
+      originalWeek: week
+    }
+  })
+
+  const completedCount = currentTerm.weeks.filter((w) => isWeekComplete(w.id)).length
 
   // Initialize refs array
   useEffect(() => {
@@ -120,39 +143,39 @@ const LevelLadder = ({ onWeekClick }) => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay }}
       >
-        {/* Each node represents one lesson milestone in the syllabus. */}
+        {/* Each node represents one week (level) in the syllabus. */}
         <motion.button
           ref={(el) => (nodeRefs.current[index] = el)}
-          className={`topic-node ${item.locked ? 'locked' : ''} ${item.progress === 100 ? 'completed' : ''} ${item.progress > 0 && item.progress < 100 ? 'in-progress' : ''}`}
+          className={`topic-node ${item.locked ? 'locked' : ''} ${item.progress === 100 ? 'completed' : ''} ${item.progress > 0 && item.progress < 100 ? 'in-progress' : ''} ${item.isNext ? 'next' : ''}`}
           onClick={() => !item.locked && onWeekClick(item.originalWeek)}
-          whileHover={!item.locked ? { scale: 1.1, y: -5 } : {}}
+          whileHover={!item.locked ? { scale: 1.08, y: -4 } : {}}
           whileTap={!item.locked ? { scale: 0.95 } : {}}
-          animate={{ y: [0, -8, 0], opacity: 1 }}
-          transition={{ 
-            y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-            opacity: { duration: 0 }
-          }}
+          animate={item.isNext ? { y: [0, -8, 0] } : { y: 0 }}
+          transition={item.isNext ? { y: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } } : { duration: 0.2 }}
           disabled={item.locked}
         >
+          {/* "Start here" pointer guides the learner to their next level. */}
+          {item.isNext && <span className="next-badge">Start here</span>}
+
           {/* Progress ring shows completion status at a glance. */}
           <div className="progress-ring">
             <CircularProgressbar
               value={item.progress}
               strokeWidth={6}
               styles={buildStyles({
-                pathColor: item.progress === 100 ? '#10b981' : '#6b9fff',
-                trailColor: 'rgba(229, 231, 235, 0.3)',
-                pathTransitionDuration: 0.5,
+                pathColor: item.progress === 100 ? '#10b981' : item.locked ? '#cbd5e1' : '#6b9fff',
+                trailColor: 'rgba(229, 231, 235, 0.4)',
+                pathTransitionDuration: 0.6,
               })}
             />
           </div>
 
-          {/* The icon hints whether the milestone is locked, new, active, or complete. */}
+          {/* The icon hints whether the level is locked, new, active, or complete. */}
           <div className="node-icon">
             {item.locked && <Lock size={26} />}
-            {item.progress === 100 && <CheckCircle2 size={26} />}
-            {item.progress > 0 && item.progress < 100 && <Play size={26} />}
-            {item.progress === 0 && !item.locked && <Star size={26} />}
+            {!item.locked && item.progress === 100 && <CheckCircle2 size={26} />}
+            {!item.locked && item.progress > 0 && item.progress < 100 && <Play size={26} />}
+            {!item.locked && item.progress === 0 && <Star size={26} />}
           </div>
 
           {/* Short labels keep the ladder readable on small screens. */}
@@ -169,12 +192,16 @@ const LevelLadder = ({ onWeekClick }) => {
         >
           <h4>{item.topicTitle}</h4>
           <p className="week-context">{item.weekTitle}</p>
-          <div className="tooltip-progress">
-            <div className="progress-bar-tooltip">
-              <div className="progress-fill-tooltip" style={{ width: `${item.progress}%` }}></div>
+          {item.locked ? (
+            <p className="tooltip-locked">🔒 Finish the previous level to unlock</p>
+          ) : (
+            <div className="tooltip-progress">
+              <div className="progress-bar-tooltip">
+                <div className="progress-fill-tooltip" style={{ width: `${item.progress}%` }}></div>
+              </div>
+              <span>{item.progress}% Complete</span>
             </div>
-            <span>{item.progress}% Complete</span>
-          </div>
+          )}
         </motion.div>
       </motion.div>
     )
@@ -226,7 +253,18 @@ const LevelLadder = ({ onWeekClick }) => {
       <div className="ladder-path" ref={containerRef} style={{ position: 'relative' }}>
         <div className="ladder-header">
           <h2>{currentClass.name} - {currentTerm.name}</h2>
-          <p>Master each topic to unlock the next milestone</p>
+          <p>Finish a level to unlock the next one</p>
+          <div className="ladder-progress-summary">
+            <div className="ladder-progress-track">
+              <motion.div
+                className="ladder-progress-bar"
+                initial={{ width: 0 }}
+                animate={{ width: `${currentTerm.weeks.length ? (completedCount / currentTerm.weeks.length) * 100 : 0}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
+            </div>
+            <span>{completedCount}/{currentTerm.weeks.length} levels complete</span>
+          </div>
         </div>
 
         <div className="topics-container">
