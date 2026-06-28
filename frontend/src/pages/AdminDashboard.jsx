@@ -15,6 +15,7 @@ const AdminDashboard = ({ user }) => {
   const [activeTab, setActiveTab] = useState('resources')
   const [resources, setResources] = useState([])
   const [students, setStudents] = useState([])
+  const [allStudents, setAllStudents] = useState([])
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [studentProgress, setStudentProgress] = useState(null)
   const [showUploadModal, setShowUploadModal] = useState(false)
@@ -75,6 +76,39 @@ const AdminDashboard = ({ user }) => {
     }
   }
 
+  // Every student in the system, so the teacher can browse and pick anyone.
+  const fetchAllStudents = async () => {
+    try {
+      const token = localStorage.getItem('authToken')
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/all-students`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAllStudents(data.data || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch all students:', error)
+    }
+  }
+
+  // Attach a student the teacher picked from the browse list.
+  const handleAttachExisting = async (student) => {
+    try {
+      const token = localStorage.getItem('authToken')
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/students/attach`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ identifier: student.lin || student.email })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to attach student')
+      await Promise.all([fetchStudents(), fetchAllStudents()])
+    } catch (error) {
+      alert(error.message)
+    }
+  }
+
   // Progress drill-down shows what a teacher needs before giving feedback.
   const fetchStudentProgress = async (studentId) => {
     try {
@@ -124,6 +158,7 @@ const AdminDashboard = ({ user }) => {
       fetchResources()
     } else if (activeTab === 'students') {
       fetchStudents()
+      fetchAllStudents()
     } else if (activeTab === 'analytics') {
       fetchAnalytics()
     }
@@ -313,7 +348,7 @@ const AdminDashboard = ({ user }) => {
       }
 
       setStudentEmail('')
-      await fetchStudents()
+      await Promise.all([fetchStudents(), fetchAllStudents()])
       alert('Student attached successfully')
     } catch (error) {
       console.error('Attach student failed:', error)
@@ -328,7 +363,8 @@ const AdminDashboard = ({ user }) => {
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const filteredStudents = students.filter(s => {
+  // Browse every student in the system; the search matches name, email, or LIN.
+  const filteredStudents = allStudents.filter(s => {
     const q = searchQuery.toLowerCase()
     return (
       s.name?.toLowerCase().includes(q) ||
@@ -569,33 +605,34 @@ const AdminDashboard = ({ user }) => {
                 </div>
 
                 <div className="students-container">
-                  {/* Students List */}
+                  {/* Students List — every student in the system, searchable by name/email/LIN. */}
                   <div className="students-list-section">
                     <div className="search-box">
                       <Search size={20} />
                       <input
                         type="text"
-                        placeholder="Search students..."
+                        placeholder="Search all students by name, email, or LIN..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
 
-                    {loading ? (
+                    {loading && allStudents.length === 0 ? (
                       <p>Loading students...</p>
                     ) : filteredStudents.length === 0 ? (
                       <div className="empty-state">
                         <Users size={48} />
-                        <p>No students yet</p>
+                        <p>{allStudents.length === 0 ? 'No students in the system yet' : 'No students match your search'}</p>
                       </div>
                     ) : (
                       <div className="students-list">
                         {filteredStudents.map(student => (
                           <motion.div
                             key={student._id}
-                            className={`student-item ${selectedStudent?._id === student._id ? 'active' : ''}`}
-                            onClick={() => handleSelectStudent(student)}
-                            whileHover={{ x: 5 }}
+                            className={`student-item ${selectedStudent?._id === student._id ? 'active' : ''} ${student.attached ? '' : 'unattached'}`}
+                            onClick={() => student.attached && handleSelectStudent(student)}
+                            whileHover={{ x: student.attached ? 5 : 0 }}
+                            style={{ cursor: student.attached ? 'pointer' : 'default' }}
                           >
                             <div className="student-info">
                               <h4>{student.name}</h4>
@@ -603,7 +640,19 @@ const AdminDashboard = ({ user }) => {
                               {student.lin && <p className="student-lin">LIN: {student.lin}</p>}
                               <span className="student-class">{student.classLevel}</span>
                             </div>
-                            <ChevronDown size={18} />
+                            {student.attached ? (
+                              <div className="student-action">
+                                <span className="attached-badge">Attached</span>
+                                <ChevronDown size={18} />
+                              </div>
+                            ) : (
+                              <button
+                                className="btn-attach-inline"
+                                onClick={(e) => { e.stopPropagation(); handleAttachExisting(student) }}
+                              >
+                                Attach
+                              </button>
+                            )}
                           </motion.div>
                         ))}
                       </div>

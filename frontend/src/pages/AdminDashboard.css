@@ -449,6 +449,45 @@
   letter-spacing: 0.02em;
 }
 
+.student-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+}
+
+.attached-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #16a34a;
+  background: #e7f8ee;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.btn-attach-inline {
+  padding: 0.45rem 1.1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-attach-inline:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+  transform: translateY(-1px);
+}
+
+.student-item.unattached {
+  opacity: 0.92;
+}
+
 .student-class {
   display: inline-block;
   margin-top: 0.3rem;

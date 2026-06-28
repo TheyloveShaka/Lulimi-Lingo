@@ -11,6 +11,7 @@ import {
   downloadResourceFile,
   getStudentProgress,
   getTeacherStudents,
+  getAllStudents,
   getTeacherAnalytics,
   attachStudentByEmail,
   seedResources
@@ -79,6 +80,7 @@ router.post('/resources/seed', authMiddleware, seedResources)
 
 // Teacher dashboard endpoints
 router.get('/teacher/students', authMiddleware, getTeacherStudents)
+router.get('/teacher/all-students', authMiddleware, getAllStudents)
 router.get('/teacher/analytics', authMiddleware, getTeacherAnalytics)
 router.post('/teacher/students/attach', authMiddleware, attachStudentByEmail)
 router.get('/teacher/student/:studentId/progress', authMiddleware, getStudentProgress)

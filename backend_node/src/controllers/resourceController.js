@@ -263,6 +263,29 @@ export const getStudentProgress = async (req, res) => {
   }
 }
 
+// Get every student in the system so a teacher can browse and pick who to attach.
+export const getAllStudents = async (req, res) => {
+  try {
+    const teacherId = req.user?.userId
+    const teacher = await User.findById(teacherId)
+    if (!teacher || (teacher.role !== 'teacher' && teacher.role !== 'admin')) {
+      return res.status(403).json({ success: false, error: 'Not authorized' })
+    }
+
+    const students = await User.find({ role: 'student' })
+      .select('name email lin classLevel language')
+      .sort({ name: 1 })
+      .lean()
+
+    const assigned = new Set((teacher.assignedStudents || []).map((id) => String(id)))
+    const data = students.map((s) => ({ ...s, attached: assigned.has(String(s._id)) }))
+
+    return res.json({ success: true, data })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+}
+
 // Get all students for a teacher
 export const getTeacherStudents = async (req, res) => {
   try {
