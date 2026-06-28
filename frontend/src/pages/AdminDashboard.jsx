@@ -328,10 +328,14 @@ const AdminDashboard = ({ user }) => {
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredStudents = students.filter(s => {
+    const q = searchQuery.toLowerCase()
+    return (
+      s.name?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      s.lin?.toLowerCase().includes(q)
+    )
+  })
 
   return (
     <div className="admin-dashboard">
@@ -596,6 +600,7 @@ const AdminDashboard = ({ user }) => {
                             <div className="student-info">
                               <h4>{student.name}</h4>
                               <p>{student.email}</p>
+                              {student.lin && <p className="student-lin">LIN: {student.lin}</p>}
                               <span className="student-class">{student.classLevel}</span>
                             </div>
                             <ChevronDown size={18} />
@@ -719,6 +724,7 @@ const AdminDashboard = ({ user }) => {
                           <thead>
                             <tr>
                               <th>Student</th>
+                              <th>LIN</th>
                               <th>Class</th>
                               <th>Lessons</th>
                               <th>Quizzes</th>
@@ -730,6 +736,7 @@ const AdminDashboard = ({ user }) => {
                             {analytics.students.map((s) => (
                               <tr key={s.id}>
                                 <td>{s.name}</td>
+                                <td>{s.lin || '—'}</td>
                                 <td>{s.classLevel}</td>
                                 <td>{s.lessonsCompleted}</td>
                                 <td>{s.quizCount}</td>

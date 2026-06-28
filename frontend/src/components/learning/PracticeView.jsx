@@ -631,8 +631,8 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
                   <span>Not quite. The correct answer is: <strong>{formatCorrectAnswer(question)}</strong></span>
                 </>
               )}
-              {!isCorrect && question.explanation && (
-                <span className="brief-explanation">{question.explanation}</span>
+              {!isCorrect && (question.explanation || question.hint) && (
+                <span className="brief-explanation">{question.explanation || question.hint}</span>
               )}
             </motion.div>
           )}

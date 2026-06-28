@@ -442,6 +442,13 @@
   color: #666;
 }
 
+.student-lin {
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  color: #4453c7 !important;
+  letter-spacing: 0.02em;
+}
+
 .student-class {
   display: inline-block;
   margin-top: 0.3rem;

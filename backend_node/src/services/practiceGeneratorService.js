@@ -59,6 +59,7 @@ Type-specific fields (use the SAME shape the assessment engine expects):
 - reading-comprehension: a "passage" field with a short ${languageName} reading text (2-4 sentences, level-appropriate), plus "options" and "correctAnswer" testing comprehension
 
 IMPORTANT: Include at least ONE reading-comprehension question with a real ${languageName} passage so learners practice reading.
+IMPORTANT: EVERY question must include a concise one-sentence "explanation" giving the reason the correct answer is right (this is shown to the learner when they miss it).
 
 Provide in JSON format:
 {

@@ -326,6 +326,7 @@ export const getTeacherAnalytics = async (req, res) => {
         id: student._id,
         name: student.name,
         email: student.email,
+        lin: student.lin,
         classLevel: student.classLevel,
         lessonsCompleted,
         quizCount: quizAttempts.length,
@@ -366,8 +367,14 @@ export const attachStudentByEmail = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to attach students' })
     }
 
+    // Match LIN case-insensitively (and exactly) so stored-casing differences
+    // never cause a miss; email is already stored lowercased.
+    const safeLin = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const student = await User.findOne({
-      $or: [{ email: identifier.toLowerCase() }, { lin: identifier.toUpperCase() }]
+      $or: [
+        { email: identifier.toLowerCase() },
+        { lin: new RegExp(`^${safeLin}$`, 'i') }
+      ]
     })
     if (!student) {
       return res.status(404).json({ success: false, error: 'No student found with that email or LIN' })
