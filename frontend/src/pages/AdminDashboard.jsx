@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { aggregateProgress } from '../services/progressService'
 import './AdminDashboard.css'
 
+// The teacher dashboard talks to the same live Node backend as the rest of the
+// app. Without this base, relative "/api/..." calls hit the frontend host and
+// fail (this was the cause of the resource upload error).
+const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app'
+
 const AdminDashboard = ({ user }) => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('resources')
@@ -37,7 +42,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/teacher/resources', {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/resources`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -56,7 +61,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/teacher/students', {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/students`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -75,7 +80,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch(`/api/teacher/student/${studentId}/progress`, {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/student/${studentId}/progress`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -100,7 +105,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/teacher/analytics', {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/analytics`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -158,7 +163,7 @@ const AdminDashboard = ({ user }) => {
         })
 
         const base64 = await toBase64(formData.file)
-        response = await fetch('/api/resources', {
+        response = await fetch(`${NODE_BACKEND_URL}/api/resources`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -175,7 +180,7 @@ const AdminDashboard = ({ user }) => {
           })
         })
       } else {
-        response = await fetch('/api/resources', {
+        response = await fetch(`${NODE_BACKEND_URL}/api/resources`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,11 +208,17 @@ const AdminDashboard = ({ user }) => {
         })
         fetchResources()
       } else {
-        alert('Failed to upload resource')
+        // Surface the real backend reason so failures are diagnosable.
+        let reason = `${response.status} ${response.statusText}`
+        try {
+          const errData = await response.json()
+          if (errData?.error) reason = errData.error
+        } catch (_) { /* response had no JSON body */ }
+        alert(`Failed to upload resource: ${reason}`)
       }
     } catch (error) {
       console.error('Upload failed:', error)
-      alert('Error uploading resource')
+      alert(`Error uploading resource: ${error.message}`)
     }
   }
 
@@ -216,7 +227,7 @@ const AdminDashboard = ({ user }) => {
       // Seeding helps bootstrap the resource library with starter content.
       setLoading(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/resources/seed', {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/resources/seed`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -249,7 +260,7 @@ const AdminDashboard = ({ user }) => {
 
     try {
       const token = localStorage.getItem('authToken')
-      const response = await fetch(`/api/resources/${resourceId}`, {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/resources/${resourceId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -287,7 +298,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setAttachingStudent(true)
       const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/teacher/students/attach', {
+      const response = await fetch(`${NODE_BACKEND_URL}/api/teacher/students/attach`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
