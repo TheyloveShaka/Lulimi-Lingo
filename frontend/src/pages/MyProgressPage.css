@@ -572,3 +572,36 @@
     height: 6px;
   }
 }
+
+/* Empty / no-data states keep the page honest when there is no activity yet. */
+.progress-empty {
+  background: #fff;
+  border: 1px dashed #d8d8e0;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-empty h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.progress-empty p {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.95rem;
+}
+
+.activity-empty {
+  color: #777;
+  font-size: 0.95rem;
+  padding: 0.5rem 0;
+}

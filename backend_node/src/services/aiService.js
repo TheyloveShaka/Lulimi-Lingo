@@ -36,13 +36,39 @@ function compactMessages(messages = [], maxMessages = 8) {
     }))
 }
 
-function buildSystemPromptFromProgress(progress) {
-  if (!progress) return 'You are a helpful language tutor.'
-  const summary = []
-  if (progress.lessonCompleted) summary.push('Last lesson completed')
-  if (progress.quizScores) summary.push(`Quiz scores: ${JSON.stringify(Object.fromEntries(progress.quizScores || []))}`)
-  if (progress.practiceData) summary.push(`Practice attempts: ${JSON.stringify(progress.practiceData)}`)
-  return `You are a helpful language tutor. Student progress summary: ${summary.join('; ')}`
+// Build a tutor system prompt that is aware of the learner's language, proficiency
+// level, and progress. Personalizing the prompt lets the tutor pitch explanations
+// at the right difficulty and reference what the student has already covered.
+function buildTutorSystemPrompt(context = {}) {
+  const { progress, language, proficiencyLevel, completedTopics, progressSummary } = context
+  const languageName = String(language || 'luganda').toLowerCase() === 'runyankole' ? 'Runyankole' : 'Luganda'
+  const level = String(proficiencyLevel || 'beginner').toLowerCase()
+
+  const facts = []
+  if (Array.isArray(completedTopics) && completedTopics.length) {
+    facts.push(`Topics already covered: ${completedTopics.slice(0, 12).join(', ')}`)
+  }
+  if (progressSummary && typeof progressSummary === 'string') {
+    facts.push(progressSummary)
+  }
+  if (progress) {
+    if (progress.quizScores) facts.push(`Recent quiz scores: ${JSON.stringify(Object.fromEntries(progress.quizScores || []))}`)
+    if (progress.practiceData) facts.push(`Practice attempts: ${JSON.stringify(progress.practiceData)}`)
+  }
+
+  const levelGuidance = {
+    beginner: 'Use very simple sentences, translate every new word, and avoid advanced grammar.',
+    intermediate: 'Use short ' + languageName + ' phrases with English support and introduce grammar gradually.',
+    advanced: 'You may converse mostly in ' + languageName + ' and use richer vocabulary and idioms.'
+  }[level] || 'Adapt to the learner as you go.'
+
+  let prompt = `You are a supportive ${languageName} language tutor for a Ugandan secondary school student.\n`
+  prompt += `The student's self-reported proficiency level is "${level}". ${levelGuidance}\n`
+  prompt += 'Stay within what the student has been learning, be encouraging, and keep answers concise.'
+  if (facts.length) {
+    prompt += `\n\nWhat you know about this student:\n- ${facts.join('\n- ')}`
+  }
+  return prompt
 }
 
 async function callGemini(prompt) {
@@ -112,7 +138,7 @@ async function callOpenAIChat(messages, max_tokens = 512, options = {}) {
   throw new Error('OpenAI request failed after retries')
 }
 
-// Export for use in content generator
+// Export the direct provider calls used by the live Node backend.
 export { callGemini, callOpenAIChat }
 
 export async function generateLesson(payload) {
@@ -176,8 +202,13 @@ export async function translate(text, source = 'en', target = 'lg') {
 
 export async function chat(message, options = {}) {
   try {
-    const progress = options.progress || null
-    const system = buildSystemPromptFromProgress(progress)
+    const system = buildTutorSystemPrompt({
+      progress: options.progress || null,
+      language: options.language,
+      proficiencyLevel: options.proficiencyLevel,
+      completedTopics: options.completedTopics,
+      progressSummary: options.progressSummary
+    })
 
     const messages = [{ role: 'system', content: system }]
     if (Array.isArray(options.conversationHistory)) {

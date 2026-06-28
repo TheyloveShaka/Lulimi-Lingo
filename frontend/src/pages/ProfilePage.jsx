@@ -18,6 +18,7 @@ const ProfilePage = ({ user }) => {
         <h1>My Profile</h1>
       </div>
 
+      {/* Profile fields are editable locally so learners can inspect their identity details. */}
       <motion.div
         className="profile-card"
         initial={{ opacity: 0, y: 20 }}
@@ -45,6 +46,13 @@ const ProfilePage = ({ user }) => {
             <label>Email Address</label>
             <p>{formData.email}</p>
           </div>
+
+          {user?.lin && (
+            <div className="info-group">
+              <label>Learner ID (LIN)</label>
+              <p>{user.lin}</p>
+            </div>
+          )}
 
           <div className="info-group">
             <label>Class Level</label>
@@ -90,6 +98,7 @@ const ProfilePage = ({ user }) => {
         </div>
       </motion.div>
 
+      {/* Summary stats here are read-only snapshots of the learner account. */}
       <motion.div
         className="profile-stats"
         initial={{ opacity: 0, y: 20 }}
@@ -112,6 +121,7 @@ const ProfilePage = ({ user }) => {
         </div>
       </motion.div>
 
+      {/* Logout clears the session keys and returns to the public landing page. */}
       <motion.div
         className="logout-section"
         initial={{ opacity: 0, y: 20 }}

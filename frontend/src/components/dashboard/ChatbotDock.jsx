@@ -3,10 +3,49 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, Minimize2, Send, Sparkles, Loader2 } from 'lucide-react'
 import { useLearning } from '../../context/LearningContext'
 import { chatWithTutor } from '../../services/aiService'
+import { getLearnerStats } from '../../services/progressService'
 import './ChatbotDock.css'
 
 const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
-  const { getCompletedTopicsForAI } = useLearning()
+  const { getCompletedTopicsForAI, language, proficiencyLevel, completedLessons, commonMistakes } = useLearning()
+  const [liveStats, setLiveStats] = useState(null)
+
+  // Load the learner's real progress once so the tutor is grounded in actual activity.
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null')
+    if (!currentUser?._id) return
+    getLearnerStats(currentUser._id, {
+      completedLessons: completedLessons?.length ? completedLessons : (currentUser.completedLessons || [])
+    }).then(setLiveStats).catch(() => {})
+  }, [completedLessons])
+
+  // Summarize the learner's real performance so the tutor can adapt its level
+  // and reference weak spots without us sending the full progress object.
+  const buildProgressSummary = () => {
+    const parts = []
+    if (liveStats) {
+      parts.push(`Lessons completed: ${liveStats.lessonsCompleted}/${liveStats.totalLessons}`)
+      if (liveStats.quizCount > 0) {
+        parts.push(`Average quiz score: ${liveStats.avgQuizScore}% (best ${liveStats.bestQuizScore}%, ${liveStats.quizCount} taken)`)
+      }
+      if (liveStats.practiceCount > 0) {
+        parts.push(`Practice sessions completed: ${liveStats.practiceCount}`)
+      }
+      if (liveStats.currentStreak > 0) {
+        parts.push(`Current daily streak: ${liveStats.currentStreak}`)
+      }
+    }
+    if (Array.isArray(commonMistakes) && commonMistakes.length) {
+      const topMistakes = commonMistakes
+        .slice()
+        .sort((a, b) => (b.count || 0) - (a.count || 0))
+        .slice(0, 3)
+        .map((m) => m.type)
+        .filter(Boolean)
+      if (topMistakes.length) parts.push(`Recurring difficulty with: ${topMistakes.join(', ')}`)
+    }
+    return parts.join('. ')
+  }
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -30,7 +69,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
   const handleSend = async () => {
     if (!inputValue.trim()) return
 
-    // Add user message
+    // Store the user's message locally before asking the AI tutor.
     const userMessage = {
       id: messages.length + 1,
       type: 'user',
@@ -44,7 +83,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
     setIsTyping(true)
 
     try {
-      // Get real completed topics from context
+      // Send completed topics so the tutor stays inside the learner's current scope.
       const topicsForAI = getCompletedTopicsForAI && getCompletedTopicsForAI()
       const contexts = topicsForAI || completedTopics || ['Basic Greetings']
 
@@ -54,10 +93,15 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
         conversationHistory: messages.length
       })
 
-      // Call AI tutor
+      // The backend returns the tutor reply and any encouragement message.
+      // We forward the learner's language, level, and a progress summary so the
+      // tutor stays aware of their proficiency.
       const response = await chatWithTutor({
         message: currentInput,
         completedTopics: contexts,
+        language,
+        proficiencyLevel,
+        progressSummary: buildProgressSummary(),
         conversationHistory: messages.map(m => ({
           role: m.type === 'user' ? 'user' : 'assistant',
           content: m.text
@@ -79,7 +123,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
       
       setMessages(prev => [...prev, botMessage])
 
-      // Add encouragement as separate message occasionally
+      // Encourage the learner with a second message when the tutor returns one.
       if (response.encouragement) {
         setTimeout(() => {
           setMessages(prev => [...prev, {
@@ -149,7 +193,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
         )}
       </AnimatePresence>
 
-      {/* Chat Panel */}
+      {/* The panel is the learner-facing AI tutor drawer. */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -175,7 +219,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Message history keeps the conversation context visible. */}
             <div className="chatbot-messages">
               {messages.map((message) => (
                 <motion.div
@@ -222,7 +266,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick actions help beginners ask useful questions fast. */}
             {messages.length === 1 && (
               <div className="quick-actions">
                 <p className="quick-actions-label">Quick actions:</p>
@@ -243,7 +287,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
               </div>
             )}
 
-            {/* Input */}
+            {/* The input sends the learner's question to the tutor. */}
             <div className="chatbot-input">
               <motion.button
                 className="collapse-btn"

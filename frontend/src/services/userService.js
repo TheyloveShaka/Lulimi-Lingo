@@ -2,6 +2,7 @@
  * User Service - Handles user authentication and profile management
  */
 
+// All auth calls go through the live Node backend.
 const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app'
 
 /**
@@ -20,6 +21,7 @@ export const signupUser = async (userData) => {
         name: userData.name,
         email: userData.email,
         password: userData.password,
+        lin: userData.lin,
         classLevel: userData.class || 'S1',
         language: userData.language || 'luganda',
         proficiencyLevel: userData.proficiencyLevel || 'beginner'
@@ -32,7 +34,7 @@ export const signupUser = async (userData) => {
       throw new Error(data.error || 'Signup failed')
     }
 
-    // Store token in localStorage
+    // The token lets the browser restore the session after refresh.
     if (data.token) {
       localStorage.setItem('authToken', data.token)
     }
@@ -68,7 +70,7 @@ export const loginUser = async (credentials) => {
       throw new Error(data.error || 'Login failed')
     }
 
-    // Store token in localStorage
+    // Persist the session token for the authenticated dashboard flow.
     if (data.token) {
       localStorage.setItem('authToken', data.token)
     }
@@ -184,13 +186,13 @@ export const loginTeacher = async (credentials) => {
       throw new Error(errorMsg)
     }
 
-    // Check if user is actually a teacher
+    // Teacher access is role-based, so the frontend checks the returned role too.
     if (data.user.role !== 'teacher' && data.user.role !== 'admin') {
       console.error('❌ User is not a teacher:', data.user.role)
       throw new Error('This account is not a teacher account')
     }
 
-    // Store token in localStorage
+    // Store both the token and safe user profile for the current session.
     if (data.token) {
       localStorage.setItem('authToken', data.token)
       localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(data.user))
@@ -232,7 +234,7 @@ export const signupTeacher = async (teacherData) => {
       throw new Error(errorMsg)
     }
 
-    // Store token in localStorage
+    // Teacher signup logs the user in immediately after the account is created.
     if (data.token) {
       localStorage.setItem('authToken', data.token)
       localStorage.setItem('lulimiLingoCurrentUser', JSON.stringify(data.user))

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileUp, Users, BarChart3, Settings, LogOut, ChevronDown, Upload, X, Eye, Download, Trash2, Printer, Search, Database } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { aggregateProgress } from '../services/progressService'
 import './AdminDashboard.css'
 
 const AdminDashboard = ({ user }) => {
@@ -17,6 +18,7 @@ const AdminDashboard = ({ user }) => {
   const [loading, setLoading] = useState(false)
   const [studentEmail, setStudentEmail] = useState('')
   const [attachingStudent, setAttachingStudent] = useState(false)
+  const [analytics, setAnalytics] = useState(null)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -30,7 +32,7 @@ const AdminDashboard = ({ user }) => {
 
   const defaultSubject = user?.language === 'runyankole' ? 'Runyankole' : 'Luganda'
 
-  // Fetch resources
+  // Admins manage two things here: resources and student progress.
   const fetchResources = async () => {
     try {
       setLoading(true)
@@ -49,7 +51,7 @@ const AdminDashboard = ({ user }) => {
     }
   }
 
-  // Fetch students
+  // Student lists power the teacher/admin progress review workflow.
   const fetchStudents = async () => {
     try {
       setLoading(true)
@@ -68,7 +70,7 @@ const AdminDashboard = ({ user }) => {
     }
   }
 
-  // Fetch student progress
+  // Progress drill-down shows what a teacher needs before giving feedback.
   const fetchStudentProgress = async (studentId) => {
     try {
       setLoading(true)
@@ -93,11 +95,32 @@ const AdminDashboard = ({ user }) => {
     }
   }, [user.role, navigate])
 
+  // Class-wide analytics aggregated from real student attempts on the backend.
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('authToken')
+      const response = await fetch('/api/teacher/analytics', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAnalytics(data.data || null)
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (activeTab === 'resources') {
       fetchResources()
     } else if (activeTab === 'students') {
       fetchStudents()
+    } else if (activeTab === 'analytics') {
+      fetchAnalytics()
     }
   }, [activeTab])
 
@@ -110,8 +133,13 @@ const AdminDashboard = ({ user }) => {
 
   const handleUploadResource = async () => {
     try {
-      if (!formData.title || (!formData.externalUrl && !formData.file)) {
-        alert('Please fill in all required fields (title + URL or file)')
+      // Teachers can upload either a direct URL or a file attachment (not both required).
+      if (!formData.title) {
+        alert('Please enter a resource title')
+        return
+      }
+      if (!formData.externalUrl && !formData.file) {
+        alert('Add a URL link OR choose a file to upload')
         return
       }
 
@@ -121,7 +149,7 @@ const AdminDashboard = ({ user }) => {
       let response
 
       if (formData.file) {
-        // Convert to base64 and send as JSON payload
+        // Convert the file to base64 so it can be posted as JSON.
         const toBase64 = (file) => new Promise((resolve, reject) => {
           const reader = new FileReader()
           reader.onload = () => resolve(reader.result.split(',')[1])
@@ -138,9 +166,11 @@ const AdminDashboard = ({ user }) => {
           },
           body: JSON.stringify({
             ...formData,
+            file: undefined,
             subject,
             fileName: formData.file.name,
             fileSize: formData.file.size,
+            fileMimeType: formData.file.type || 'application/octet-stream',
             fileBase64: base64
           })
         })
@@ -168,7 +198,8 @@ const AdminDashboard = ({ user }) => {
           type: 'document',
           classLevel: 'S1',
           subject: defaultSubject,
-          externalUrl: ''
+          externalUrl: '',
+          file: null
         })
         fetchResources()
       } else {
@@ -182,6 +213,7 @@ const AdminDashboard = ({ user }) => {
 
   const handleSeedResources = async () => {
     try {
+      // Seeding helps bootstrap the resource library with starter content.
       setLoading(true)
       const token = localStorage.getItem('authToken')
       const response = await fetch('/api/resources/seed', {
@@ -212,6 +244,7 @@ const AdminDashboard = ({ user }) => {
   }
 
   const handleDeleteResource = async (resourceId) => {
+    // Delete is destructive, so it asks for confirmation first.
     if (!window.confirm('Are you sure you want to delete this resource?')) return
 
     try {
@@ -232,6 +265,7 @@ const AdminDashboard = ({ user }) => {
   }
 
   const handleSelectStudent = (student) => {
+    // Selecting a learner loads their progress into the right-hand panel.
     setSelectedStudent(student)
     fetchStudentProgress(student._id)
   }
@@ -243,9 +277,10 @@ const AdminDashboard = ({ user }) => {
   }
 
   const handleAttachStudent = async () => {
-    const email = studentEmail.trim().toLowerCase()
-    if (!email) {
-      alert('Enter a student email')
+    // Attaching by email or LIN links a student to the teacher's dashboard.
+    const identifier = studentEmail.trim()
+    if (!identifier) {
+      alert('Enter a student email or LIN')
       return
     }
 
@@ -258,7 +293,7 @@ const AdminDashboard = ({ user }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ identifier })
       })
 
       const data = await response.json()
@@ -495,13 +530,13 @@ const AdminDashboard = ({ user }) => {
 
                 <div className="attach-student-panel">
                   <div>
-                    <h3>Attach Student by Email</h3>
+                    <h3>Attach Student by Email or LIN</h3>
                     <p>Link a learner to your account so their progress, quiz history, and analytics show here.</p>
                   </div>
                   <div className="attach-student-form">
                     <input
-                      type="email"
-                      placeholder="student@example.com"
+                      type="text"
+                      placeholder="student@example.com or LIN"
                       value={studentEmail}
                       onChange={(e) => setStudentEmail(e.target.value)}
                     />
@@ -559,8 +594,10 @@ const AdminDashboard = ({ user }) => {
                     )}
                   </div>
 
-                  {/* Progress Details */}
-                  {selectedStudent && studentProgress && (
+                  {/* Progress Details — aggregated across every week the student has worked on. */}
+                  {selectedStudent && studentProgress && (() => {
+                    const agg = aggregateProgress(studentProgress.progress || [])
+                    return (
                     <div className="progress-details-section">
                       <div className="progress-header">
                         <h3>{selectedStudent.name}'s Progress</h3>
@@ -577,32 +614,29 @@ const AdminDashboard = ({ user }) => {
                       <div className="progress-summary">
                         <div className="summary-card">
                           <h4>Overall Progress</h4>
-                          <p className="big-number">
-                            {studentProgress.progress[0]?.completionPercentage || 0}%
-                          </p>
+                          <p className="big-number">{agg.overallProgress}%</p>
                         </div>
                         <div className="summary-card">
                           <h4>Average Score</h4>
-                          <p className="big-number">
-                            {(studentProgress.progress[0]?.averageScore || 0).toFixed(1)}%
-                          </p>
+                          <p className="big-number">{agg.quizCount > 0 ? `${agg.avgQuizScore}%` : '—'}</p>
                         </div>
                         <div className="summary-card">
-                          <h4>Total Score</h4>
-                          <p className="big-number">
-                            {studentProgress.progress[0]?.totalScore || 0}
-                          </p>
+                          <h4>Quizzes Taken</h4>
+                          <p className="big-number">{agg.quizCount}</p>
                         </div>
                       </div>
 
                       <div className="quiz-attempts">
                         <h4>Quiz Attempts</h4>
-                        {studentProgress.progress[0]?.quizAttempts?.length > 0 ? (
+                        {agg.quizAttempts.length > 0 ? (
                           <div className="attempts-list">
-                            {studentProgress.progress[0].quizAttempts.map((attempt, idx) => (
+                            {agg.quizAttempts
+                              .slice()
+                              .sort((a, b) => new Date(b.attemptDate) - new Date(a.attemptDate))
+                              .map((attempt, idx) => (
                               <div key={idx} className="attempt-item">
-                                <span className="attempt-quiz">Quiz {attempt.quizId}</span>
-                                <span className="attempt-score">{attempt.percentage}%</span>
+                                <span className="attempt-quiz">{attempt.quizId || `Week ${attempt.weekId || '–'}`}</span>
+                                <span className="attempt-score">{Math.round(attempt.percentage ?? 0)}%</span>
                                 <span className="attempt-date">
                                   {new Date(attempt.attemptDate).toLocaleDateString()}
                                 </span>
@@ -614,7 +648,8 @@ const AdminDashboard = ({ user }) => {
                         )}
                       </div>
                     </div>
-                  )}
+                    )
+                  })()}
                 </div>
               </motion.div>
             )}
@@ -632,31 +667,73 @@ const AdminDashboard = ({ user }) => {
                   <h2>Class Analytics</h2>
                 </div>
 
-                <div className="analytics-grid">
-                  <div className="analytics-card">
-                    <h3>Total Students</h3>
-                    <p className="stat-number">{students.length}</p>
-                  </div>
-                  <div className="analytics-card">
-                    <h3>Total Resources</h3>
-                    <p className="stat-number">{resources.length}</p>
-                  </div>
-                  <div className="analytics-card">
-                    <h3>Avg. Class Progress</h3>
-                    <p className="stat-number">
-                      {students.length > 0
-                        ? ((students.reduce((acc, s) => acc + (s.progressPercentage || 0), 0) / students.length) || 0).toFixed(1)
-                        : 0}
-                      %
-                    </p>
-                  </div>
-                  <div className="analytics-card">
-                    <h3>Resources Viewed</h3>
-                    <p className="stat-number">
-                      {resources.reduce((acc, r) => acc + (r.viewCount || 0), 0)}
-                    </p>
-                  </div>
-                </div>
+                {loading && !analytics ? (
+                  <p>Loading analytics...</p>
+                ) : (
+                  <>
+                    <div className="analytics-grid">
+                      <div className="analytics-card">
+                        <h3>Total Students</h3>
+                        <p className="stat-number">{analytics?.totalStudents ?? students.length}</p>
+                      </div>
+                      <div className="analytics-card">
+                        <h3>Active Students</h3>
+                        <p className="stat-number">{analytics?.activeStudents ?? 0}</p>
+                      </div>
+                      <div className="analytics-card">
+                        <h3>Class Avg. Quiz Score</h3>
+                        <p className="stat-number">
+                          {analytics?.totalQuizAttempts > 0 ? `${analytics.classAvgQuizScore}%` : '—'}
+                        </p>
+                      </div>
+                      <div className="analytics-card">
+                        <h3>Quizzes Taken</h3>
+                        <p className="stat-number">{analytics?.totalQuizAttempts ?? 0}</p>
+                      </div>
+                      <div className="analytics-card">
+                        <h3>Practice Sessions</h3>
+                        <p className="stat-number">{analytics?.totalPracticeAttempts ?? 0}</p>
+                      </div>
+                      <div className="analytics-card">
+                        <h3>Total Resources</h3>
+                        <p className="stat-number">{resources.length}</p>
+                      </div>
+                    </div>
+
+                    {/* Per-student breakdown so a teacher can compare learners at a glance. */}
+                    <div className="analytics-table-wrap">
+                      <h3>Student Breakdown</h3>
+                      {analytics?.students?.length > 0 ? (
+                        <table className="analytics-table">
+                          <thead>
+                            <tr>
+                              <th>Student</th>
+                              <th>Class</th>
+                              <th>Lessons</th>
+                              <th>Quizzes</th>
+                              <th>Avg Score</th>
+                              <th>Practice</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {analytics.students.map((s) => (
+                              <tr key={s.id}>
+                                <td>{s.name}</td>
+                                <td>{s.classLevel}</td>
+                                <td>{s.lessonsCompleted}</td>
+                                <td>{s.quizCount}</td>
+                                <td>{s.quizCount > 0 ? `${s.avgQuizScore}%` : '—'}</td>
+                                <td>{s.practiceCount}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <p className="empty-text">No students attached yet. Attach students from the Student Progress tab.</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -750,13 +827,16 @@ const AdminDashboard = ({ user }) => {
                   </select>
                 </div>
 
+                <div className="form-hint">Provide a URL link <strong>or</strong> upload a file — either one works.</div>
+
                 <div className="form-group">
-                  <label>URL Link *</label>
+                  <label>URL Link</label>
                   <input
                     type="url"
                     placeholder="https://example.com/resource"
                     value={formData.externalUrl}
                     onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
+                    disabled={Boolean(formData.file)}
                   />
                 </div>
 
@@ -766,6 +846,9 @@ const AdminDashboard = ({ user }) => {
                     type="file"
                     onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] || null })}
                   />
+                  {formData.file && (
+                    <span className="file-chosen">Selected: {formData.file.name}</span>
+                  )}
                 </div>
 
                 <div className="form-actions">

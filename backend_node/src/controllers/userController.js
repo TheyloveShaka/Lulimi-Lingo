@@ -8,28 +8,40 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
  * POST /api/auth/signup
  */
 export const signup = async (req, res) => {
-  const { name, email, password, classLevel, language, proficiencyLevel } = req.body
-  
+  const { name, email, password, classLevel, language, proficiencyLevel, lin } = req.body
+
   try {
-    // Validate required fields
+    // Keep validation close to the controller so bad requests fail early.
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, error: 'Name, email, and password are required' })
     }
-    
+
     if (password.length < 6) {
       return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' })
     }
-    
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() })
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: 'User with this email already exists' })
+
+    // The LIN identifies the learner in school records, so we capture it at signup.
+    const normalizedLin = String(lin || '').trim().toUpperCase()
+    if (!normalizedLin) {
+      return res.status(400).json({ success: false, error: 'Learner Identification Number (LIN) is required' })
     }
-    
-    // Create new user
+
+    // A learner is unique by both email and LIN.
+    const existingUser = await User.findOne({
+      $or: [{ email: email.toLowerCase() }, { lin: normalizedLin }]
+    })
+    if (existingUser) {
+      const conflict = existingUser.lin === normalizedLin
+        ? 'A student with this LIN already exists'
+        : 'User with this email already exists'
+      return res.status(400).json({ success: false, error: conflict })
+    }
+
+    // Persist the learner profile with defaults that match the curriculum.
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase(),
+      lin: normalizedLin,
       password,
       role: 'student',
       classLevel: classLevel || 'S1',
@@ -38,16 +50,17 @@ export const signup = async (req, res) => {
       completedLessons: [],
       completedTopics: []
     })
-    
-    // Generate JWT token
+
+    // The token lets the frontend re-open the session after refresh.
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '30d' })
-    
+
     return res.status(201).json({
       success: true,
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
+        lin: user.lin,
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
@@ -69,27 +82,32 @@ export const signup = async (req, res) => {
  * POST /api/auth/login
  */
 export const login = async (req, res) => {
-  const { email, password } = req.body
-  
+  // `email` may carry either an email address or a LIN, so we treat it as a
+  // generic identifier and accept an explicit `lin` field too.
+  const { email, password, lin } = req.body
+  const identifier = String(lin || email || '').trim()
+
   try {
-    // Validate required fields
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Email and password are required' })
+    // Login accepts an identifier (email or LIN) plus password.
+    if (!identifier || !password) {
+      return res.status(400).json({ success: false, error: 'Email or LIN and password are required' })
     }
-    
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() })
+
+    // Look up the learner by email or LIN before checking the password hash.
+    const user = await User.findOne({
+      $or: [{ email: identifier.toLowerCase() }, { lin: identifier.toUpperCase() }]
+    })
     if (!user) {
-      return res.status(401).json({ success: false, error: 'Invalid email or password' })
+      return res.status(401).json({ success: false, error: 'Invalid credentials' })
     }
     
-    // Verify password
+    // Password verification stays inside the model so hashing stays encapsulated.
     const isPasswordValid = await user.verifyPassword(password)
     if (!isPasswordValid) {
       return res.status(401).json({ success: false, error: 'Invalid email or password' })
     }
     
-    // Generate JWT token
+    // Reissue a token after login so the browser can treat the session as fresh.
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '30d' })
     
     return res.json({
@@ -98,6 +116,7 @@ export const login = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        lin: user.lin,
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
@@ -120,6 +139,7 @@ export const login = async (req, res) => {
  */
 export const getCurrentUser = async (req, res) => {
   try {
+    // This endpoint is what the frontend uses to restore the signed-in user.
     const user = await User.findById(req.user.userId)
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' })
@@ -131,6 +151,7 @@ export const getCurrentUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        lin: user.lin,
         role: user.role,
         classLevel: user.classLevel,
         language: user.language,
@@ -154,6 +175,7 @@ export const updateProgress = async (req, res) => {
   try {
     const { completedLessons, completedTopics } = req.body
     
+    // Keep the stored progress summary lightweight so it is fast to read back.
     const user = await User.findByIdAndUpdate(
       req.user.userId,
       {
@@ -187,7 +209,7 @@ export const teacherSignup = async (req, res) => {
   const { name, email, password, schoolName, classLevels } = req.body
   
   try {
-    // Validate required fields
+    // Teachers use the same account base, but get a different role and dashboard.
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, error: 'Name, email, and password are required' })
     }
@@ -196,13 +218,13 @@ export const teacherSignup = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' })
     }
     
-    // Check if user already exists
+    // Reuse the same email uniqueness rule for teachers.
     const existingUser = await User.findOne({ email: email.toLowerCase() })
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'User with this email already exists' })
     }
     
-    // Create new teacher user
+    // Teacher accounts start with the first class level they manage.
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase(),
@@ -216,7 +238,7 @@ export const teacherSignup = async (req, res) => {
       assignedStudents: []
     })
     
-    // Generate JWT token
+    // Teacher tokens work the same way as student tokens.
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '30d' })
     
     return res.status(201).json({

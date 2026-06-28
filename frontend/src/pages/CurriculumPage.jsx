@@ -7,6 +7,7 @@ import './CurriculumPage.css'
 const CurriculumPage = () => {
   const navigate = useNavigate()
 
+  // This page is a read-only map of the syllabus, useful for exploring the full course.
   const classes = Object.keys(curriculumData)
 
   return (

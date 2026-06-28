@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, GraduationCap, Loader2 } from 'lucide-react'
+import { User, Mail, Lock, GraduationCap, Loader2, Fingerprint } from 'lucide-react'
 import { signupUser } from '../../services/userService'
 import './SignupCard.css'
 
@@ -8,6 +8,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    lin: '',
     password: '',
     class: 'S1',
     language: 'luganda',
@@ -29,6 +30,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
   ]
 
   const handleChange = (e) => {
+    // Keep the form state in sync with whatever the learner types or selects.
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -43,6 +45,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
   }
 
   const validate = () => {
+    // Basic client-side checks catch obvious problems before the API call.
     const newErrors = {}
     
     if (!formData.name.trim()) {
@@ -54,7 +57,11 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid'
     }
-    
+
+    if (!formData.lin.trim()) {
+      newErrors.lin = 'Learner Identification Number (LIN) is required'
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required'
     } else if (formData.password.length < 6) {
@@ -67,6 +74,7 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Validate first so the backend only receives clean signup requests.
     const newErrors = validate()
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -78,11 +86,12 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
       const result = await signupUser(formData)
       
       if (result.success && result.user) {
-        // Store user data (without password)
+        // Store the safe subset of user data that the app needs after login.
         const userData = {
           _id: result.user._id,
           name: result.user.name,
           email: result.user.email,
+          lin: result.user.lin,
           classLevel: result.user.classLevel,
           language: result.user.language,
           proficiencyLevel: result.user.proficiencyLevel,
@@ -148,6 +157,23 @@ const SignupCard = ({ onSignup, onShowLogin }) => {
             />
           </div>
           {errors.email && <span className="error-message">{errors.email}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="lin">Learner Identification Number (LIN)</label>
+          <div className={`input-wrapper ${errors.lin ? 'error' : ''}`}>
+            <Fingerprint size={20} className="input-icon" />
+            <input
+              type="text"
+              id="lin"
+              name="lin"
+              placeholder="e.g. UG-2024-0001234"
+              value={formData.lin}
+              onChange={handleChange}
+              disabled={isLoading}
+            />
+          </div>
+          {errors.lin && <span className="error-message">{errors.lin}</span>}
         </div>
 
         <div className="form-group">

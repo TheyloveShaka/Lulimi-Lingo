@@ -8,6 +8,7 @@ import { callOpenAIChat } from './aiService.js';
 
 class LessonGeneratorService {
   constructor() {
+    // OpenAI is the preferred provider; Gemini is the fallback path.
     this.aiService = geminiService;
   }
 
@@ -60,6 +61,7 @@ Provide the lesson in this JSON structure:
 Return ONLY valid JSON.`;
 
     try {
+      // Ask the provider for strict JSON so the UI can render predictable sections.
       const openAiResponse = await callOpenAIChat([
         { role: 'system', content: `You are an expert ${languageName} teacher. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
@@ -68,6 +70,7 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Lesson generation OpenAI error:', error)
       try {
+        // If OpenAI fails or is unavailable, fall back to the Gemini service.
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
           return this._parseLesson(response, topic, 'gemini', languageName)

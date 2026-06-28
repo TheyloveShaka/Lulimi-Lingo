@@ -93,6 +93,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
   }, [loading]);
 
   const loadQuiz = async () => {
+    // Ask the backend for a fresh quiz, then normalize it for timed assessment.
     setLoading(true);
     setError(null);
     setUserAnswers({});
@@ -115,6 +116,7 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
       });
 
       if (result.success) {
+        // Normalize the backend payload so scoring and navigation stay predictable.
         const quizData = result.quiz?.questions?.length > 0
           ? { ...result.quiz, questions: normalizeQuestions(result.quiz.questions) }
           : { questions: normalizeQuestions(generateMockQuizQuestions(topic, numberOfQuestions)) };
@@ -585,6 +587,13 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
               <Flag size={16} />
             </button>
           </div>
+
+          {question.passage && (
+            <div className="question-passage">
+              <span className="passage-label">📖 Read the passage</span>
+              <p>{question.passage}</p>
+            </div>
+          )}
 
           <h3 className="question-text">{question.question}</h3>
 

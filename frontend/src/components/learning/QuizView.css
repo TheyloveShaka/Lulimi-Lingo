@@ -405,6 +405,32 @@
   line-height: 1.6;
 }
 
+/* Reading passage shown above comprehension questions. */
+.question-passage {
+  background: #f8fafc;
+  border-left: 4px solid #6b9fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.question-passage .passage-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #4453c7;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.question-passage p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
 /* ============ Quiz Options ============ */
 .quiz-options {
   margin-bottom: 2.5rem;

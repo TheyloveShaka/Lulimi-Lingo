@@ -18,9 +18,9 @@ import {
   getOutOfScopeResponse
 } from './promptRouter';
 
-// API Configuration - Node Backend
+// API Configuration - the browser talks to backend_node, not the legacy Python folder.
 const AI_CONFIG = {
-  // Node.js backend endpoint
+  // Current production backend endpoint.
   backendUrl:
     import.meta.env.VITE_BACKEND_URL ||
     import.meta.env.VITE_NODE_BACKEND_URL ||
@@ -37,6 +37,7 @@ const resolveLanguageLabel = (language = 'luganda') => (
 /**
  * Make an API call to the Node backend
  */
+// Keep the frontend contract narrow: one request wrapper for all AI routes.
 const callBackend = async (endpoint, payload) => {
   if (AI_CONFIG.useMockResponses) {
     return {
@@ -205,6 +206,9 @@ export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', c
     _nonce: Date.now() // Prevent cache collisions across views
   };
 
+  // Mirror the quiz validator: stay lenient so the shared normalizeQuestion engine
+  // (which repairs shapes for matching/reorder/etc.) gets a chance to run. Being
+  // over-strict here was rejecting otherwise-renderable sets and breaking practice.
   const validate = (res) => {
     const questionsPayload = res.questions || res.practice?.questions || res.data?.questions;
     const qs = Array.isArray(questionsPayload) ? questionsPayload : parsePracticeQuestions(questionsPayload);
@@ -213,28 +217,11 @@ export const generatePractice = async ({ topic, proficiencyLevel = 'beginner', c
       const questionText = q?.question || q?.prompt || q?.text;
       if (!q || !questionText) return false;
       const type = (q.type || '').toLowerCase();
+      // Only multiple-choice truly needs options + an answer to be usable.
       if (type === 'multiple-choice') {
         if (!Array.isArray(q.options) || q.options.length < 2) return false;
         if (!(q.correctAnswer || q.correct_answer || q.answer)) return false;
-        // Accept answers that may not exactly match option string formatting
-        // (AI may return slightly different punctuation/capitalization).
-        // Only treat as invalid when options and correctAnswer are both missing or malformed.
       }
-      if (type === 'translate' || type === 'fill-blank') {
-        if (!(q.correctAnswer || q.correct_answer || q.answer) && !Array.isArray(q.acceptableAnswers) && !Array.isArray(q.acceptable_answers)) return false;
-      }
-      if (type === 'reorder') {
-        // Accept either: old format (tokens + correctOrder arrays) or new format (correctAnswer string)
-        const hasOldFormat = Array.isArray(q.tokens) && Array.isArray(q.correctOrder);
-        const correctValue = q.correctAnswer || q.correct_answer || q.answer;
-        const hasNewFormat = correctValue && typeof correctValue === 'string';
-        if (!hasOldFormat && !hasNewFormat) return false;
-      }
-         if (type === 'matching') {
-           // Matching needs options and some form of correctAnswer
-           if (!Array.isArray(q.options) || q.options.length < 2) return false;
-           if (!(q.correctAnswer || q.correct_answer || q.answer)) return false;
-         }
     }
     return true;
   };
@@ -293,14 +280,15 @@ export const generateFeedback = async ({ learnerAnswers = {}, correctAnswers = {
   return { success: false, error: 'AI did not return feedback' };
 };
 
-export const chatWithTutor = async ({ message, completedTopics = [], conversationHistory = [], language, proficiencyLevel }) => {
+export const chatWithTutor = async ({ message, completedTopics = [], conversationHistory = [], language, proficiencyLevel, progressSummary = '' }) => {
   const languageLabel = resolveLanguageLabel(language);
   const payload = {
     message,
     completed_topics: completedTopics || [],
     conversation_history: conversationHistory.slice(-5),
     language,
-    proficiency_level: proficiencyLevel
+    proficiency_level: proficiencyLevel,
+    progress_summary: progressSummary
   };
 
   console.log('🎤 Chat payload:', payload);

@@ -15,6 +15,7 @@ const LoginModal = ({ onClose, onLogin }) => {
   const navigate = useNavigate()
 
   const handleChange = (e) => {
+    // Keep the modal form controlled so validation stays simple.
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -30,9 +31,10 @@ const LoginModal = ({ onClose, onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Validate before calling the API so errors appear immediately in the modal.
     const newErrors = {}
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email or LIN is required'
     }
     if (!formData.password) {
       newErrors.password = 'Password is required'
@@ -48,11 +50,12 @@ const LoginModal = ({ onClose, onLogin }) => {
       const result = await loginUser(formData)
       
       if (result.success && result.user) {
-        // Store user data (without password)
+        // Store only the safe profile data that the app needs after login.
         const userData = {
           _id: result.user._id,
           name: result.user.name,
           email: result.user.email,
+          lin: result.user.lin,
           classLevel: result.user.classLevel,
           language: result.user.language,
           proficiencyLevel: result.user.proficiencyLevel,
@@ -96,14 +99,14 @@ const LoginModal = ({ onClose, onLogin }) => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">Email or LIN</label>
             <div className={`input-wrapper ${errors.email ? 'error' : ''}`}>
               <Mail size={20} className="input-icon" />
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
-                placeholder="your.email@example.com"
+                placeholder="Email address or Learner ID (LIN)"
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}

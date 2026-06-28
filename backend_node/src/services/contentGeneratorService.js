@@ -12,9 +12,7 @@ const __dirname = path.dirname(__filename)
 const DATA_DIR_CANDIDATES = [
   process.env.CURRICULUM_DATA_DIR,
   path.resolve(__dirname, '..', '..', 'data'),
-  path.resolve(__dirname, '..', '..', '..', 'backend', 'data'),
   '/app/data',
-  '/backend/data'
 ].filter(Boolean)
 
 function resolveDataFile(fileName) {

@@ -56,6 +56,9 @@ const saveToCache = async ({ contentType, requestKey, requestMeta, content, prov
   )
 }
 
+// The controller turns each request into a stable cache key so the same
+// topic, level, and objectives reuse cached AI output instead of regenerating it.
+
 /**
  * Generate a lesson using AI
  * POST /api/ai/lesson
@@ -275,7 +278,11 @@ export const chatWithTutor = async (req, res) => {
     const {
       userId,
       message,
-      conversationHistory = req.body.conversation_history || []
+      conversationHistory = req.body.conversation_history || [],
+      language = req.body.language || 'luganda',
+      proficiencyLevel = req.body.proficiency_level || 'beginner',
+      completedTopics = req.body.completed_topics || [],
+      progressSummary = req.body.progress_summary || ''
     } = req.body
 
     if (!message) {
@@ -288,8 +295,16 @@ export const chatWithTutor = async (req, res) => {
     // Load user progress for context and keep prompt short
     const progress = userId ? await Progress.findOne({ user: userId }).lean() : null
 
-    // GPT-4o first, Gemini fallback
-    const aiResult = await tutorChat(message, { progress, conversationHistory })
+    // GPT-4o first, Gemini fallback. The learner context (level, language, topics,
+    // progress) is forwarded so the tutor can tailor difficulty and references.
+    const aiResult = await tutorChat(message, {
+      progress,
+      conversationHistory,
+      language,
+      proficiencyLevel,
+      completedTopics,
+      progressSummary
+    })
     const reply = aiResult.response
 
     // Persist conversation

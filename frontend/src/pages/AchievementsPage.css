@@ -140,6 +140,18 @@
   font-style: italic;
 }
 
+/* Locked badges show progress text instead of an unlock label. */
+.unlock-date.pending {
+  color: #999;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.achievements-page.loading {
+  padding: 3rem 2rem;
+  color: #666;
+}
+
 @media (max-width: 768px) {
   .achievements-page {
     padding: 1rem;

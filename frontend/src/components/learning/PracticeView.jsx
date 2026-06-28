@@ -189,6 +189,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
   }, [loading]);
 
   const loadPractice = async () => {
+    // Build the practice set from curriculum context first, then fall back to AI output.
     setLoading(true);
     setError(null);
     setUserAnswers({});
@@ -208,6 +209,7 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
         || termCurriculum?.data?.milestones?.[0];
 
       if (termCurriculum.success && matchingMilestone?.id) {
+        // Curriculum-backed practice keeps exercises aligned with the syllabus.
         try {
           const curriculumResult = await generateCurriculumPractice(classLevel, term, matchingMilestone.id, topicTitle, 4);
           console.log('📚 Curriculum practice result:', { success: curriculumResult.success, contentKeys: Object.keys(curriculumResult.content || {}) });
@@ -451,6 +453,14 @@ const PracticeView = ({ topic, onComplete, onStartQuiz }) => {
             {question.type === 'reorder' && '🔀 Reorder'}
             {question.type === 'matching' && '🧩 Matching'}
           </div>
+
+          {/* Reading passage (for comprehension questions) */}
+          {question.passage && (
+            <div className="question-passage">
+              <span className="passage-label">📖 Read the passage</span>
+              <p>{question.passage}</p>
+            </div>
+          )}
 
           {/* Question Text */}
           <h3 className="question-text">{question.question}</h3>

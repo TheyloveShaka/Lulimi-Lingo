@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useLearning } from '../context/LearningContext'
+import { getLearnerStats } from '../services/progressService'
 import Sidebar from '../components/dashboard/Sidebar'
 import LevelLadder from '../components/dashboard/LevelLadder'
 import ChatbotDock from '../components/dashboard/ChatbotDock'
@@ -21,21 +22,35 @@ const Dashboard = ({ user }) => {
   const [chatbotOpen, setChatbotOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState('home')
   const { language: selectedLanguage, completedLessons, completedTopics, currentStreak } = useLearning()
+  const [liveStats, setLiveStats] = useState(null)
 
+  // Everything on this screen is driven by the learner's stored progress.
   const userName = user?.name || 'Student'
 
-  // Calculate real progress based on completed lessons and topics
+  // Pull real attempt history from the backend so the header reflects actual activity.
+  useEffect(() => {
+    let active = true
+    getLearnerStats(user?._id, {
+      completedLessons: completedLessons?.length ? completedLessons : (user?.completedLessons || [])
+    }).then((stats) => {
+      if (active) setLiveStats(stats)
+    })
+    return () => { active = false }
+  }, [user, completedLessons])
+
+  // Prefer real backend stats; fall back to local context if the fetch is pending.
   const progressMetrics = useMemo(() => {
-    const totalLessons = 48 // 4 terms × 3 weeks × 4 lessons per week
+    const totalLessons = 48
     const completedLessonsCount = completedLessons?.length || 0
-    const overallProgress = Math.round((completedLessonsCount / totalLessons) * 100)
-    const streak = currentStreak || 0
+    const localProgress = Math.min(Math.round((completedLessonsCount / totalLessons) * 100), 100)
 
     return {
-      overallProgress: Math.min(overallProgress, 100),
-      streak: streak
+      overallProgress: liveStats?.overallProgress ?? localProgress,
+      streak: liveStats?.currentStreak ?? (currentStreak || 0),
+      avgQuizScore: liveStats?.avgQuizScore ?? 0,
+      quizCount: liveStats?.quizCount ?? 0
     }
-  }, [completedLessons, currentStreak])
+  }, [completedLessons, currentStreak, liveStats])
 
   const handleWeekClick = (week) => {
     setSelectedWeek(week)
@@ -47,6 +62,7 @@ const Dashboard = ({ user }) => {
 
   // Render the correct page content based on current page
   const renderPageContent = () => {
+    // Each sidebar option swaps the main dashboard area without leaving the app.
     switch (currentPage) {
       case 'progress':
         return <MyProgressPage user={user} />
@@ -96,6 +112,12 @@ const Dashboard = ({ user }) => {
                   <span className="stat-label">Current Streak</span>
                   <div className="stat-value">
                     <span className="stat-number">{progressMetrics.streak} {progressMetrics.streak === 1 ? 'day' : 'days'}</span>
+                  </div>
+                </div>
+                <div className="progress-stat">
+                  <span className="stat-label">Quiz Average</span>
+                  <div className="stat-value">
+                    <span className="stat-number">{progressMetrics.quizCount > 0 ? `${progressMetrics.avgQuizScore}%` : '—'}</span>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import Resource from '../models/Resource.js'
 import User from '../models/User.js'
+import Progress from '../models/Progress.js'
 
 const getDefaultSeedResources = () => ([
   {
@@ -92,34 +93,28 @@ export const getTeacherResources = async (req, res) => {
   }
 }
 
-// Upload a new resource (for teachers/admins)
+// Upload a new resource (for teachers/admins). Accepts EITHER an external URL
+// OR an uploaded file (stored in the DB so it survives redeploys), not both required.
 export const uploadResource = async (req, res) => {
   try {
-    const { title, description, type, classLevel, subject, externalUrl, fileName, fileSize, fileBase64 } = req.body
+    const { title, description, type, classLevel, subject, externalUrl, fileName, fileSize, fileBase64, fileMimeType } = req.body
     const uploadedBy = req.user?.userId
 
     // Verify user is teacher or admin
     const user = await User.findById(uploadedBy)
-    if (user.role !== 'teacher' && user.role !== 'admin') {
+    if (!user || (user.role !== 'teacher' && user.role !== 'admin')) {
       return res.status(403).json({ success: false, error: 'Only teachers and admins can upload resources' })
     }
 
-    // If a base64 file was provided, write it to disk and set fileUrl
-    let fileUrl = undefined
-    if (fileBase64 && fileName) {
-      try {
-        const uploadsDir = resolveDataFile('uploads')
-        // Ensure uploadsDir exists
-        const fs = require('fs')
-        const path = require('path')
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true })
-        const safeName = `${Date.now()}_${fileName.replace(/[^a-z0-9.-]/gi, '_')}`
-        const filePath = path.join(uploadsDir, safeName)
-        fs.writeFileSync(filePath, Buffer.from(fileBase64, 'base64'))
-        fileUrl = `/data/uploads/${safeName}`
-      } catch (writeErr) {
-        console.error('Failed to write uploaded file:', writeErr.message)
-      }
+    const trimmedUrl = String(externalUrl || '').trim()
+    const hasFile = Boolean(fileBase64 && fileName)
+
+    // Clear, early validation so the teacher gets a helpful message either way.
+    if (!title || !classLevel || !subject) {
+      return res.status(400).json({ success: false, error: 'Title, class level, and subject are required' })
+    }
+    if (!trimmedUrl && !hasFile) {
+      return res.status(400).json({ success: false, error: 'Provide either a URL or a file to upload' })
     }
 
     const newResource = new Resource({
@@ -128,19 +123,49 @@ export const uploadResource = async (req, res) => {
       type,
       classLevel,
       subject,
-      externalUrl,
-      fileUrl,
-      fileName,
-      fileSize,
+      externalUrl: trimmedUrl || undefined,
+      fileName: hasFile ? fileName : undefined,
+      fileSize: hasFile ? fileSize : undefined,
+      fileMimeType: hasFile ? (fileMimeType || 'application/octet-stream') : undefined,
+      fileData: hasFile ? fileBase64 : undefined,
       uploadedBy
     })
 
+    // The download path points at the file-serving endpoint below.
+    if (hasFile) {
+      newResource.fileUrl = `/api/resources/${newResource._id}/file`
+    }
+
     await newResource.save()
+
+    // Never return the heavy base64 blob to the client.
+    const saved = newResource.toObject()
+    delete saved.fileData
 
     res.status(201).json({
       success: true,
-      data: newResource
+      data: saved
     })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+}
+
+// Stream a stored uploaded file back to the client (students or teachers).
+export const downloadResourceFile = async (req, res) => {
+  try {
+    const { resourceId } = req.params
+    const resource = await Resource.findById(resourceId).select('+fileData fileName fileMimeType')
+    if (!resource || !resource.fileData) {
+      return res.status(404).json({ success: false, error: 'File not found' })
+    }
+
+    await Resource.findByIdAndUpdate(resourceId, { $inc: { downloadCount: 1 } })
+
+    const buffer = Buffer.from(resource.fileData, 'base64')
+    res.setHeader('Content-Type', resource.fileMimeType || 'application/octet-stream')
+    res.setHeader('Content-Disposition', `inline; filename="${(resource.fileName || 'resource').replace(/"/g, '')}"`)
+    return res.send(buffer)
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }
@@ -217,9 +242,8 @@ export const getStudentProgress = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to view this student' })
     }
 
-    // Get progress data
-    const Progress = require('../models/Progress.js').default
-    const progressData = await Progress.find({ user: studentId })
+    // Get progress data (all weeks for this learner)
+    const progressData = await Progress.find({ user: studentId }).lean()
 
     res.json({
       success: true,
@@ -258,14 +282,83 @@ export const getTeacherStudents = async (req, res) => {
   }
 }
 
+// Class-wide analytics aggregated from every assigned student's real attempts.
+export const getTeacherAnalytics = async (req, res) => {
+  try {
+    const teacherId = req.user?.userId
+    const teacher = await User.findById(teacherId).populate('assignedStudents')
+    if (!teacher) {
+      return res.status(404).json({ success: false, error: 'Teacher not found' })
+    }
+
+    const students = Array.isArray(teacher.assignedStudents) ? teacher.assignedStudents : []
+    const studentIds = students.map((s) => s._id)
+    const progressRecords = await Progress.find({ user: { $in: studentIds } }).lean()
+
+    // Group progress records per student so we can summarise each learner.
+    const byStudent = new Map()
+    progressRecords.forEach((rec) => {
+      const key = String(rec.user)
+      if (!byStudent.has(key)) byStudent.set(key, [])
+      byStudent.get(key).push(rec)
+    })
+
+    let totalQuizAttempts = 0
+    let quizScoreSum = 0
+    let totalPracticeAttempts = 0
+    let activeStudents = 0
+
+    const perStudent = students.map((student) => {
+      const records = byStudent.get(String(student._id)) || []
+      const quizAttempts = records.flatMap((r) => r.quizAttempts || [])
+      const practiceAttempts = records.flatMap((r) => r.practiceAttempts || [])
+      const lessonsCompleted = records.filter((r) => r.lessonCompleted).length
+      const avgQuiz = quizAttempts.length
+        ? Math.round(quizAttempts.reduce((s, a) => s + (a.percentage || 0), 0) / quizAttempts.length)
+        : 0
+
+      if (quizAttempts.length || practiceAttempts.length || lessonsCompleted) activeStudents += 1
+      totalQuizAttempts += quizAttempts.length
+      quizScoreSum += quizAttempts.reduce((s, a) => s + (a.percentage || 0), 0)
+      totalPracticeAttempts += practiceAttempts.length
+
+      return {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        classLevel: student.classLevel,
+        lessonsCompleted,
+        quizCount: quizAttempts.length,
+        avgQuizScore: avgQuiz,
+        practiceCount: practiceAttempts.length
+      }
+    })
+
+    return res.json({
+      success: true,
+      data: {
+        totalStudents: students.length,
+        activeStudents,
+        totalQuizAttempts,
+        totalPracticeAttempts,
+        classAvgQuizScore: totalQuizAttempts ? Math.round(quizScoreSum / totalQuizAttempts) : 0,
+        students: perStudent
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+}
+
 // Attach a student to a teacher by student email
 export const attachStudentByEmail = async (req, res) => {
   try {
     const teacherId = req.user?.userId
-    const email = String(req.body?.email || '').trim().toLowerCase()
+    // Accept an email or a LIN so teachers can attach students by either identifier.
+    const identifier = String(req.body?.identifier || req.body?.email || req.body?.lin || '').trim()
 
-    if (!email) {
-      return res.status(400).json({ success: false, error: 'Student email is required' })
+    if (!identifier) {
+      return res.status(400).json({ success: false, error: 'Student email or LIN is required' })
     }
 
     const teacher = await User.findById(teacherId)
@@ -273,9 +366,11 @@ export const attachStudentByEmail = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to attach students' })
     }
 
-    const student = await User.findOne({ email })
+    const student = await User.findOne({
+      $or: [{ email: identifier.toLowerCase() }, { lin: identifier.toUpperCase() }]
+    })
     if (!student) {
-      return res.status(404).json({ success: false, error: 'No student found with that email' })
+      return res.status(404).json({ success: false, error: 'No student found with that email or LIN' })
     }
 
     if (student.role !== 'student') {

@@ -46,6 +46,7 @@ const HelpPage = () => {
         <p>Get answers to your questions</p>
       </div>
 
+      {/* FAQs answer the common questions before the learner has to ask for support. */}
       <motion.div
         className="faq-section"
         initial={{ opacity: 0, y: 20 }}
@@ -87,6 +88,7 @@ const HelpPage = () => {
         </div>
       </motion.div>
 
+      {/* Contact cards show the support channels and location in one place. */}
       <motion.div
         className="contact-section"
         initial={{ opacity: 0, y: 20 }}
@@ -116,6 +118,7 @@ const HelpPage = () => {
         </div>
       </motion.div>
 
+      {/* The tips section turns the help page into a mini learning guide too. */}
       <motion.div
         className="tips-section"
         initial={{ opacity: 0, y: 20 }}

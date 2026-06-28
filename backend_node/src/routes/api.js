@@ -8,8 +8,10 @@ import {
   uploadResource, 
   deleteResource, 
   getResource,
+  downloadResourceFile,
   getStudentProgress,
   getTeacherStudents,
+  getTeacherAnalytics,
   attachStudentByEmail,
   seedResources
 } from '../controllers/resourceController.js'
@@ -48,14 +50,14 @@ router.post('/content/quiz', generateQuizContent)
 router.post('/content/practice', generatePracticeContent)
 router.post('/content/resource', generateResourceContent)
 
-// Legacy AI endpoints (fallback to mock data)
+// Legacy AI endpoints kept for compatibility with older client calls.
 router.post('/lesson', generateLesson)
 router.post('/practice', generatePractice)
 router.post('/quiz', generateQuiz)
 router.post('/chat', chatWithTutor)
 router.post('/feedback', generateFeedback)
 
-// New AI endpoints (explicit naming)
+// New AI endpoints with explicit naming for the current frontend flow.
 router.post('/ai/lesson', generateLesson)
 router.post('/ai/practice', generatePractice)
 router.post('/ai/quiz', generateQuiz)
@@ -68,6 +70,7 @@ router.post('/progress/:userId', upsertProgress)
 
 // Resource endpoints
 router.get('/resources/class/:classLevel', getResourcesByClass)
+router.get('/resources/:resourceId/file', downloadResourceFile)
 router.get('/resources/:resourceId', getResource)
 router.get('/teacher/resources', authMiddleware, getTeacherResources)
 router.post('/resources', authMiddleware, uploadResource)
@@ -76,6 +79,7 @@ router.post('/resources/seed', authMiddleware, seedResources)
 
 // Teacher dashboard endpoints
 router.get('/teacher/students', authMiddleware, getTeacherStudents)
+router.get('/teacher/analytics', authMiddleware, getTeacherAnalytics)
 router.post('/teacher/students/attach', authMiddleware, attachStudentByEmail)
 router.get('/teacher/student/:studentId/progress', authMiddleware, getStudentProgress)
 

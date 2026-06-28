@@ -8,6 +8,7 @@ import { callOpenAIChat } from './aiService.js';
 
 class PracticeGeneratorService {
   constructor() {
+    // OpenAI is preferred first, and Gemini is used if the primary call fails.
     this.aiService = geminiService;
   }
 
@@ -37,24 +38,40 @@ class PracticeGeneratorService {
     const prompt = `Generate 5 varied practice questions for ${languageName} topic: "${topic}"
 
 Proficiency level: ${proficiencyLevel}
+Match the difficulty, vocabulary, and sentence length to a ${proficiencyLevel} learner.
 ${mistakesText}
 ${objectivesText}
 
-Include these question types:
-1. Fill in the blank
-2. Multiple choice
-3. Translation
-4. Word reordering (if applicable)
-5. Matching or open-ended
+Use a mix of these question types:
+- fill-blank
+- multiple-choice
+- translate
+- reorder
+- matching
+- reading-comprehension
+
+Type-specific fields (use the SAME shape the assessment engine expects):
+- multiple-choice: "options" array, plus "correctAnswer" matching one option exactly
+- fill-blank: optional "options" array; always include "correctAnswer"
+- translate: "correctAnswer" (and optional "acceptableAnswers" array of valid variants)
+- matching: "pairs" array of { "left": "...", "right": "..." }
+- reorder: "tokens" (shuffled array) and "correctOrder" (correct array)
+- reading-comprehension: a "passage" field with a short ${languageName} reading text (2-4 sentences, level-appropriate), plus "options" and "correctAnswer" testing comprehension
+
+IMPORTANT: Include at least ONE reading-comprehension question with a real ${languageName} passage so learners practice reading.
 
 Provide in JSON format:
 {
   "questions": [
     {
       "id": 1,
-      "type": "fill-blank|multiple-choice|translate|reorder|matching",
+      "type": "fill-blank|multiple-choice|translate|reorder|matching|reading-comprehension",
       "question": "Question text",
-      "options": ["Option A", "Option B"] (only for multiple choice/matching),
+      "passage": "Short reading passage (only for reading-comprehension)",
+      "options": ["Option A", "Option B"],
+      "pairs": [{ "left": "...", "right": "..." }],
+      "tokens": ["..."],
+      "correctOrder": ["..."],
       "correctAnswer": "The answer",
       "hint": "Helpful hint",
       "explanation": "Why this is correct"
@@ -62,9 +79,10 @@ Provide in JSON format:
   ]
 }
 
-Return ONLY valid JSON.`;
+Only include the fields relevant to each question's type. Return ONLY valid JSON.`;
 
     try {
+      // Ask for structured JSON so the frontend can render practice items consistently.
       const openAiResponse = await callOpenAIChat([
         { role: 'system', content: `You are an expert ${languageName} tutor. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
@@ -73,6 +91,7 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Practice generation OpenAI error:', error)
       try {
+        // The fallback keeps practice usable even when the main provider is unavailable.
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
           return this._parsePractice(response, topic, 'gemini', languageName)
@@ -85,6 +104,7 @@ Return ONLY valid JSON.`;
   }
 
   async _parsePractice(content, topic, provider = 'unknown', languageName = 'Luganda') {
+    // The parser repairs provider output into the exact shape the UI expects.
     const tryParse = (text) => {
       try {
         const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);

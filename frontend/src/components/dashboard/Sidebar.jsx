@@ -13,6 +13,7 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
 
   useEffect(() => {
     const handleResize = () => {
+      // The sidebar adapts to screen size so mobile users get a drawer instead of a fixed rail.
       const mobile = window.innerWidth < 1024
       setIsMobile(mobile)
       // Auto-collapse sidebar on mobile
@@ -42,23 +43,23 @@ const Sidebar = ({ expanded, onToggle, currentPage, onPageChange }) => {
   ]
 
   const handleMenuClick = (itemId, isLogout) => {
-    // Close mobile menu after selection
+    // Selecting a page should also close the drawer on smaller screens.
     if (isMobile) {
       setMobileMenuOpen(false)
     }
     
     if (isLogout) {
-      // Clear user session with correct localStorage keys
+      // Logging out clears the session keys the app uses to restore auth.
       localStorage.removeItem('authToken')
       localStorage.removeItem('lulimiLingoCurrentUser')
-      // Reload page to reset auth state
+      // A hard reload resets the React state back to the public landing page.
       window.location.href = '/'
     } else {
       onPageChange(itemId)
     }
   }
 
-  // Mobile hamburger menu handler
+  // This toggles the off-canvas mobile navigation.
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)
   }

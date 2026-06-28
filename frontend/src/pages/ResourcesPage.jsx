@@ -12,27 +12,8 @@ const ResourcesPage = ({ user }) => {
   const NODE_BACKEND_URL = import.meta.env.VITE_NODE_BACKEND_URL || 'https://lulimi-lingo-production.up.railway.app'
   const languageLabel = user?.language === 'runyankole' ? 'Runyankole' : 'Luganda'
 
+  // Fallback to real curated video playlists when teachers haven't uploaded yet.
   const seedResources = [
-    {
-      id: 'luganda-doc-1',
-      title: 'Luganda Topic Notes - Greetings',
-      type: 'document',
-      uploadedBy: { name: 'Lulimi Lingo' },
-      classLevel: 'S1',
-      subject: 'Luganda',
-      description: 'Class notes and key examples for greeting forms, responses, and usage.',
-      fileName: 'luganda-greetings-notes.pdf'
-    },
-    {
-      id: 'runyankole-doc-1',
-      title: 'Runyankole Topic Notes - Greetings',
-      type: 'document',
-      uploadedBy: { name: 'Lulimi Lingo' },
-      classLevel: 'S1',
-      subject: 'Runyankole',
-      description: 'Class notes and key examples for greeting forms, responses, and usage.',
-      fileName: 'runyankole-greetings-notes.pdf'
-    },
     {
       id: 'luganda-playlist-1',
       title: 'Luganda Learning Playlist 1',
@@ -134,6 +115,7 @@ const ResourcesPage = ({ user }) => {
   useEffect(() => {
     const loadResources = async () => {
       try {
+        // This page asks the backend for teacher-uploaded resources first.
         setLoading(true)
         setError(null)
         const classLevel = user?.classLevel || 'S1'
@@ -166,6 +148,7 @@ const ResourcesPage = ({ user }) => {
     loadResources()
   }, [user?.classLevel, languageLabel])
 
+  // Search narrows the resource list without leaving the page.
   const filteredResources = useMemo(() => {
     const query = searchQuery.toLowerCase()
     return resources.filter((resource) => {
@@ -180,10 +163,22 @@ const ResourcesPage = ({ user }) => {
   const documentResources = filteredResources.filter((resource) => resource.type === 'document')
   const videoResources = filteredResources.filter((resource) => resource.type === 'video')
 
+  // Resolve a usable link for a resource: external URL first, else the uploaded
+  // file served from the backend.
+  const resolveOpenUrl = (resource) => {
+    if (resource.externalUrl) return resource.externalUrl
+    if (resource.fileUrl) {
+      return resource.fileUrl.startsWith('http') ? resource.fileUrl : `${NODE_BACKEND_URL}${resource.fileUrl}`
+    }
+    return null
+  }
+
+  // One card handles both documents and video resources.
   const ResourceCard = ({ resource, idx }) => {
     const isVideo = resource.type === 'video'
     const previewImage = isVideo ? getYoutubeThumbnail(resource.externalUrl) : null
     const embedUrl = isVideo ? getEmbedUrl(resource.externalUrl) : null
+    const openUrl = resolveOpenUrl(resource)
 
     return (
       <motion.div
@@ -240,10 +235,10 @@ const ResourcesPage = ({ user }) => {
 
         <button
           className="btn-download"
-          onClick={() => resource.externalUrl && window.open(resource.externalUrl, '_blank')}
-          disabled={!resource.externalUrl}
+          onClick={() => openUrl && window.open(openUrl, '_blank', 'noopener')}
+          disabled={!openUrl}
         >
-          {resource.type === 'video' ? 'Watch' : 'Open'} <ExternalLink size={14} />
+          {isVideo ? 'Watch' : resource.fileUrl && !resource.externalUrl ? 'Download' : 'Open'} <ExternalLink size={14} />
         </button>
       </motion.div>
     )

@@ -8,6 +8,7 @@ import { callOpenAIChat } from './aiService.js';
 
 class QuizGeneratorService {
   constructor() {
+    // The service starts with OpenAI output and falls back to Gemini when needed.
     this.aiService = geminiService;
   }
 
@@ -37,11 +38,15 @@ For each question provide in JSON format. Use a mix of types:
 - translate
 - matching
 - reorder
+- reading-comprehension
 
 Type-specific fields:
 - multiple-choice, true-false: "options" array
 - matching: "pairs" array of { "left": "...", "right": "..." }
 - reorder: "tokens" (shuffled array) and "correctOrder" (correct array)
+- reading-comprehension: a "passage" field with a short ${languageName} reading text (2-4 sentences, level-appropriate), plus an "options" array and "correctAnswer" testing comprehension of that passage
+
+IMPORTANT: Include at least ONE reading-comprehension question with a real ${languageName} passage so learners practice reading.
 
 Format:
 {
@@ -50,6 +55,7 @@ Format:
       "id": 1,
       "question": "Question text",
       "type": "multiple-choice",
+      "passage": "Short reading passage (only for reading-comprehension)",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": "The correct option exactly as written",
       "explanation": "Why this is correct",
@@ -62,6 +68,7 @@ Make questions progressively harder (start easy, end harder).
 Return ONLY valid JSON.`;
 
     try {
+      // Force JSON output so quizzes can be normalized and scored in the UI.
       const openAiResponse = await callOpenAIChat([
         { role: 'system', content: `You are an expert ${languageName} assessment designer. Return only valid JSON, no markdown.` },
         { role: 'user', content: prompt }
@@ -70,6 +77,7 @@ Return ONLY valid JSON.`;
     } catch (error) {
       console.error('Quiz generation OpenAI error:', error)
       try {
+        // Fallback provider keeps the assessment path available.
         if (this.aiService.isEnabled()) {
           const response = await this.aiService.generateContent(prompt)
           return this._parseQuiz(response, topic, numQuestions, 'gemini', languageName)
@@ -82,6 +90,7 @@ Return ONLY valid JSON.`;
   }
 
   async _parseQuiz(content, topic, numQuestions, provider = 'unknown', languageName = 'Luganda') {
+    // Repair any malformed output so the app can still show a clean quiz.
     const tryParse = (text) => {
       try {
         const jsonMatch = String(text || '').match(/\{[\s\S]*\}/);

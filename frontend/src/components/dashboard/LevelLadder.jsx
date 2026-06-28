@@ -24,7 +24,7 @@ const LevelLadder = ({ onWeekClick }) => {
   const currentClass = curriculumData[selectedClass]
   const currentTerm = currentClass.terms[selectedTerm]
   
-  // Flatten topics from all weeks into a single ladder
+  // Flatten topics from all weeks into a single ladder so progress looks like a path.
   const topics = currentTerm.weeks.flatMap((week, weekIndex) => 
     week.topics.map((topic, topicIndex) => ({
       id: `${week.id}-${topicIndex}`,
@@ -45,7 +45,7 @@ const LevelLadder = ({ onWeekClick }) => {
   // Constants for precise calculations
   const CIRCLE_RADIUS = 80 // 160px diameter / 2
 
-  // Calculate all paths at once
+  // The SVG connector lines are drawn from the node positions after render.
   useEffect(() => {
     const updateAllPaths = () => {
       const topicsContainer = containerRef.current?.querySelector('.topics-container')
@@ -63,7 +63,7 @@ const LevelLadder = ({ onWeekClick }) => {
         const prevRect = prevNode.getBoundingClientRect()
         const currentRect = currentNode.getBoundingClientRect()
 
-        // Calculate relative positions within container
+        // Measure both nodes relative to the ladder container.
         const prevX = prevRect.left - containerRect.left + prevRect.width / 2
         const prevY = prevRect.top - containerRect.top + prevRect.height / 2
         const currentX = currentRect.left - containerRect.left + currentRect.width / 2
@@ -83,7 +83,7 @@ const LevelLadder = ({ onWeekClick }) => {
         const endX = currentX - Math.cos(angle) * CIRCLE_RADIUS
         const endY = currentY - Math.sin(angle) * CIRCLE_RADIUS
 
-        // Create smooth wavy curve
+        // The curved path gives the ladder a game-like, guided feel.
         const perpAngle = angle + Math.PI / 2
         const waveOffset = Math.abs(dx) * 0.15
         
@@ -120,7 +120,7 @@ const LevelLadder = ({ onWeekClick }) => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay }}
       >
-        {/* Topic Node */}
+        {/* Each node represents one lesson milestone in the syllabus. */}
         <motion.button
           ref={(el) => (nodeRefs.current[index] = el)}
           className={`topic-node ${item.locked ? 'locked' : ''} ${item.progress === 100 ? 'completed' : ''} ${item.progress > 0 && item.progress < 100 ? 'in-progress' : ''}`}
@@ -134,7 +134,7 @@ const LevelLadder = ({ onWeekClick }) => {
           }}
           disabled={item.locked}
         >
-          {/* Progress Ring */}
+          {/* Progress ring shows completion status at a glance. */}
           <div className="progress-ring">
             <CircularProgressbar
               value={item.progress}
@@ -147,7 +147,7 @@ const LevelLadder = ({ onWeekClick }) => {
             />
           </div>
 
-          {/* Icon */}
+          {/* The icon hints whether the milestone is locked, new, active, or complete. */}
           <div className="node-icon">
             {item.locked && <Lock size={26} />}
             {item.progress === 100 && <CheckCircle2 size={26} />}
@@ -155,13 +155,13 @@ const LevelLadder = ({ onWeekClick }) => {
             {item.progress === 0 && !item.locked && <Star size={26} />}
           </div>
 
-          {/* Topic Title Badge */}
+          {/* Short labels keep the ladder readable on small screens. */}
           <div className="topic-badge">
             <span className="topic-title">{getBadgeText(item.topicTitle)}</span>
           </div>
         </motion.button>
 
-        {/* Tooltip */}
+        {/* Tooltip gives the full topic name and completion percentage. */}
         <motion.div
           className="topic-tooltip"
           initial={{ opacity: 0, scale: 0.8 }}
@@ -182,7 +182,7 @@ const LevelLadder = ({ onWeekClick }) => {
 
   return (
     <div className="level-ladder">
-      {/* Class & Term Selector */}
+      {/* Class and term controls let learners jump to the right syllabus segment. */}
       <div className="ladder-controls">
         <div className="class-selector">
           <label>Select Class:</label>
@@ -222,7 +222,7 @@ const LevelLadder = ({ onWeekClick }) => {
         </div>
       </div>
 
-      {/* Ladder Path */}
+      {/* The ladder path is the visual map of progression through the course. */}
       <div className="ladder-path" ref={containerRef} style={{ position: 'relative' }}>
         <div className="ladder-header">
           <h2>{currentClass.name} - {currentTerm.name}</h2>

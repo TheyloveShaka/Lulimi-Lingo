@@ -17,10 +17,11 @@ connectDB()
 // Middleware
 app.use(cors())
 app.use(morgan('dev'))
-app.use(bodyParser.json({ limit: '1mb' }))
-app.use(bodyParser.urlencoded({ extended: true }))
+// Raised so teachers can upload base64-encoded files (which inflate ~33%).
+app.use(bodyParser.json({ limit: '15mb' }))
+app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' }))
 
-// Routes
+// Single live API surface for the frontend.
 app.use('/api', apiRoutes)
 
 app.get('/', (req, res) => {

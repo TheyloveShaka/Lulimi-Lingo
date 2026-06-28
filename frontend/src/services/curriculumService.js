@@ -5,10 +5,12 @@
  * Loads curriculum structure, generates content using curriculum templates.
  */
 
+// Curriculum calls hit the public Node API surface.
 const API_BASE = import.meta.env.VITE_API_URL || 'https://lulimi-lingo-production.up.railway.app/api'
 
 const getCurrentLanguage = () => {
   try {
+    // Let the syllabus-driven generators match the learner's chosen language.
     const user = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null')
     return user?.language || 'luganda'
   } catch {
@@ -21,6 +23,7 @@ const getCurrentLanguage = () => {
  */
 export async function getCurriculum() {
   try {
+    // This loads the full class map used by the curriculum page.
     const response = await fetch(`${API_BASE}/curriculum`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -38,6 +41,7 @@ export async function getCurriculum() {
  */
 export async function getClassCurriculum(classLevel) {
   try {
+    // Class-specific calls keep the UI from loading more syllabus than it needs.
     const response = await fetch(`${API_BASE}/curriculum/${classLevel}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -55,6 +59,7 @@ export async function getClassCurriculum(classLevel) {
  */
 export async function getTermCurriculum(classLevel, term) {
   try {
+    // Term-level lookup drives the milestone and lesson selectors.
     const response = await fetch(`${API_BASE}/curriculum/${classLevel}/${term}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -72,6 +77,7 @@ export async function getTermCurriculum(classLevel, term) {
  */
 export async function getMilestoneDetails(classLevel, term, milestoneId) {
   try {
+    // Milestones hold the detailed outcomes and scenario prompts.
     const response = await fetch(`${API_BASE}/curriculum/${classLevel}/${term}/${milestoneId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -89,6 +95,7 @@ export async function getMilestoneDetails(classLevel, term, milestoneId) {
  */
 export async function generateCurriculumLesson(classLevel, term, milestoneId, topic) {
   try {
+    // Lesson generation uses curriculum metadata so AI content stays aligned.
     const response = await fetch(`${API_BASE}/content/lesson`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -113,6 +120,7 @@ export async function generateCurriculumLesson(classLevel, term, milestoneId, to
  */
 export async function generateCurriculumQuiz(classLevel, term, milestoneId, topic, questionCount = 15) {
   try {
+    // Quiz generation reuses the same milestone data for consistency.
     const response = await fetch(`${API_BASE}/content/quiz`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -138,6 +146,7 @@ export async function generateCurriculumQuiz(classLevel, term, milestoneId, topi
  */
 export async function generateCurriculumPractice(classLevel, term, milestoneId, topic, scenarioCount = 4) {
   try {
+    // Practice generation is scenario-based so learners can apply the lesson.
     const response = await fetch(`${API_BASE}/content/practice`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -163,6 +172,7 @@ export async function generateCurriculumPractice(classLevel, term, milestoneId, 
  */
 export async function generateCurriculumResource(classLevel, topic, resourceType = 'vocabulary_list') {
   try {
+    // Resources are lightweight references that support the main lesson flow.
     const response = await fetch(`${API_BASE}/content/resource`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

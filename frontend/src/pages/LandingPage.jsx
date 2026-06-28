@@ -16,6 +16,7 @@ const LandingPage = ({ onSignup, onLogin }) => {
   const [loginMode, setLoginMode] = useState('student') // 'student' or 'teacher'
   const [showTeacherSignup, setShowTeacherSignup] = useState(false)
 
+  // Signup and login both end by pushing the learner into the protected app area.
   const handleSignup = (userData) => {
     console.log('User signed up:', userData)
     onSignup(userData)
@@ -44,7 +45,7 @@ const LandingPage = ({ onSignup, onLogin }) => {
 
   return (
     <div className="landing-page">
-      {/* Header with Admin Link */}
+      {/* The landing page explains the product and gives entry points for each user type. */}
       <header className="landing-header">
         <div className="header-content">
           <div className="header-logo">
@@ -70,6 +71,7 @@ const LandingPage = ({ onSignup, onLogin }) => {
         </div>
       </header>
 
+      {/* Hero, signup, and info sections are sequenced to guide first-time visitors. */}
       <HeroSection onGetStarted={() => document.getElementById('signup').scrollIntoView({ behavior: 'smooth' })} />
       
       <div id="signup" className="signup-section">

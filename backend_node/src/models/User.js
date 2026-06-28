@@ -5,6 +5,10 @@ const { Schema } = mongoose
 const UserSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, index: true, unique: true, lowercase: true },
+  // Learner Identification Number (Uganda EMIS/UNEB LIN). Used to identify students
+  // alongside email. sparse+unique so teacher/admin accounts (without a LIN) don't
+  // collide on a null value.
+  lin: { type: String, trim: true, uppercase: true, index: true, unique: true, sparse: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
   classLevel: { type: String, enum: ['S1', 'S2', 'S3', 'S4'], default: 'S1' },

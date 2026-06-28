@@ -25,6 +25,7 @@ const TeacherSignupModal = ({ onClose, onSignup, onShowLogin }) => {
   const [loading, setLoading] = useState(false)
 
   const handleSignupChange = (e) => {
+    // Separate signup state keeps the teacher form easy to switch in and out of login mode.
     const { name, value } = e.target
     setSignupData(prev => ({
       ...prev,
@@ -34,6 +35,7 @@ const TeacherSignupModal = ({ onClose, onSignup, onShowLogin }) => {
   }
 
   const handleLoginChange = (e) => {
+    // Login mode uses its own state so the two forms never collide.
     const { name, value } = e.target
     setLoginData(prev => ({
       ...prev,
@@ -46,7 +48,7 @@ const TeacherSignupModal = ({ onClose, onSignup, onShowLogin }) => {
     e.preventDefault()
     setError('')
 
-    // Validation
+    // Quick client checks catch the most obvious teacher signup issues.
     if (!signupData.name || !signupData.email || !signupData.password) {
       setError('Please fill in all required fields')
       return
@@ -84,7 +86,7 @@ const TeacherSignupModal = ({ onClose, onSignup, onShowLogin }) => {
     e.preventDefault()
     setError('')
 
-    // Validation
+    // Quick client checks catch empty teacher login submissions.
     if (!loginData.email || !loginData.password) {
       setError('Please fill in all fields')
       return
@@ -115,6 +117,7 @@ const TeacherSignupModal = ({ onClose, onSignup, onShowLogin }) => {
   }
 
   const toggleMode = () => {
+    // Switching modes resets errors and password visibility for a clean form state.
     setIsLogin(!isLogin)
     setError('')
     setShowPassword(false)

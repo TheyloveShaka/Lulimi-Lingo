@@ -19,27 +19,27 @@ export const useLearning = () => {
 };
 
 export const LearningProvider = ({ children }) => {
-  // Current learning position
+  // Current learning position tells the app which syllabus slice to show.
   const [currentClass, setCurrentClass] = useState('S1');
   const [currentTerm, setCurrentTerm] = useState(1);
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentTopic, setCurrentTopic] = useState(null);
-  // Selected UI/learning language
+  // Selected UI/learning language keeps prompts and labels aligned with the learner.
   const [language, setLanguage] = useState('luganda');
 
-  // Learning progress
+  // Learning progress is stored here so every page can read the same shared state.
   const [completedTopics, setCompletedTopics] = useState([]);
   const [completedLessons, setCompletedLessons] = useState([]);
   const [quizScores, setQuizScores] = useState({});
   const [practiceHistory, setPracticeHistory] = useState([]);
 
-  // Mistake tracking for personalized learning
+  // Mistake tracking helps the app personalize future lessons and practice.
   const [commonMistakes, setCommonMistakes] = useState([]);
   const [proficiencyLevel, setProficiencyLevel] = useState('beginner');
   const [currentStreak, setCurrentStreak] = useState(0);
   const [lastActivityDate, setLastActivityDate] = useState(null);
 
-  // Current mode
+  // Current mode tells the UI which learning activity is active right now.
   const [learningMode, setLearningMode] = useState('LESSON'); // LESSON, PRACTICE, QUIZ, OVERVIEW, TUTOR_CHAT
 
   // Load saved progress from localStorage
@@ -83,7 +83,7 @@ export const LearningProvider = ({ children }) => {
     }
   }, []);
 
-  // Save progress to localStorage
+  // Persist the current snapshot so refreshes do not wipe the learner state.
   const saveProgress = (overrides = {}) => {
     const progress = {
       completedTopics,
@@ -101,7 +101,7 @@ export const LearningProvider = ({ children }) => {
     localStorage.setItem('lulimiLingoProgress', JSON.stringify(progress));
   };
 
-  // Update activity streak
+  // Streaks reward consecutive days of practice and keep learners engaged.
   const updateActivityStreak = () => {
     const today = new Date().toDateString();
     const last = lastActivityDate ? new Date(lastActivityDate).toDateString() : null;
@@ -166,7 +166,7 @@ export const LearningProvider = ({ children }) => {
     lastActivityDate
   ]);
 
-  // Get current week data from syllabus (array format)
+  // This converts the syllabus JSON into the active lesson context for the UI.
   const getCurrentWeekData = () => {
     // syllabusContent is an array - find matching entry
     const entry = syllabusContent.find(s => 
@@ -191,12 +191,12 @@ export const LearningProvider = ({ children }) => {
     return null;
   };
 
-  // Get all topics for AI scope control
+  // The AI only needs the topics already completed, so we send a compact list.
   const getCompletedTopicsForAI = () => {
     return completedTopics.map(t => t.name || t);
   };
 
-  // Mark a topic as completed
+  // Completion updates feed both progress tracking and streak calculation.
   const completeTopic = (topic) => {
     if (!completedTopics.find(t => t.id === topic.id)) {
       const newCompleted = [...completedTopics, topic];
@@ -206,7 +206,7 @@ export const LearningProvider = ({ children }) => {
     }
   };
 
-  // Mark a lesson as completed
+  // Lesson completion is tracked separately from topic completion.
   const completeLesson = (lessonId) => {
     if (!completedLessons.includes(lessonId)) {
       const newCompleted = [...completedLessons, lessonId];
@@ -216,7 +216,7 @@ export const LearningProvider = ({ children }) => {
     }
   };
 
-  // Record a quiz score
+  // Quiz scores are stored so we can show history and adjust proficiency.
   const recordQuizScore = (quizId, score, maxScore) => {
     const newScores = {
       ...quizScores,
@@ -229,7 +229,7 @@ export const LearningProvider = ({ children }) => {
     saveProgress({ quizScores: newScores });
   };
 
-  // Track mistakes for personalized learning
+  // Mistakes are grouped by type so the next practice set can target weak spots.
   const recordMistake = (mistake) => {
     const existing = commonMistakes.find(m => m.type === mistake.type);
     let updatedMistakes;
@@ -244,7 +244,7 @@ export const LearningProvider = ({ children }) => {
     saveProgress({ commonMistakes: updatedMistakes });
   };
 
-  // Update proficiency level based on performance
+  // Proficiency is derived from recent scores instead of being manually set.
   const updateProficiency = (scores) => {
     const scoreValues = Object.values(scores);
     if (scoreValues.length < 3) return;

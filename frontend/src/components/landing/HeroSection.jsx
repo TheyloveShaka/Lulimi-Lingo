@@ -16,7 +16,7 @@ const HeroSection = ({ onGetStarted }) => {
 
   return (
     <section className="hero-section">
-      {/* Floating Background Shapes */}
+      {/* Decorative shapes add motion without competing with the call to action. */}
       <div className="floating-shapes">
         {floatingShapes.map((shape) => (
           <motion.div
@@ -43,6 +43,7 @@ const HeroSection = ({ onGetStarted }) => {
       </div>
 
       <div className="hero-content">
+        {/* The main message explains what the app is before asking the user to act. */}
         <motion.div
           className="hero-text"
           initial={{ opacity: 0, y: 30 }}
@@ -96,6 +97,7 @@ const HeroSection = ({ onGetStarted }) => {
             </div>
           </div>
 
+          {/* The two CTAs split first-time users from people who want the syllabus directly. */}
           <div className="hero-cta">
             <motion.button
               className="btn btn-primary"

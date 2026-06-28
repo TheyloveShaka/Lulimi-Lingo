@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Bell, Moon, Volume2, Lock, LogOut } from 'lucide-react'
+import { Bell, Moon, Lock, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import './SettingsPage.css'
@@ -9,11 +9,11 @@ const SettingsPage = () => {
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: false,
-    soundEnabled: true,
     emailUpdates: true
   })
 
   const handleLogout = () => {
+    // Session state lives in localStorage, so logout removes those keys first.
     localStorage.removeItem('authToken')
     localStorage.removeItem('lulimiLingoCurrentUser')
     navigate('/')
@@ -26,7 +26,9 @@ const SettingsPage = () => {
         <p>Manage your preferences</p>
       </div>
 
+      {/* Settings are grouped so the learner can scan preferences quickly. */}
       <div className="settings-sections">
+        {/* Notifications control the nudges that keep practice going. */}
         <motion.div
           className="settings-section"
           initial={{ opacity: 0, y: 20 }}
@@ -52,25 +54,9 @@ const SettingsPage = () => {
             </label>
           </div>
 
-          <div className="setting-item">
-            <div className="setting-info">
-              <Volume2 size={24} />
-              <div>
-                <h3>Sound Effects</h3>
-                <p>Play sounds for quiz completions</p>
-              </div>
-            </div>
-            <label className="toggle">
-              <input
-                type="checkbox"
-                checked={settings.soundEnabled}
-                onChange={(e) => setSettings({ ...settings, soundEnabled: e.target.checked })}
-              />
-              <span></span>
-            </label>
-          </div>
         </motion.div>
 
+        {/* Preferences change how the app feels while the user is studying. */}
         <motion.div
           className="settings-section"
           initial={{ opacity: 0, y: 20 }}
@@ -116,6 +102,7 @@ const SettingsPage = () => {
           </div>
         </motion.div>
 
+        {/* The session section is intentionally small because logout is the main action here. */}
         <motion.div
           className="settings-section danger-zone"
           initial={{ opacity: 0, y: 20 }}

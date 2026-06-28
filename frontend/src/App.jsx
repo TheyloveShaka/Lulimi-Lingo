@@ -12,7 +12,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Check if user is already logged in on app load
+  // This runs once so the app can restore the session before showing pages.
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('authToken')
@@ -62,6 +62,7 @@ function App() {
     )
   }
 
+  // The router switches between public learning pages and protected dashboard pages.
   return (
     <LearningProvider>
       <Router>

@@ -7,6 +7,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 class GeminiService {
   constructor() {
+    // The wrapper can run in mock mode when no key is configured.
     this.apiKey = process.env.GEMINI_API_KEY || 'your-gemini-api-key-here';
     this.model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
     this.enabled = this.apiKey && this.apiKey !== 'your-gemini-api-key-here';
@@ -29,6 +30,7 @@ class GeminiService {
    */
   async generateContent(prompt) {
     if (!this.enabled) {
+      // Keep development flows alive even when Gemini is not configured.
       console.warn('Gemini API not enabled, returning mock response');
       return this._getMockResponse();
     }
@@ -68,6 +70,7 @@ class GeminiService {
   }
 
   _getMockResponse() {
+    // Mock text makes the app fail softly instead of crashing the UI.
     return 'This is a mock response. Please configure your GEMINI_API_KEY environment variable.';
   }
 

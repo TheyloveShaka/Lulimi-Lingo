@@ -4,6 +4,10 @@ export const normalizeQuestionType = (type, questionText = '', options = []) => 
   const raw = String(type || '').toLowerCase().replace(/[\s_]+/g, '-');
   const prompt = String(questionText || '').toLowerCase();
 
+  // Reading-comprehension renders a passage, then answers like an MCQ (or text).
+  if (raw.includes('reading') || raw.includes('comprehension') || raw.includes('passage')) {
+    return Array.isArray(options) && options.length > 0 ? 'multiple-choice' : 'translate';
+  }
   if (raw.includes('multiple') || raw.includes('choice') || raw === 'mcq') return 'multiple-choice';
   if (raw.includes('fill') || raw.includes('blank')) return 'fill-blank';
   if (raw.includes('translate') || raw.includes('translation')) return 'translate';
@@ -97,9 +101,12 @@ export const normalizeQuestion = (question, index) => {
     normalizedType = 'reorder';
   }
 
+  const passage = question?.passage || question?.reading || question?.readingPassage || question?.reading_passage || '';
+
   return {
     id: question?.id || index + 1,
     type: normalizedType,
+    passage: passage ? String(passage) : '',
     question: String(question?.question || question?.prompt || `Question ${index + 1}`),
     options: normalizedType === 'true-false' && normalizedOptions.length === 0
       ? ['True', 'False']

@@ -4,6 +4,7 @@ import User from '../models/User.js'
 export const getProgress = async (req, res) => {
   const { userId } = req.params
   try {
+    // Progress is stored by user and week so the UI can show where the learner left off.
     const progress = await Progress.find({ user: userId }).lean()
     return res.json({ success: true, progress })
   } catch (err) {
@@ -16,6 +17,7 @@ export const upsertProgress = async (req, res) => {
   const { userId } = req.params
   const payload = req.body || {}
   try {
+    // Start from the learner profile so the progress record inherits language defaults.
     const user = await User.findById(userId)
     if (!user) return res.status(404).json({ success: false, error: 'User not found' })
 
@@ -25,6 +27,7 @@ export const upsertProgress = async (req, res) => {
 
     let doc = await Progress.findOne(filter)
     if (!doc) {
+      // One document per learner/week/language keeps progress updates easy to merge.
       doc = new Progress({
         user: userId,
         weekId: payload.weekId,

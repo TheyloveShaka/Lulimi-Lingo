@@ -293,3 +293,35 @@
     font-size: 0.85rem;
   }
 }
+
+/* Hint banner pointing learners to where quizzes are launched. */
+.quizzes-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eef2ff;
+  color: #4453c7;
+  border: 1px solid #dfe5ff;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.quizzes-empty {
+  background: #fff;
+  border: 1px dashed #d8d8e0;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quizzes-page.loading {
+  padding: 3rem 2rem;
+  color: #666;
+}

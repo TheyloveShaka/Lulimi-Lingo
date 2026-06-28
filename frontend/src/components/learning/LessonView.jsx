@@ -8,11 +8,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  BookOpen, 
-  Play, 
-  CheckCircle, 
-  ChevronRight, 
-  Volume2,
+  BookOpen,
+  Play,
+  CheckCircle,
+  ChevronRight,
+  Globe,
   Lightbulb,
   MessageCircle,
   RefreshCw
@@ -46,7 +46,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
     { id: 'introduction', title: 'Introduction', icon: BookOpen },
     { id: 'explanation', title: 'Concept', icon: Lightbulb },
     { id: 'examples', title: 'Examples', icon: MessageCircle },
-    { id: 'culturalNote', title: 'Cultural Note', icon: Volume2 }
+    { id: 'culturalNote', title: 'Cultural Note', icon: Globe }
   ];
 
   const normalizeExample = (example) => {
@@ -110,6 +110,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
     setLoading(true);
     setError(null);
 
+    // Pull the syllabus context into the AI request so the lesson matches the learner's current week.
     const context = getSyllabusContext();
     
     try {
@@ -121,7 +122,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
         objectives: topic?.objectives || context.weekData?.objectives || [],
         language: context.language,
         proficiencyLevel: context.proficiencyLevel,
-        skipCache: true // Always get fresh lesson content
+        skipCache: true // Fresh content keeps the lesson aligned with the latest request.
       });
 
       if (result.success) {
@@ -149,6 +150,7 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
   };
 
   const handleLessonComplete = () => {
+    // Completion updates both local progress state and the server record.
     completeLesson(topic?.id || topic);
     try {
       const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null');
@@ -302,9 +304,6 @@ const LessonView = ({ topic, onComplete, onStartPractice }) => {
                           <p className="target-lang-text">{parsedExample.targetLangText}</p>
                           <p className="english-text">{parsedExample.englishText}</p>
                         </div>
-                        <button className="audio-btn" title="Listen">
-                          <Volume2 size={16} />
-                        </button>
                       </motion.div>
                     );
                   })
