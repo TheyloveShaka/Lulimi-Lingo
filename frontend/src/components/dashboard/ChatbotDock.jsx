@@ -10,6 +10,13 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
   const { getCompletedTopicsForAI, language, proficiencyLevel, completedLessons, commonMistakes } = useLearning()
   const [liveStats, setLiveStats] = useState(null)
 
+  // The tutor greeting/fallback must match the learner's chosen language, otherwise
+  // a Runyankole account would still be greeted in Luganda. Pick the labels from
+  // the active language rather than hardcoding Luganda.
+  const isRunyankole = String(language || '').toLowerCase() === 'runyankole'
+  const languageLabel = isRunyankole ? 'Runyankole' : 'Luganda'
+  const greeting = isRunyankole ? 'Agandi' : 'Oli otya'
+
   // Load the learner's real progress once so the tutor is grounded in actual activity.
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem('lulimiLingoCurrentUser') || 'null')
@@ -50,7 +57,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
     {
       id: 1,
       type: 'bot',
-      text: "Oli otya! 👋 I'm your Luganda learning assistant. I can help you understand lessons, practice vocabulary, or answer questions about what you've learned. How can I help you today?",
+      text: `${greeting}! 👋 I'm your ${languageLabel} learning assistant. I can help you understand lessons, practice vocabulary, or answer questions about what you've learned. How can I help you today?`,
       timestamp: new Date()
     }
   ])
@@ -117,7 +124,7 @@ const ChatbotDock = ({ isOpen, onToggle, completedTopics }) => {
       const botMessage = {
         id: messages.length + 2,
         type: 'bot',
-        text: response.response || "I'm here to help you learn Luganda!",
+        text: response.response || `I'm here to help you learn ${languageLabel}!`,
         timestamp: new Date()
       }
       
