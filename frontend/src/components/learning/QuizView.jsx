@@ -117,10 +117,22 @@ const QuizView = ({ topic, onComplete, numberOfQuestions = 5 }) => {
 
       if (result.success) {
         // Normalize the backend payload so scoring and navigation stay predictable.
-        const quizData = result.quiz?.questions?.length > 0
+        // The hardcoded mock is Luganda-only, so we never fall back to it for other
+        // languages (e.g. Runyankole) — surface an error so the learner retries
+        // instead of being shown the wrong language.
+        const hasQuestions = result.quiz?.questions?.length > 0;
+        const isLuganda = String(context.language || 'luganda').toLowerCase() !== 'runyankole';
+
+        if (!hasQuestions && !isLuganda) {
+          setError('Could not generate a quiz right now. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        const quizData = hasQuestions
           ? { ...result.quiz, questions: normalizeQuestions(result.quiz.questions) }
           : { questions: normalizeQuestions(generateMockQuizQuestions(topic, numberOfQuestions)) };
-        
+
         setQuiz(quizData);
         setIsCached(Boolean(result.cached));
         setProvider(result.provider || 'openai');
