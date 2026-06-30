@@ -168,12 +168,15 @@ export const LearningProvider = ({ children }) => {
 
   // This converts the syllabus JSON into the active lesson context for the UI.
   const getCurrentWeekData = () => {
-    // syllabusContent is an array - find matching entry
-    const entry = syllabusContent.find(s => 
-      s.class === currentClass && 
-      s.term === currentTerm
+    // Match on language too, otherwise a Runyankole learner would pull the
+    // Luganda entry and see Luganda topic titles/objectives in their lessons.
+    const normalizedLanguage = String(language || 'luganda').trim().toLowerCase();
+    const entry = syllabusContent.find(s =>
+      s.class === currentClass &&
+      s.term === currentTerm &&
+      String(s.language || '').trim().toLowerCase() === normalizedLanguage
     );
-    
+
     if (!entry) return null;
 
     // Parse week range to check if current week falls within it

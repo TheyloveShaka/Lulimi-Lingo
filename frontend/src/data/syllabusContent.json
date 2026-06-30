@@ -695,6 +695,411 @@
       "translation_legal_text",
       "case_study_analysis"
     ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S1",
+    "term": 1,
+    "week_range": "1-7",
+    "topic": "Family",
+    "objectives": [
+      "Pronounce, read, and write the Runyankole alphabet and vowel lengths",
+      "Describe family genealogy and relationships (Extended family)",
+      "Welcome, greet, and bid farewell observing time, gender, and age",
+      "Count and write numerals (1-1,000,000) in words",
+      "Tell time and write dates accurately"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "transcription",
+      "family_tree_labeling",
+      "dialogue_writing"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S1",
+    "term": 1,
+    "week_range": "8-12",
+    "topic": "Life at Home",
+    "objectives": [
+      "Identify roles of different family members",
+      "Name domestic objects in singular and plural",
+      "Appreciate the value of lullabies and traditional rhymes",
+      "Explain taboos related to domestic objects"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "object_naming",
+      "song_composition",
+      "translation"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S1",
+    "term": 2,
+    "week_range": "1-6",
+    "topic": "Crops, Plants, and Foods",
+    "objectives": [
+      "Categorize food crops and wild plants",
+      "Differentiate seasons and their impact on agriculture",
+      "Describe food preparation processes",
+      "Use dictionary skills to find synonyms and antonyms"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "recipe_description",
+      "multiple_choice",
+      "process_writing"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S1",
+    "term": 2,
+    "week_range": "7-12",
+    "topic": "Animal Rearing",
+    "objectives": [
+      "Name domestic animals, birds, and their products",
+      "Identify traditional treatments for animal diseases",
+      "Differentiate punctuation marks and their functions"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "punctuation_exercises",
+      "descriptive_essay",
+      "vocabulary_matching"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S1",
+    "term": 3,
+    "week_range": "1-12",
+    "topic": "Personal and Community Hygiene",
+    "objectives": [
+      "Name internal and external body parts",
+      "Explain prevention of diseases using traditional and modern methods",
+      "Translate short sentences related to health"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "labeling_diagrams",
+      "translation",
+      "poster_design"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S2",
+    "term": 1,
+    "week_range": "1-7",
+    "topic": "Establishing and Managing Relationships",
+    "objectives": [
+      "Describe adolescence changes and effects",
+      "Identify dangers of peer pressure and drug abuse",
+      "Use verbs related to growth and relationships"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "letter_writing",
+      "persuasive_dialogue",
+      "comprehension"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S2",
+    "term": 1,
+    "week_range": "8-12",
+    "topic": "School Environment",
+    "objectives": [
+      "Describe the school environment and routine",
+      "Present news on different platforms",
+      "Fill in forms and official documents"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "news_reading",
+      "form_filling",
+      "descriptive_composition"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S2",
+    "term": 2,
+    "week_range": "1-7",
+    "topic": "Public Places",
+    "objectives": [
+      "Vocabulary for shops, markets, and hospitals",
+      "Bargaining and transaction dialogues",
+      "Use tenses correctly in conversation"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "role_play",
+      "dialogue_writing",
+      "listening_comprehension"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S2",
+    "term": 2,
+    "week_range": "8-12",
+    "topic": "Traditional Ceremonies: Naming",
+    "objectives": [
+      "Explain how people acquire names",
+      "Identify surnames and their origins (Clans)",
+      "Form nouns and verbs"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "essay_writing",
+      "name_classification",
+      "proverb_analysis"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S2",
+    "term": 3,
+    "week_range": "1-12",
+    "topic": "Occupations and Careers",
+    "objectives": [
+      "Identify professions and places of work",
+      "Write a Curriculum Vitae (CV) and application letter",
+      "Use personal pronouns correctly"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "cv_writing",
+      "formal_letter_writing",
+      "matching_exercises"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S3",
+    "term": 1,
+    "week_range": "1-7",
+    "topic": "Games, Sports and Leisure",
+    "objectives": [
+      "Identify traditional and modern games",
+      "Write an argumentative composition",
+      "Use possessive and demonstrative pronouns"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "argumentative_essay",
+      "debate",
+      "rules_explanation"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S3",
+    "term": 1,
+    "week_range": "8-12",
+    "topic": "Indigenous Tourism",
+    "objectives": [
+      "Identify wildlife and cultural heritage sites",
+      "Understand noun classes and their agreement",
+      "Appreciate local cultural sites"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "brochure_design",
+      "role_play_tour_guide",
+      "grammar_exercises"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S3",
+    "term": 2,
+    "week_range": "1-6",
+    "topic": "Clans",
+    "objectives": [
+      "Name clans and their totems",
+      "Understand noun classes and their agreement",
+      "Write invitation letters for clan functions"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "family_history_project",
+      "invitation_writing",
+      "totem_identification"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S3",
+    "term": 2,
+    "week_range": "7-12",
+    "topic": "Wealth Creation",
+    "objectives": [
+      "Explain wealth creation and management",
+      "Identify proverbs and idioms related to wealth",
+      "Use adjectives correctly"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "proverb_analysis",
+      "essay_wealth_management",
+      "song_composition"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S3",
+    "term": 3,
+    "week_range": "1-12",
+    "topic": "Environmental Awareness and Water",
+    "objectives": [
+      "Explain causes of environmental degradation",
+      "Write announcements regarding environment",
+      "Use prepositions and postpositions",
+      "Summarize passages about water safety"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "announcement_writing",
+      "summary_exercises",
+      "translation"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S4",
+    "term": 1,
+    "week_range": "1-6",
+    "topic": "Migration and Settlement",
+    "objectives": [
+      "Trace origins and migration stories",
+      "Use conjunctions, interjections, and ideophones",
+      "Describe myths about tribe/clan origins"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "narrative_writing",
+      "map_interpretation",
+      "storytelling"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S4",
+    "term": 1,
+    "week_range": "7-12",
+    "topic": "Traditional Ceremonies: Marriage and Funeral",
+    "objectives": [
+      "Explain Marriage and Funeral rites",
+      "Write a Will",
+      "Conjugate verbs"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "will_writing",
+      "speech_writing",
+      "ceremony_simulation"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S4",
+    "term": 2,
+    "week_range": "1-6",
+    "topic": "Cultural Values, Morals, and Ethics",
+    "objectives": [
+      "Identify role models and acceptable dress codes",
+      "Explain corruption and its effects",
+      "Use verb extensions and noun class agreement"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "debate_corruption",
+      "composition_role_model",
+      "grammar_exercises"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S4",
+    "term": 2,
+    "week_range": "7-12",
+    "topic": "Leadership and Citizenship",
+    "objectives": [
+      "Comprehend traditional and modern leadership structures",
+      "Appreciate electoral processes",
+      "Use advanced noun classes and verb extensions"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "campaign_speech",
+      "organogram_drawing",
+      "manifesto_writing"
+    ]
+  },
+  {
+    "language": "Runyankole",
+    "class": "S4",
+    "term": 3,
+    "week_range": "1-12",
+    "topic": "Human Rights",
+    "objectives": [
+      "State fundamental human rights",
+      "Know rights of children, workers, and PWDs",
+      "Understand reduplication of words"
+    ],
+    "vocabulary": [],
+    "grammar_focus": [],
+    "cultural_notes": [],
+    "assessment_types": [
+      "report_writing",
+      "translation_legal_text",
+      "case_study_analysis"
+    ]
   }
 ]
 
